@@ -1,0 +1,92 @@
+<ion-content class="ion-padding login-page" [ngClass]="{'loading-active': isLoading}" fullscreen>
+  <div class="status-header"></div>
+
+  <!-- Modern Loader -->
+  <div class="modern-loader" *ngIf="isLoading">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- Logo / Branding -->
+  <div class="logo-section">
+    <img src="/assets/donut-chart.png" class="responsive-logo" alt="SplitX Logo" />
+    <h2 class="welcome-text">SplitX</h2>
+    <p class="sub-text">Login to continue</p>
+  </div>
+
+  <!-- Centered Card Wrapper -->
+  <div class="card-wrapper">
+    <ion-card class="auth-card">
+      <ion-card-content>
+        <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+
+          <!-- Username Field -->
+          <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'username'">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-input 
+              type="text" 
+              placeholder="Username" 
+              [(ngModel)]="loginData.username" 
+              name="username"
+              #usernameInput="ngModel" 
+              required
+              (ionFocus)="focusedField = 'username'"
+              (ionBlur)="focusedField = ''">
+            </ion-input>
+          </ion-item>
+          <div class="input-error" *ngIf="loginData.username && loginData.username.length < 3">
+            Username must be at least 3 characters.
+          </div>
+
+          <!-- Password Field -->
+          <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'password'">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input 
+              type="password" 
+              placeholder="Password" 
+              [(ngModel)]="loginData.password" 
+              name="password"
+              #passwordInput="ngModel" 
+              required
+              (ionFocus)="focusedField = 'password'"
+              (ionBlur)="focusedField = ''">
+            </ion-input>
+          </ion-item>
+          <div class="input-error" *ngIf="loginData.password && !isPasswordValid(loginData.password)">
+            Password must be at least 6 chars, include 1 uppercase, 1 number, and 1 special char.
+          </div>
+
+          <!-- Remember Me -->
+          <div class="remember-me">
+            <label>
+              <input type="checkbox" [(ngModel)]="loginData.rememberMe" name="rememberMe">
+              <span class="checkmark"></span>
+              Remember Me
+            </label>
+          </div>
+
+          <!-- Forgot Password -->
+          <div class="forgot-password">
+            <a (click)="goToForgotPassword()">Forgot Password?</a>
+          </div>
+
+          <!-- Submit Button -->
+          <ion-button 
+            type="submit" 
+            expand="block" 
+            class="login-btn"
+            [disabled]="loginData.username.length < 3 || !isPasswordValid(loginData.password)">
+            Login
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Register Footer -->
+  <div class="register-link">
+    Don’t have an account?
+    <a (click)="goToRegistration()"> Register</a>
+  </div>
+</ion-content>

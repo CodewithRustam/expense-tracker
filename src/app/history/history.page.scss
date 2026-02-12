@@ -1,0 +1,386 @@
+/* ================= VARIABLES ================= */
+:host {
+  /* Use Ionic theme variables that adapt to light/dark mode */
+  --glass-border-light: rgba(0, 0, 0, 0.1);
+  --glass-border-dark: rgba(255, 255, 255, 0.08);
+  --glass-surface-light: rgba(0, 0, 0, 0.03);
+  --glass-surface-dark: rgba(255, 255, 255, 0.03);
+
+  /* Neons */
+  --primary-glow: #51012f;
+  --secondary-glow: #6366f1;
+  --success-neon: #4ade80;
+  --danger-neon: #f87171;
+
+  /* Dimensions */
+  --card-radius: 24px;
+  --max-width: 500px;
+}
+
+:host {
+  --glass-border: var(--glass-border-dark);
+  --glass-surface: var(--glass-surface-dark);
+}
+
+@media (prefers-color-scheme: light) {
+  :host {
+    --glass-border: var(--glass-border-light);
+    --glass-surface: var(--glass-surface-light);
+  }
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+  font-family: 'Poppins', sans-serif;
+}
+
+
+@keyframes floatOrb {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(30px, 50px);
+  }
+}
+
+/* ================= HEADER ================= */
+
+ion-content {
+  --background: var(--ion-background-color);
+  font-family: 'Poppins', sans-serif;
+}
+
+ion-header {
+  /* This ensures the header starts AFTER the notch/status bar */
+  padding-top: var(--ion-safe-area-top);
+  background: transparent;
+  /* Keep your glass look */
+}
+
+.top-gradient-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  padding-top: var(--ion-safe-area-top);
+  background: linear-gradient(to bottom, rgba(84, 104, 201, 0.55) 0%, rgba(99, 102, 241, 0.15) 55%, transparent 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.static-header {
+  padding: 10px 20px 0;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  padding: 0;
+  margin: 0;
+}
+
+/* ================= STICKY DASHBOARD CONTAINER ================= */
+.sticky-dashboard {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 10px 20px 20px;
+  backdrop-filter: blur(200px);
+  -webkit-backdrop-filter: blur(25px);
+  margin: 0 -10px;
+  width: calc(100% + 20px);
+  transition: all 0.9s cubic-bezier(0.6, 0, 0.4, 1);
+}
+
+/* ================= HISTORY HERO CARD ================= */
+.history-hero {
+  position: relative;
+  border-radius: 28px;
+  padding: 24px 20px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(22px);
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+
+  /* Noise Overlay */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
+
+.hero-header {
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-info {
+  display: flex;
+  flex-direction: column;
+  margin: 0px 20px 20px
+}
+
+.balance-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--ion-text-color-step-500);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.balance-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--ion-text-color);
+  line-height: 1;
+  letter-spacing: -1px;
+  transition: 0.3s ease;
+}
+
+.balance-decoration {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ================= MONTH NAV PILL ================= */
+
+.month-nav-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.month-nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 2px 8px;
+  backdrop-filter: blur(5px);
+
+  .nav-btn {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    height: 28px;
+    width: 28px;
+    --color: var(--ion-text-color);
+    --border-radius: 50%;
+    font-size: 0.8rem;
+
+    &[disabled] {
+      opacity: 0.3;
+    }
+
+    ion-icon {
+      font-size: 14px;
+    }
+  }
+
+  .month-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    min-width: 60px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ================= LIST & CARDS ================= */
+.list-wrapper {
+  padding: 20px 20px 100px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.section-header {
+  margin-bottom: 15px;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 700;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 40%;
+    height: 3px;
+    background: var(--secondary-glow);
+    border-radius: 3px;
+  }
+}
+
+.island-card {
+  display: flex;
+  align-items: center;
+  background: var(--ion-background-color);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  gap: 12px;
+  padding: 16px, 20px;
+  margin-bottom: 22px;
+}
+
+.room-balance-card {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0px 0px 15px;
+  border-bottom: 2px solid var(--glass-border);
+}
+
+.icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--ion-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-room {
+  font-size: 0.60rem;
+  color: var(--ion-text-color-step-600);
+  border: 1px solid #9f9fbe;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #7b85d72e;
+}
+
+.card-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.amount-val {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.amount-val.credit {
+  color: var(--success-neon);
+}
+
+.amount-val.debit {
+  color: var(--danger-neon);
+}
+
+.date-val {
+  font-size: 0.7rem;
+  color: var(--ion-text-color-step-600);
+}
+
+/* ================= EMPTY STATE ================= */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.empty-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--glass-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  border: 1px solid var(--glass-border);
+}
+
+.empty-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  margin: 0 0 8px 0;
+}
+
+.empty-message {
+  font-size: 0.9rem;
+  color: var(--ion-text-color-step-600);
+  margin: 0;
+  text-align: center;
+}
+
+/* ================= SKELETONS ================= */
+.skeleton-wrapper {
+  padding: 20px 20px 20px;
+}
+
+.skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+ion-skeleton-text {
+  --background: var(--glass-surface);
+  --border-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-skeleton-text {
+    --background: rgba(255, 255, 255, 0.05);
+  }
+}

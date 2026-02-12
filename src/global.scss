@@ -35,3 +35,307 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+ion-modal::part(content) {
+  --border-radius: 20px 20px 0 0;
+  overflow: hidden;
+}
+
+ion-content {
+  padding-top: env(safe-area-inset-top);
+  --padding-bottom: 55px !important;
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+/* Ensure all components use the same font */
+* {
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+ion-app {
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+/* Custom modal class to make it look like a popup instead of fullscreen */
+ion-modal.global-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+
+
+ion-modal.global-modal::part(content) {
+  --width: 320px;
+  --min-width: 280px;
+  --max-width: 90%;
+  --height: auto;
+  --border-radius: 20px;
+  --background: var(--ion-card-background, #fff);
+  --box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  --padding: 20px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  animation: fadeInPopup 0.25s ease;
+}
+
+/* Smooth fade + scale animation */
+@keyframes fadeInPopup {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+ion-app {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+body.app-loaded ion-app {
+  opacity: 1;
+}
+
+/* 🌟 Container: Top Center */
+.custom-toast-container {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+/* 💎 Premium Toast Base */
+.custom-toast {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 320px;
+  max-width: 400px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  /* Slightly squarer than pill for more text space */
+  overflow: hidden;
+
+  /* Glassmorphism Dark Theme */
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 24px -1px rgba(0, 0, 0, 0.25),
+    0 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+
+  color: #f2f2f2;
+  font-size: 14px;
+  font-weight: 500;
+
+  /* Animation Start */
+  opacity: 0;
+  transform: translateY(-20px) scale(0.96);
+  transition: all 0.35s cubic-bezier(0.21, 1.02, 0.48, 1);
+}
+
+/* ✨ Show State */
+.custom-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 🎨 Theme Colors (Icon & Glow only - Keeping bg dark looks more premium) */
+.toast-success {
+  border-left: 3px solid #2ecc71;
+}
+
+.toast-success .toast-icon {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.toast-error {
+  border-left: 3px solid #ff4757;
+}
+
+.toast-error .toast-icon {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.15);
+}
+
+.toast-warning {
+  border-left: 3px solid #ffa502;
+}
+
+.toast-warning .toast-icon {
+  color: #ffa502;
+  background: rgba(255, 165, 2, 0.15);
+}
+
+/* 🖼 Icon Wrapper */
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+  /* Pushes close button to the end */
+  line-height: 1.4;
+}
+
+/* ❌ Close Button */
+.toast-close {
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 4px;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* ⏳ Progress Bar */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left;
+  animation: progress 3s linear forwards;
+}
+
+.toast-success .toast-progress {
+  background: #2ecc71;
+}
+
+.toast-error .toast-progress {
+  background: #ff4757;
+}
+
+.toast-warning .toast-progress {
+  background: #ffa502;
+}
+
+/* Pauses animation on hover */
+.custom-toast:hover .toast-progress {
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+
+/* ===============================
+   DESKTOP / TABLET SPLIT LAYOUT
+   (Mobile untouched)
+================================ */
+
+@media screen and (min-width: 810px) {
+  ion-content .responsive-shell {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .desktop-split-layout {
+    display: grid;
+    grid-template-columns: 1.3fr 1.7fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .desktop-left {
+    position: sticky;
+    top: 96px;
+    /* below header */
+  }
+}
+
+/* ===============================
+   DESKTOP EXPENSE LAYOUT
+   SAFE: NO EXISTING CLASS MODIFIED
+================================ */
+
+.expense-desktop-shell {
+  display: block;
+}
+
+@media screen and (min-width: 810px) {
+  .expense-desktop-shell {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    max-width: 1440px;
+    margin: 0 49px;
+    padding: 0 37px;
+  }
+
+  .expense-left {
+    position: sticky;
+    top: 16px;
+    height: fit-content;
+  }
+
+  .expense-right {
+    min-width: 0;
+    margin: 0 60px;
+  }
+}
+
+/* ===============================
+   ANALYTICS DESKTOP LAYOUT
+   SAFE: NO EXISTING CLASS MODIFIED
+================================ */
+
+.analytics-desktop-shell {
+  display: block;
+}
+
+@media screen and (min-width: 810px) {
+  .analytics-desktop-shell {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    max-width: 1440px;
+    margin: 0 49px;
+    padding: 0 37px;
+  }
+
+  .analytics-left {
+    position: sticky;
+    top: 16px;
+    height: fit-content;
+  }
+
+  .analytics-right {
+    min-width: 0;
+    margin: 0 60px;
+  }
+}
+

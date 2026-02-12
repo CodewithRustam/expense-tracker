@@ -1,0 +1,121 @@
+<ion-header class="ion-no-border glass-header" [translucent]="true">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
+    <ion-title>History</ion-title>
+  </ion-buttons>
+  <div class="top-gradient-mask"></div>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+
+  <!-- ✅ Desktop container -->
+  <div class="page-container">
+    <ng-container *ngIf="isLoading; else mainContent">
+      <div class="skeleton-wrapper">
+        <div class="history-hero skeleton-card" style="display:block; min-height: 140px;">
+          <div>
+            <ion-skeleton-text animated style="width: 80px; height: 12px; margin-bottom: 8px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 120px; height: 32px;"></ion-skeleton-text>
+          </div>
+
+          <div style="display:flex; justify-content:center; margin-top:16px;">
+            <ion-skeleton-text animated style="width:110px; height:36px; border-radius:12px;"></ion-skeleton-text>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+          <div *ngFor="let i of [1,2,3,4]" class="island-card skeleton-card">
+            <ion-skeleton-text animated style="width:52px; height:52px; border-radius:16px;"></ion-skeleton-text>
+            <div style="flex:1">
+              <ion-skeleton-text animated style="width:60%; height:18px; margin-bottom:6px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:40%; height:12px;"></ion-skeleton-text>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #mainContent>
+
+      <div class="sticky-dashboard" [class.is-stuck]="isSticky">
+        <div class="history-hero">
+          <div class="hero-header">
+
+            <div class="hero-info">
+              <span class="balance-label">Total Spent</span>
+              <h1 class="balance-amount">₹{{ total | number:'1.2-2' }}</h1>
+            </div>
+
+            <div class="month-nav-wrapper">
+              <div class="month-nav-pill">
+                <ion-button fill="clear" class="nav-btn" (click)="previousMonth()" [disabled]="currentMonthIndex === 0">
+                  <ion-icon name="chevron-back-outline"></ion-icon>
+                </ion-button>
+
+                <span class="month-label">{{ selectedMonth }}</span>
+
+                <ion-button fill="clear" class="nav-btn" (click)="nextMonth()"
+                  [disabled]="currentMonthIndex === months.length - 1">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+          </div>
+          <div class="balance-decoration"></div>
+        </div>
+      </div>
+
+      <div class="list-wrapper">
+        <div class="section-header">
+          <h3 class="section-title">Recent Activity</h3>
+        </div>
+
+        <ng-container *ngIf="!isLoadingExpenses; else listSkeleton">
+
+          <div class="island-card" *ngFor="let expense of filteredExpenses">
+            <div class="icon-box">
+              <i [class]="expense.iconName" [style.color]="getIconColor(expense.iconName)"></i>
+            </div>
+
+            <div class="room-balance-card">
+              <div class="card-info">
+                <h4 class="item-name">{{ expense.name }}</h4>
+                <span class="item-room">{{ expense.room }}</span>
+              </div>
+
+              <div class="card-amount">
+                <span class="amount-val" [ngClass]="expense.type">
+                  {{ expense.type === 'credit' ? '+' : '-' }} ₹{{ expense.total | number:'1.0-0' }}
+                </span>
+                <span class="date-val">{{ expense.date | date:'MMM dd' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="filteredExpenses.length === 0" class="empty-container">
+            <div class="empty-circle">
+              <ion-icon name="file-tray-outline"></ion-icon>
+            </div>
+            <h3>No Data</h3>
+            <p>No transactions in {{ selectedMonth }}</p>
+          </div>
+
+        </ng-container>
+
+        <ng-template #listSkeleton>
+          <div class="island-card skeleton-card" *ngFor="let sk of [1,2,3,4]">
+            <ion-skeleton-text animated style="width:52px; height:52px; border-radius:16px;"></ion-skeleton-text>
+            <div style="flex:1">
+              <ion-skeleton-text animated style="width:60%; height:18px; margin-bottom:6px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:40%; height:12px;"></ion-skeleton-text>
+            </div>
+          </div>
+        </ng-template>
+
+      </div>
+
+    </ng-template>
+
+  </div>
+</ion-content>

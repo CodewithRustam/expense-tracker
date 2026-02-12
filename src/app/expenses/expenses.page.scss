@@ -1,0 +1,686 @@
+/* ================= THEME & GRADIENTS ================= */
+:host {
+  --primary-glow: #6366f1;
+  --secondary-glow: #6366f1;
+  --glass-surface: rgba(235, 150, 150, 0.05);
+  --glass-border: rgba(226, 226, 246, 0.45);
+  --success-neon: #4ade80;
+  --danger-neon: #f87171;
+  --max-width: 500px;
+  font-family: 'Poppins', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --glass-border: rgba(46, 46, 49, 0.56)
+  }
+}
+
+ion-header {
+  /* This ensures the header starts AFTER the notch/status bar */
+  padding-top: var(--ion-safe-area-top);
+  background: transparent;
+  /* Keep your glass look */
+}
+
+.top-gradient-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding-top: var(--ion-safe-area-top);
+  height: 25vh;
+  background: linear-gradient(to bottom, rgba(84, 104, 201, 0.5) 0%, rgba(99, 102, 241, 0.1) 60%, transparent 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Make ion-item fully transparent */
+.ledger-glass-panel {
+  --background: transparent !important;
+  /* default background */
+  --background-activated: transparent !important;
+  /* when tapped */
+  --background-focused: transparent !important;
+  /* focus state */
+  --background-hover: transparent !important;
+  /* hover state */
+  --ripple-color: transparent !important;
+  /* removes click ripple */
+  --box-shadow: none !important;
+  /* remove internal shadows */
+}
+
+
+/* ================= THE GLASS HUB (Dashboard) ================= */
+.hub-container {
+  padding: 10px 14px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.glass-hub {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.hub-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 5px;
+}
+
+.edit-btn-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 4px;
+  padding: 5px 8px;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+
+  background: rgba(99, 102, 241, 0.12);
+  color: #b5bedf;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+/* Hover */
+.edit-btn-mini:hover {
+  background: rgba(99, 102, 241, 0.22);
+  color: #eef2ff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Active (click) */
+.edit-btn-mini:active {
+  transform: scale(0.96);
+}
+
+/* Optional: focus for accessibility */
+.edit-btn-mini:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.45);
+}
+
+
+.ledger-slider {
+  align-items: center;
+  border: 1px solid var(--glass-border);
+  padding: 20px 10px;
+  border-radius: 28px;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30, 32, 45, 0.6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:active {
+      background: rgba(30, 32, 45, 0.9);
+    }
+  }
+}
+
+.edit-btn-mini:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+}
+
+.edit-btn-mini:active {
+  transform: scale(0.92);
+}
+
+.room-name {
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to bottom right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #4535358a;
+}
+
+.month-capsule {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 2px 6px;
+
+  .selected-month {
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 75px;
+    text-align: center;
+  }
+
+  ion-button {
+    height: 28px;
+    width: 28px;
+    --color: #fff;
+    margin: 0;
+  }
+}
+
+.hub-stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .s-label {
+    font-size: 0.55rem;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
+  }
+
+  .s-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--glass-border);
+  }
+}
+
+.hub-members {
+  margin-bottom: 18px;
+
+  .member-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-top: 2px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.member-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.4;
+  transition: 0.3s ease;
+
+  .avatar-sq {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: var(--glass-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border: 1px solid var(--glass-border);
+  }
+
+  .chip-name {
+    font-size: 0.6rem;
+    font-weight: 600;
+  }
+
+  &.active {
+    opacity: 1;
+    transform: translateY(-2px);
+
+    .avatar-sq {
+      background: var(--secondary-glow);
+      color: #fff;
+      border-color: #fff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+  }
+}
+
+.holo-mini-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--glass-border);
+
+  .m-tag {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    opacity: 0.6;
+    display: block;
+  }
+
+  .m-amt {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .m-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    &.pos {
+      color: var(--success-neon);
+    }
+
+    &.neg {
+      color: var(--danger-neon);
+    }
+  }
+
+  .status-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .st-label {
+      font-size: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .st-val {
+      font-size: 1rem;
+      font-weight: 800;
+    }
+  }
+}
+
+.btn-settle {
+  height: 30px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  --border-radius: 10px;
+  margin: 0;
+  --background: var(--ion-color-warning);
+}
+
+/* ================= STICKY HISTORY BAR ================= */
+.sticky-history-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(var(--ion-background-color-rgb), 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  padding: 14px 18px;
+}
+
+.history-content {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ion-color-medium);
+  }
+
+  .h-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--glass-border), transparent);
+  }
+}
+
+/* ================= THE LEDGER (Optimized Transaction List) ================= */
+.ledger-container {
+  padding: 1rem 1rem 0.3rem 1rem;
+}
+
+
+.ledger-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --transition: 0.2s ease;
+}
+
+.icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border: 1px solid var(--glass-border);
+}
+
+
+.row-separator {
+  height: 1px;
+  margin: 0 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Delete Swipe Styling */
+.delete-swipe-btn {
+  --background: var(--ion-color-danger);
+  --color: #fff;
+
+  ion-icon {
+    font-size: 1.6rem;
+  }
+}
+
+/* UTILS */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: floatOrb 10s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+  top: -5%;
+  left: -5%;
+  width: 280px;
+  height: 280px;
+  background: var(--primary-glow);
+}
+
+.orb-2 {
+  bottom: 15%;
+  right: -5%;
+  width: 220px;
+  height: 220px;
+  background: var(--secondary-glow);
+  animation-delay: -5s;
+}
+
+@keyframes floatOrb {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(20px, 40px);
+  }
+}
+
+.empty-ledger {
+  text-align: center;
+  padding: 50px 0;
+  opacity: 0.4;
+
+  i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+}
+
+.transaction-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* LEFT = 30% */
+.row-left {
+  flex: 0 0 70%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  /* VERY important for ellipsis */
+}
+
+/* RIGHT = 70% */
+.row-right {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* TEXT SAFETY */
+.text-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tx-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-meta {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* AMOUNT */
+.tx-amount {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tx-amount.pos {
+  color: #2ecc71;
+  font-weight: 800;
+}
+
+.settledlbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.settled-icon {
+  font-size: 18px;
+}
+
+/* ================= SKELETON STYLING ================= */
+ion-skeleton-text {
+  --background: rgba(255, 255, 255, 0.05);
+  --background-animated: rgba(255, 255, 255, 0.12);
+  margin: 4px 0;
+}
+
+.skeleton-stat-val {
+  width: 60px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.skeleton-stat-label {
+  width: 40px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.skeleton-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px !important;
+}
+
+.skeleton-chip-name {
+  width: 30px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px !important;
+}
+
+.skeleton-tx-title {
+  width: 120px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-tx-meta {
+  width: 80px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.skeleton-tx-amt {
+  width: 50px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+
+/* ================= TRANSACTION SKELETON ================= */
+
+.skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.skeleton-tx-title {
+  width: 120px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.skeleton-tx-meta {
+  width: 80px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.skeleton-tx-amt {
+  width: 50px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+/* Force visibility in dark / glass UI */
+ion-skeleton-text {
+  --background: rgba(255, 255, 255, 0.15);
+  --background-animated: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Skeleton styles ===== */
+
+.room-name-skeleton {
+  width: 160px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.month-capsule.skeleton {
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+}
+
+.month-skel {
+  width: 100px;
+  height: 30px;
+  border-radius: 4px;
+}
+
+.settled-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settledlbl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.amount-badge {
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.paid-badge {
+  background: rgba(239, 68, 68, 0.15);
+  /* red */
+  color: #ef4444;
+}
+
+.received-badge {
+  background: rgba(34, 197, 94, 0.15);
+  /* green */
+  color: #22c55e;
+}

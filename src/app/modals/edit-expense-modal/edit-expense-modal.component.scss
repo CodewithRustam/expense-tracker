@@ -1,0 +1,241 @@
+/* --- GLOBAL VARIABLES --- */
+ion-toolbar {
+  --background: var(--ion-background-color);
+  --border-width: 0;
+
+  ion-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding-left: 20px;
+  }
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+/* --- 1. ROOM SECTION --- */
+.room-container {
+  padding-top: 10px;
+}
+
+.section-label {
+  padding-left: 24px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.room-scroll-wrapper {
+  overflow-x: auto;
+  padding: 14px 20px 20px 20px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.room-track {
+  display: flex;
+  gap: 20px;
+}
+
+.room-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 64px;
+
+  .avatar-wrapper {
+    width: 60px;
+    height: 60px;
+    background: var(--ion-color-step-100);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    .initials {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--ion-text-color);
+    }
+  }
+
+  .room-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ion-color-medium);
+    text-align: center;
+    max-width: 70px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.active {
+    .avatar-wrapper {
+      background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
+      ;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+
+      .initials {
+        color: var(--ion-color-primary-contrast);
+      }
+    }
+
+    .room-name {
+      color: var(--ion-color-primary);
+      font-weight: 700;
+    }
+  }
+}
+
+/* --- 2. FORM CARD --- */
+.form-card {
+  background: var(--ion-item-background);
+  margin: 0 20px;
+  border-radius: 20px;
+  padding: 8px 20px;
+  border: 1px solid var(--ion-color-step-100);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+
+  &.clickable:active {
+    opacity: 0.6;
+  }
+
+  .icon-square {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    font-size: 1.2rem;
+
+    /* Tints */
+    &.primary-tint {
+      background: rgba(var(--ion-color-primary-rgb), 0.12);
+      color: var(--ion-color-primary);
+    }
+
+    &.success-tint {
+      background: rgba(var(--ion-color-success-rgb), 0.12);
+      color: var(--ion-color-success);
+    }
+
+    &.warning-tint {
+      background: rgba(var(--ion-color-warning-rgb), 0.12);
+      color: var(--ion-color-warning);
+    }
+
+    .currency-symbol {
+      font-weight: 700;
+    }
+  }
+
+  .input-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    ion-label {
+      font-size: 0.75rem;
+      color: var(--ion-color-medium);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    ion-input,
+    .date-display {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--ion-text-color);
+      --padding-start: 0;
+      --padding-top: 0;
+      --padding-bottom: 0;
+      --background: transparent;
+      --placeholder-color: var(--ion-color-medium);
+      --placeholder-opacity: 0.5;
+    }
+
+    .amount-input {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  }
+}
+
+.divider {
+  height: 1px;
+  background: var(--ion-color-step-100);
+  margin-left: 58px;
+}
+
+/* --- 3. MODAL & DATETIME --- */
+ion-modal.auto-height {
+  --height: auto;
+  align-items: flex-end;
+  --border-radius: 24px 24px 0 0;
+}
+
+.datetime-wrapper {
+  background: var(--ion-item-background);
+  padding: 24px 16px 40px 16px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+ion-datetime {
+  max-width: 100%;
+  background: transparent;
+  color: var(--ion-text-color);
+  margin: 0 auto;
+  --show-buttons: none;
+}
+
+/* --- 4. FOOTER & GRADIENT BUTTON --- */
+.footer-pad {
+  padding: 20px;
+  // background: var(--ion-background-color);
+}
+
+.main-btn {
+  /* Indigo-Purple Gradient */
+  --background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
+  --color: #ffffff;
+  --border-radius: 18px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  --box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+    --box-shadow: 0 5px 15px -3px rgba(99, 102, 241, 0.5);
+  }
+
+  /* Disabled state adjustment so it doesn't look broken */
+  // &.button-disabled {
+  //   --background: var(--ion-color-step-300);
+  //   --box-shadow: none;
+  //   opacity: 0.6;
+  // }
+}

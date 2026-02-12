@@ -1,0 +1,18 @@
+<div class="modal-glass-card">
+
+  <div class="modal-icon">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+  </div>
+
+  <p class="modal-message" [innerHTML]="message"></p>
+
+  <div class="modal-buttons">
+    <button class="btn-cancel" (click)="dismiss(false)">
+      {{ cancelText }}
+    </button>
+    <button class="btn-confirm" (click)="dismiss(true)">
+      {{ confirmText }}
+    </button>
+  </div>
+
+</div>

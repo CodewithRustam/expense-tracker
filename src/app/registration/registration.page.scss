@@ -1,0 +1,145 @@
+:host {
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--ion-background-color, #f4f6fb);
+  text-align: center;
+  height: 100vh;
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+img {
+  max-width: 20%;
+  border-radius: 18px;
+}
+
+.checkbox-item {
+  --background: transparent;
+  margin-bottom: 12px;
+}
+
+.checkbox-item ion-label {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.logo-section {
+  margin-bottom: 20px;
+  margin-top: 4rem;
+}
+
+.logo-icon {
+  font-size: 72px;
+  color: var(--ion-color-tertiary);
+}
+
+.welcome-text {
+  margin: 8px 0 4px;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.sub-text {
+  color: #777;
+  font-size: 0.9rem;
+}
+:host {
+  --member-tab-border: #d0d0ef;
+}
+@media (prefers-color-scheme: dark) {
+  :host {
+    --member-tab-border: #343c51;
+  }
+}
+ion-card.auth-card {
+  border: 1px solid  var(--member-tab-border);
+  border-radius: 15px;
+  padding: 10px;
+  margin: 20px;
+}
+
+.input-item {
+  --background: #f0f2f8;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+
+  // ✨ BOOTSTRAP GLOW EFFECT
+  &:focus-within {
+    border-color: #4e54c8;
+    box-shadow:
+      0 0 0 3px rgba(78, 84, 200, 0.1),
+      0 0 0 6px rgba(78, 84, 200, 0.05);
+    transform: translateY(-1px);
+  }
+}
+
+.input-item ion-icon {
+  color: var(--ion-color-tertiary);
+  font-size: 20px;
+  margin-right: 14px;
+}
+
+.register-btn {
+  --background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  border-radius: 12px;
+  font-weight: 600;
+  --border-radius: 10px;
+  height: 46px;
+  --padding-start: 1.5rem;
+  --padding-end: 1.5rem;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.login-link {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.login-link a {
+  color: var(--ion-color-tertiary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .input-item {
+    --background: #222;
+
+    &:focus-within {
+      border-color: #8f94fb;
+      box-shadow:
+        0 0 0 3px rgba(143, 148, 251, 0.2),
+        0 0 0 6px rgba(143, 148, 251, 0.1);
+    }
+  }
+
+  .sub-text,
+  .login-link {
+    color: #aaa;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  ion-card.auth-card {
+    box-shadow: 0 3px 8px #d7d8da;
+  }
+}

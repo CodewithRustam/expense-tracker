@@ -1,0 +1,86 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>New Expense</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" color="medium">
+        <ion-icon name="close-circle" slot="icon-only" size="large"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="room-container">
+    <div class="section-label">Assign Room</div>
+
+    <div class="room-scroll-wrapper">
+      <div class="room-track">
+        <div *ngFor="let g of filteredGroups" class="room-item" [class.active]="newExpense.roomId === g.roomId"
+          (click)="newExpense.roomId = g.roomId">
+
+          <div class="avatar-wrapper">
+            <span class="initials">{{ g.name.substring(0,1) }}</span>
+          </div>
+          <span class="room-name">{{ g.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+
+    <div class="input-row">
+      <div class="icon-square primary-tint">
+        <ion-icon name="bag-handle"></ion-icon>
+      </div>
+      <div class="input-body">
+        <ion-label>Item Name</ion-label>
+        <ion-input [(ngModel)]="newExpense.item" placeholder="e.g. Groceries"></ion-input>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="input-row">
+      <div class="icon-square success-tint">
+        <span class="currency-symbol">₹</span>
+      </div>
+      <div class="input-body">
+        <ion-label>Amount</ion-label>
+        <ion-input type="number" [(ngModel)]="newExpense.amount" placeholder="0.00" class="amount-input"></ion-input>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="input-row clickable" (click)="showDatePicker = true">
+      <div class="icon-square warning-tint">
+        <ion-icon name="calendar"></ion-icon>
+      </div>
+      <div class="input-body">
+        <ion-label>Date</ion-label>
+        <div class="date-display">{{ formatDate(newExpense.date) }}</div>
+      </div>
+      <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
+    </div>
+
+  </div>
+
+  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
+    [breakpoints]="[0, 0.42]">
+    <ng-template>
+      <div class="datetime-wrapper">
+        <ion-datetime [(ngModel)]="newExpense.date" presentation="date" [max]="today" size="cover"
+          (ionChange)="confirmDate()">
+        </ion-datetime>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <div class="footer-pad">
+    <ion-button expand="block" class="main-btn" (click)="addExpense()">
+      Add Expense
+    </ion-button>
+  </div>
+</ion-content>

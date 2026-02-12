@@ -1,20 +1,208 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border glass-header" [translucent]="true">
+  <div class="top-gradient-mask"></div>
+
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <div class="static-header">
+      <div class="top-nav">
+
+        <!-- USER INFO -->
+        <div class="user-section" (click)="goToProfile()">
+          <div class="avatar-container">
+            <ion-avatar *ngIf="!isLoading; else avatarSkeleton">
+              <img
+                src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light">
+            </ion-avatar>
+
+            <ng-template #avatarSkeleton>
+              <ion-skeleton-text animated style="width:52px;height:52px;border-radius:50%;"></ion-skeleton-text>
+            </ng-template>
+          </div>
+
+          <div class="greeting-text">
+            <span *ngIf="!isLoading; else greetingSkeleton" class="greeting-label">
+              {{ greetingText }}
+            </span>
+            <h2 *ngIf="!isLoading; else nameSkeleton" class="user-name">
+              {{ userName }}
+            </h2>
+
+            <ng-template #greetingSkeleton>
+              <ion-skeleton-text animated style="width:80px;height:14px;margin-bottom:4px;"></ion-skeleton-text>
+            </ng-template>
+
+            <ng-template #nameSkeleton>
+              <ion-skeleton-text animated style="width:120px;height:22px;"></ion-skeleton-text>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="header-actions">
+          <ion-button fill="clear" class="action-icon" (click)="openNotifications()">
+            <ion-icon name="notifications-outline"></ion-icon>
+            <span class="notification-badge" *ngIf="!isLoading && unreadCount > 0">
+              {{ unreadCount }}
+            </span>
+          </ion-button>
+        </div>
+
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [scrollEvents]="true">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="responsive-shell">
+
+    <!-- BACKGROUND -->
+    <div class="ambient-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+
+    <!-- =============================
+         DESKTOP / TABLET SPLIT LAYOUT
+         ============================= -->
+    <div class="desktop-split-layout">
+
+      <!-- LEFT SIDE : CHARTS + STATS -->
+      <div class="desktop-left">
+
+        <div class="chart-hero" *ngIf="!isLoading; else balanceSkeleton">
+          <div class="chart-header">
+            <div class="header-info">
+              <div class="balance-label">Room Spending</div>
+              <h1 class="chart-title">
+                ₹{{ selectedGroup?.totalAmount | number:'1.0-1' }}
+              </h1>
+            </div>
+
+            <div class="group-selector">
+              <ion-select
+                interface="popover"
+                [value]="selectedGroup"
+                (ionChange)="onGroupChange($event)"
+                toggleIcon="chevron-down-outline"
+                class="custom-select">
+                <ion-select-option
+                  *ngFor="let group of groups"
+                  [value]="group">
+                  {{ group.name }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+
+          <div class="chart-wrapper">
+            <apx-chart
+              *ngIf="chartOptions?.series?.length"
+              [series]="chartOptions.series"
+              [chart]="chartOptions.chart"
+              [xaxis]="chartOptions.xaxis"
+              [yaxis]="chartOptions.yaxis"
+              [plotOptions]="chartOptions.plotOptions"
+              [dataLabels]="chartOptions.dataLabels"
+              [colors]="chartOptions.colors"
+              [grid]="chartOptions.grid"
+              [tooltip]="chartOptions.tooltip"
+              [fill]="chartOptions.fill">
+            </apx-chart>
+          </div>
+
+          <div class="balance-decoration"></div>
+        </div>
+
+        <ng-template #balanceSkeleton>
+          <div class="chart-hero skeleton-chart"></div>
+        </ng-template>
+
+      </div>
+
+      <!-- RIGHT SIDE : PORTFOLIO + GROUPS -->
+      <div class="desktop-right">
+
+        <div class="main-content">
+
+          <div class="total-summary-row" *ngIf="!isLoading">
+            <span class="summary-label">Total Portfolio:</span>
+            <span class="summary-value">
+              ₹{{ getTotalBalance() | number:'1.0-0' }}
+            </span>
+          </div>
+
+          <div class="section-header">
+            <h3 class="section-title">Your Groups</h3>
+          </div>
+
+          <ng-container *ngIf="isLoading; else groupContent">
+
+            <!-- SKELETON -->
+            <div class="group-list">
+              <div class="group-card skeleton-card" *ngFor="let i of [1,2,3,4]">
+                <ion-skeleton-text animated></ion-skeleton-text>
+              </div>
+            </div>
+
+          </ng-container>
+
+          <ng-template #groupContent>
+
+            <div class="group-list" *ngIf="groups.length > 0; else emptyState">
+              <div
+                class="group-card island-card"
+                *ngFor="let group of groups"
+                (click)="goToDetails(group)">
+
+                <div
+                  class="card-icon-wrapper"
+                  [ngClass]="getGroupColorClass(group.type)">
+                  <ion-icon [name]="group.iconName || 'people-outline'"></ion-icon>
+                </div>
+
+                <div class="card-info">
+                  <h4 class="group-name">{{ group.name }}</h4>
+                  <div class="group-meta">
+                    <span class="group-type">{{ group.type }}</span>
+                    <span class="group-date">{{ group.month }}</span>
+                  </div>
+                </div>
+
+                <div class="card-amount">
+                  <span class="amount-value">
+                    ₹{{ group.totalAmount | number:'1.0-1' }}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+            <ng-template #emptyState>
+              <div class="empty-container">
+                <div class="empty-circle">
+                  <ion-icon name="wallet-outline"></ion-icon>
+                </div>
+                <h3 class="empty-title">No groups yet</h3>
+                <p class="empty-message">
+                  Create your first group to start tracking expenses
+                </p>
+              </div>
+            </ng-template>
+
+          </ng-template>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FAB -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="openAddExpense()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+
   </div>
+
 </ion-content>

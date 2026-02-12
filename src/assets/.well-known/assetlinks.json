@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.example.expensetracker",
+    "sha256_cert_fingerprints": [
+      "62:7B:6D:D0:26:A1:10:54:D2:09:72:D6:97:15:FD:8C:65:FD:0C:FD:FB:60:B9:F5:E5:66:2B:85:80:7D:D7:FB"
+    ]
+  }
+}]

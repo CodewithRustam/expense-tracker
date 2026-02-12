@@ -1,0 +1,144 @@
+/* ================= VARIABLES ================= */
+:host {
+  --glass-border-light: rgba(0, 0, 0, 0.1);
+  --glass-border-dark: rgba(255, 255, 255, 0.08);
+  --glass-surface-light: rgba(0, 0, 0, 0.03);
+  --glass-surface-dark: rgba(255, 255, 255, 0.03);
+
+  --primary-glow: #59113a;
+  --secondary-glow: #6366f1;
+  --success-neon: #4ade80;
+  --danger-neon: #f43f5e;
+
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+/* Theme-aware glass effects */
+:host {
+  --glass-border: var(--glass-border-dark);
+  --glass-surface: var(--glass-surface-dark);
+}
+
+@media (prefers-color-scheme: light) {
+  :host {
+    --glass-border: var(--glass-border-light);
+    --glass-surface: var(--glass-surface-light);
+  }
+}
+
+/* ================= GLASS MODAL CARD ================= */
+.modal-glass-card {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  padding: 32px 24px;
+  text-align: center;
+  border-radius: 28px;
+  font-family: var(--ion-font-family);
+
+  /* Glass background */
+  background: var(--ion-background-color);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(20, 20, 30, 0.85);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Top shine effect */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  }
+
+  /* Ambient glow behind modal */
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+/* ================= ICON ================= */
+.modal-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  color: var(--ion-text-color-step-600, var(--ion-color-medium));
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-icon {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.2));
+  }
+}
+
+/* ================= MESSAGE ================= */
+.modal-message {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+  line-height: 1.5;
+  margin: 0 0 24px;
+  letter-spacing: 0.3px;
+}
+
+/* ================= BUTTONS ================= */
+.modal-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Base button */
+button {
+  border: none;
+  padding: 12px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+/* Cancel - glassy ghost */
+.btn-cancel {
+  background: var(--glass-surface);
+  color: var(--ion-text-color-step-600, var(--ion-color-medium));
+  border: 1px solid var(--glass-border);
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Confirm - neon gradient */
+.btn-confirm {
+  background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+  color: white;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+  }
+}

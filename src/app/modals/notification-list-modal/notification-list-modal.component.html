@@ -1,0 +1,67 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title class="modal-title">Notifications</ion-title>
+    
+    <ion-buttons slot="start">
+       <ion-button (click)="markAllAsRead()" class="mark-read-text" [disabled]="notifications.length === 0">
+         Mark all read
+       </ion-button>
+    </ion-buttons>
+
+    <ion-buttons slot="end">
+      <ion-button fill="clear" class="close-btn" (click)="close()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  
+  <div class="main-container">
+    <div class="list-wrapper" *ngIf="loading">
+      <div *ngFor="let i of [1,2,3,4]" style="margin-bottom: 12px;">
+        <ion-skeleton-text animated style="width: 100%; height: 110px; border-radius: 16px;"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <div class="list-wrapper" *ngIf="notifications.length > 0; else emptyView">
+        <ion-list class="bg-transparent" lines="none">
+          <ion-item-sliding #slidingItem *ngFor="let n of notifications" (ionDrag)="onDrag($event)">
+            
+            <ion-item-options side="end" (ionSwipe)="deleteNotification(n, slidingItem)">
+              <ion-item-option color="transparent" expandable></ion-item-option>
+            </ion-item-options>
+
+            <ion-item class="notification-item" [class.unread]="!n.isRead">
+              <div class="notification-card-inner">
+                <div class="notif-header">
+                  <h2>{{ n.title }}</h2>
+                  <div *ngIf="!n.isRead" class="unread-glow"></div>
+                </div>
+                <p class="notif-body">{{cleanBody(n.body)}}</p>
+                <div class="notif-footer">
+                  <span class="time-stamp">{{ n.receivedAt | date: 'shortTime' }}</span>
+                </div>
+              </div>
+            </ion-item>
+
+          </ion-item-sliding>
+        </ion-list>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyView>
+      <div class="empty-state-container">
+        <div class="icon-circle">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <div class="pulse-ring"></div>
+        </div>
+        <h3>All caught up</h3>
+        <p>No new alerts to show right now.</p>
+      </div>
+    </ng-template>
+  </div>
+
+</ion-content>

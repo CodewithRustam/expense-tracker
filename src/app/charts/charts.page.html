@@ -1,0 +1,193 @@
+<ion-header class="ion-no-border" [translucent]="true">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
+    <ion-title>Analytics</ion-title>
+  </ion-buttons>
+  <div class="top-gradient-mask"></div>
+</ion-header>
+
+<ion-content>
+
+  <ng-container *ngIf="isLoading; else mainContent">
+    <div class="skeleton-wrapper">
+      <div class="chart-skelton skeleton-card" style="display:block; height: 400px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+          <div>
+            <ion-skeleton-text animated style="width: 80px; height: 12px; margin-bottom:8px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 120px; height: 30px;"></ion-skeleton-text>
+          </div>
+          <ion-skeleton-text animated style="width: 100px; height: 36px; border-radius: 12px;"></ion-skeleton-text>
+        </div>
+        <div style="display:flex; justify-content:center; margin-bottom: 20px;">
+          <ion-skeleton-text animated style="width: 140px; height: 36px; border-radius: 18px;"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text animated style="width: 100%; height: 210px; border-radius: 8%;"></ion-skeleton-text>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <div *ngFor="let i of [1,2,3]" class="island-card skeleton-card">
+          <ion-skeleton-text animated style="width: 48px; height: 48px; border-radius: 14px;"></ion-skeleton-text>
+          <div style="flex:1">
+            <ion-skeleton-text animated style="width: 60%; height: 20px; margin-bottom: 6px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 40%; height: 14px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #mainContent>
+
+    <!-- ================= DESKTOP SHELL ================= -->
+    <div class="analytics-desktop-shell">
+
+      <!-- ============== LEFT ================= -->
+      <div class="analytics-left">
+
+        <div class="sticky-dashboard">
+          <div class="chart-hero">
+
+            <div class="hero-header-row">
+              <div class="hero-info">
+                <span class="balance-label">Total Spent</span>
+                <h1 class="balance-amount">₹{{ getMonthlyTotal() | number:'1.0-0' }}</h1>
+              </div>
+
+              <div class="internal-group-selector">
+                <ion-select
+                  interface="popover"
+                  [value]="selectedGroup"
+                  (ionChange)="onGroupChange($event)"
+                  toggleIcon="chevron-down-outline"
+                  class="custom-select">
+                  <ion-select-option *ngFor="let g of groups" [value]="g">
+                    {{ g.name }}
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+
+            <div class="hero-month-row">
+              <div class="month-nav-pill">
+                <ion-button fill="clear" class="nav-btn" (click)="previousMonth()" [disabled]="isLoading">
+                  <ion-icon name="chevron-back-outline"></ion-icon>
+                </ion-button>
+                <span class="month-label">{{ currentMonthLabel }}</span>
+                <ion-button
+                  fill="clear"
+                  class="nav-btn"
+                  (click)="nextMonth()"
+                  [disabled]="isLoading || !canNavigateNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+            <div class="chart-wrapper" *ngIf="hasData(); else emptyChartState">
+              <apx-chart
+                [series]="chartOptions.series"
+                [chart]="chartOptions.chart"
+                [labels]="chartOptions.labels"
+                [colors]="chartOptions.colors"
+                [dataLabels]="chartOptions.dataLabels"
+                [plotOptions]="chartOptions.plotOptions"
+                [legend]="chartOptions.legend"
+                [responsive]="chartOptions.responsive">
+              </apx-chart>
+            </div>
+
+            <ng-template #emptyChartState>
+              <div class="empty-chart-placeholder">
+                <div class="empty-icon-circle">
+                  <ion-icon name="stats-chart-outline"></ion-icon>
+                </div>
+                <p class="empty-text">
+                  No expenses recorded for<br>{{ currentMonthLabel }}
+                </p>
+                <div class="empty-line"></div>
+              </div>
+            </ng-template>
+
+            <div class="balance-decoration"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============== RIGHT ================= -->
+      <div class="analytics-right">
+
+        <div class="list-wrapper" *ngIf="hasData()">
+
+          <div class="sticky-segment-wrapper">
+            <div class="neon-segment">
+              <button
+                class="seg-btn"
+                [class.active]="activeTab === 'categories'"
+                (click)="switchTab('categories')">
+                Categories
+              </button>
+              <button
+                class="seg-btn"
+                [class.active]="activeTab === 'topSpends'"
+                (click)="switchTab('topSpends')">
+                Top Spends
+              </button>
+            </div>
+          </div>
+
+          <ng-container *ngIf="activeTab === 'categories'">
+            <div class="island-card" *ngFor="let c of trendData.categoryExpenses">
+              <div class="icon-box">
+                <i [class]="c.iconName" [style.color]="getIconColor(c.iconName)"></i>
+              </div>
+              <div class="card-info">
+                <h4 class="item-name">{{ c.categoryName || 'Unknown' }}</h4>
+                <span class="item-meta">
+                  {{ getLatestDate(c.monthlyTotals) | date:'MMM yyyy' }}
+                </span>
+              </div>
+              <div class="card-amount">
+                ₹{{ getCategoryTotal(c) | number:'1.0-0' }}
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab === 'topSpends'">
+            <div class="island-card" *ngFor="let t of trendData.topSpends">
+              <div class="icon-box">
+                <i [class]="t.iconName" [style.color]="getIconColor(t.iconName)"></i>
+              </div>
+              <div class="card-info">
+                <h4 class="item-name">{{ t.categoryName }}</h4>
+                <span class="item-meta">
+                  {{ getLatestDate(t.monthlyTotals) | date:'MMM dd' }}
+                </span>
+              </div>
+              <div class="card-amount">
+                ₹{{ getTopSpendTotal(t) | number:'1.0-0' }}
+              </div>
+            </div>
+          </ng-container>
+
+          <div
+            *ngIf="(activeTab === 'categories' && trendData.categoryExpenses.length === 0)
+              || (activeTab === 'topSpends' && trendData.topSpends.length === 0)"
+            class="empty-container">
+            <div class="empty-circle">
+              <ion-icon name="pie-chart-outline"></ion-icon>
+            </div>
+            <h3 class="empty-title">No Data</h3>
+            <p class="empty-message">
+              No expenses found for {{ currentMonthLabel }}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </ng-template>
+
+</ion-content>

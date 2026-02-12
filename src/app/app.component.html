@@ -1,3 +1,10 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-router-outlet [swipeGesture]="true" *ngIf="isOnline"></ion-router-outlet>
+
+  <div *ngIf="!isOnline" class="no-internet">
+      <div class="status-header"></div>
+    <img [src]="imageUrl" alt="No Internet" class="no-internet-img" />
+    <h2>You're Offline</h2>
+    <p>Check your internet connection and try again.</p>
+  </div>
 </ion-app>

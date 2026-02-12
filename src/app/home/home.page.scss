@@ -1,27 +1,590 @@
-#container {
-  text-align: center;
+/* ================= VARIABLES ================= */
+:host {
+  /* Use Ionic theme variables that adapt to light/dark mode */
+  --glass-border-light: rgba(0, 0, 0, 0.1);
+  --glass-border-dark: rgba(255, 255, 255, 0.08);
+  --glass-surface-light: rgba(0, 0, 0, 0.03);
+  --glass-surface-dark: rgba(255, 255, 255, 0.03);
 
-  position: absolute;
+  /* Neons - adapt to theme */
+  --primary-glow: #51012f;
+  --secondary-glow: #6366f1;
+  --success-neon: #4ade80;
+  --danger-neon: #f87171;
+
+  /* Dimensions */
+  --card-radius: 24px;
+  --btn-radius: 16px;
+  --header-glow: #51012f;
+  --max-width: 500px;
+}
+
+/* Use Ionic's background color variable */
+ion-content {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+:host {
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+}
+
+:host {
+  --glass-border: var(--glass-border-dark);
+  --glass-surface: var(--glass-surface-dark);
+}
+
+@media (prefers-color-scheme: light) {
+  :host {
+    --glass-border: var(--glass-border-light);
+    --glass-surface: var(--glass-surface-light);
+  }
+}
+
+/* ================= HEADER & STATUS BAR GRADIENT ================= */
+ion-header.glass-header {
+  --ion-toolbar-background: transparent;
+  --ion-toolbar-border-width: 0;
+  background: transparent;
+}
+
+.top-gradient-mask {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  height: 35vh;
+  background: linear-gradient(to bottom,
+      rgba(84, 104, 201, 0.55) 0%,
+      rgba(99, 102, 241, 0.15) 55%,
+      transparent 100%);
+  z-index: 1;
+  pointer-events: none;
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+/* ================= AMBIENT BACKGROUND ================= */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: floatOrb 10s infinite alternate ease-in-out;
+}
 
-  color: #8c8c8c;
+.orb-1 {
+  top: -8%;
+  left: -12%;
+  width: 320px;
+  height: 320px;
+  background: var(--secondary-glow);
+  opacity: 0.28;
+}
 
+.orb-2 {
+  bottom: 18%;
+  right: -8%;
+  width: 260px;
+  height: 260px;
+  background: var(--secondary-glow);
+  opacity: 0.22;
+  animation-delay: -6s;
+}
+
+@keyframes floatOrb {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(30px, 50px);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .orb {
+    opacity: 0.15;
+  }
+}
+
+/* ================= HEADER SECTION ================= */
+.static-header {
+  padding: 10px 20px 0;
+  position: relative;
+  z-index: 2;
+}
+
+ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.avatar-container {
+  position: relative;
+
+  ion-avatar {
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.greeting-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.greeting-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.user-name {
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
+  color: var(--ion-text-color);
+  letter-spacing: -0.5px;
 }
 
-#container a {
-  text-decoration: none;
+@media (prefers-color-scheme: dark) {
+  .user-name {
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-icon {
+  --color: var(--ion-text-color);
+  --padding-start: 0;
+  --padding-end: 0;
+  width: 44px;
+  height: 44px;
+  position: relative;
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--danger-neon);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+}
+
+/* ================= ANALYTICS HERO CARD ================= */
+.chart-hero {
+  position: relative;
+  border-radius: 28px;
+  padding: 24px 20px 10px 20px;
+  margin: 20px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 3;
+}
+
+.balance-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--ion-text-color-step-500, var(--ion-color-medium));
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.chart-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--ion-text-color);
+  letter-spacing: -1px;
+}
+
+.group-selector {
+  background: var(--glass-surface);
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  padding: 0 10px;
+  backdrop-filter: blur(5px);
+
+  .custom-select {
+    --placeholder-color: var(--ion-text-color);
+    --placeholder-opacity: 1;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-height: 36px;
+    color: var(--ion-text-color);
+  }
+}
+
+.chart-wrapper {
+  margin-left: -15px;
+  margin-right: -10px;
+  margin-bottom: -5px;
+  position: relative;
+  z-index: 2;
+}
+
+.balance-decoration {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ================= MAIN CONTENT ================= */
+.main-content {
+  padding: 0 20px 100px;
+  position: relative;
+  z-index: 5;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 40%;
+    height: 3px;
+    background: linear-gradient(to right, var(--ion-color-tertiary), transparent);
+    border-radius: 3px;
+  }
+}
+
+/* ================= GROUP LIST ================= */
+.group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.island-card {
+
+  display: flex;
+  justify-content: space-evenly;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: var(--ion-background-color);
+
+  border: 1px solid var(--glass-border);
+
+  padding: 20px 24px;
+
+  border-radius: 28px;
+  transition: all 0.3s ease;
+
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30, 32, 45, 0.6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-color-scheme: dark) {
+
+    &:active {
+
+      background: rgba(30, 32, 45, 0.9);
+
+    }
+
+  }
+
+}
+
+.card-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24px;
+
+  &.travel {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+  }
+
+  &.food {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+  }
+
+  &.home {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+  }
+
+  background: rgba(var(--ion-color-medium-rgb, 148, 163, 184), 0.1);
+  color: var(--ion-color-medium);
+}
+
+.group-date {
+  font-size: 0.8rem;
+  color: var(--ion-text-color-step-600, var(--ion-color-medium));
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.card-amount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.amount-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--success-neon);
+  display: block;
+}
+
+.group-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+  margin: 0 0 6px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-meta {
+  align-items: center;
+}
+
+.group-type {
+
+  background: var(--glass-surface);
+
+  color: var(--ion-text-color-step-600, var(--ion-color-medium));
+
+  padding: 3px 10px;
+
+  border-radius: 8px;
+
+  font-size: 0.75rem;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+
+}
+
+/* ================= SKELETON LOADING ================= */
+.skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--ion-background-color);
+  border: 1px solid var(--glass-border);
+  padding: 18px;
+  border-radius: 20px;
+}
+
+.skeleton-chart {
+  display: flex;
+  flex-direction: column;
+  height: 240px;
+  justify-content: space-between;
+  padding: 24px 20px;
+
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .skeleton-bars-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 120px;
+    margin-top: 20px;
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .skeleton-bar {
+    flex: 1;
+    border-radius: 6px;
+    overflow: hidden;
+
+    ion-skeleton-text {
+      height: 100%;
+      margin: 0;
+      --border-radius: 6px;
+    }
+  }
+}
+
+ion-skeleton-text {
+  --background: var(--glass-surface);
+  --border-radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-skeleton-text {
+    --background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ================= FAB BUTTON ================= */
+ion-fab {
+  z-index: 10000 !important;
+  position: fixed !important;
+  bottom: 100px !important;
+  right: 20px !important;
+}
+
+ion-fab-button {
+  --background: var(--ion-color-tertiary);
+  --color: var(--ion-color-primary-contrast);
+  --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 78, 84, 200), 0.4);
+  width: 56px;
+  height: 56px;
+
+  ion-icon {
+    font-size: 28px;
+  }
+}
+
+/* ================= MISC ================= */
+.total-summary-row {
+  margin: 0 20px 25px;
+  padding: 12px 20px;
+  background: var(--glass-surface);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .summary-label {
+    font-size: 0.9rem;
+    color: var(--ion-text-color-step-400);
+    font-weight: 500;
+  }
+
+  .summary-value {
+    font-weight: 700;
+    color: var(--secondary-glow);
+  }
+}
+
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.empty-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--glass-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  border: 1px solid var(--glass-border);
+}
+

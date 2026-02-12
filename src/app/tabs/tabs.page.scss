@@ -1,0 +1,90 @@
+/* ================= ROOT VARIABLES ================= */
+:host {
+  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+
+  --bar-height: 70px;
+  --bar-radius: 24px;
+  --floating-margin: 10px;
+
+  /* LIGHT THEME */
+  --bar-bg: rgba(255, 255, 255, 0.75);
+  --bar-border: rgba(0, 0, 0, 0.08);
+
+  --tab-bg-active: rgba(var(--ion-color-primary-rgb), 0.12);
+
+  --neon-primary: var(--ion-color-tertiary);
+  --neon-text: var(--ion-color-step-600);
+}
+
+/* ================= DARK THEME ================= */
+@media (prefers-color-scheme: dark) {
+  :host {
+    --bar-bg: rgba(15, 23, 42, 0.85);
+    --bar-border: rgba(255, 255, 255, 0.08);
+    --tab-bg-active: rgba(var(--ion-color-primary-rgb), 0.2);
+    --neon-text: var(--ion-color-step-400);
+  }
+}
+
+/* ================= TAB BAR ================= */
+ion-tab-bar {
+  position: absolute;
+  bottom: var(--floating-margin);
+  left: var(--floating-margin);
+  right: var(--floating-margin);
+  height: var(--bar-height);
+  border-radius: var(--bar-radius);
+
+  background: var(--bar-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--bar-border);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+
+  --border: none;
+}
+
+/* ================= TAB BUTTON ================= */
+ion-tab-button {
+  --background: transparent;
+  --color: var(--neon-text);
+  --color-selected: var(--neon-primary);
+  --ripple-color: transparent;
+
+  position: relative;
+  border-radius: 16px;
+  margin: 6px;
+  transition: all 0.25s ease;
+}
+
+/* ================= ICON ================= */
+.tab-icon {
+  font-size: 22px;
+  transition: all 0.3s ease;
+}
+
+/* ================= LABEL ================= */
+ion-label {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 4px;
+  opacity: 0.7;
+  transition: all 0.25s ease;
+}
+
+/* ================= SELECTED TAB (IMPORTANT) ================= */
+ion-tab-button.tab-selected {
+  transform: translateY(-4px);
+}
+
+/* Icon color change */
+ion-tab-button.tab-selected .tab-icon {
+  color: var(--neon-tertiary);
+  transform: scale(1.1);
+}
+
+/* Label color change */
+ion-tab-button.tab-selected ion-label {
+  color: var(--neon-tertiary);
+  opacity: 1;
+}

@@ -1,0 +1,87 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-modal-header">
+    <ion-title>Settle Balance</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">Cancel</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content scroll-y="true">
+  <div class="scroll-fix-wrapper">
+
+    <!-- Skeleton Loader -->
+    <div *ngIf="isLoading" class="skeleton-container">
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line medium"></div>
+      <div class="skeleton-line long"></div>
+      <div class="skeleton-line btn"></div>
+    </div>
+
+    <!-- Actual Content -->
+    <div *ngIf="!isLoading && user && settlementDetails.length > 0" class="fade-in">
+
+      <!-- Amount Hero -->
+      <div class="amount-hero">
+        <div class="amount-display">
+          <span class="currency">₹</span>
+          <span class="amount-text">{{ user.netBalance < 0 ? (-user.netBalance).toFixed(2) : '0.00' }}</span>
+        </div>
+      </div>
+
+      <div class="form-content">
+        <!-- Details Card -->
+        <div class="details-card">
+          <div class="form-row">
+            <div class="icon-box purple">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="field-body">
+              <ion-label>Payer</ion-label>
+              <p class="value-text">{{ user.memberName }}</p>
+            </div>
+          </div>
+
+          <div class="row-divider"></div>
+
+          <div class="form-row">
+            <div class="icon-box orange">
+              <ion-icon name="wallet-outline"></ion-icon>
+            </div>
+            <div class="field-body">
+              <ion-label>Total Balance</ion-label>
+              <p class="value-text"
+                [style.color]="user.netBalance < 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+                {{ user.netBalance < 0 ? 'Pay ₹' + (-user.netBalance).toFixed(2) : 'No balance due' }} </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="member-container">
+          <div *ngFor="let detail of filteredMembers" class="member-row"
+            [class.selected]="selectedMember?.toMemberId === detail.toMemberId"
+            (click)="selectedMember = detail; onMemberChange()">
+            <div class="member-avatar">{{ detail.toMemberName.substring(0,1) }}</div>
+            <span class="member-label">{{ detail.toMemberName }}</span>
+            <span class="amount-label">₹{{ detail.amount.toFixed(2) }}</span>
+            <ion-icon *ngIf="selectedMember?.toMemberId === detail.toMemberId" name="checkmark-circle"
+              class="check"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <ion-button expand="block" class="confirm-btn" [disabled]="!selectedMember" (click)="confirmSettlement()">
+          Confirm Settlement
+        </ion-button>
+
+        <div class="bottom-spacer"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && settlementDetails.length === 0" class="empty-state fade-in">
+      <ion-icon name="receipt-outline" size="large"></ion-icon>
+      <p>No settlements available.</p>
+    </div>
+  </div>
+</ion-content>

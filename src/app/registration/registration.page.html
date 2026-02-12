@@ -1,0 +1,60 @@
+<ion-content class="register-page">
+  <div class="auth-container">
+    <!-- Optional Logo / Branding -->
+    <div class="logo-section">
+      <img src="/assets/donut-chart.png" />
+      <h2 class="welcome-text">SplitX</h2>
+      <p class="sub-text">Sign up to continue</p>
+    </div>
+
+    <ion-card class="auth-card">
+      <ion-card-content>
+        <form #registerForm="ngForm" (ngSubmit)="onRegister()">
+
+          <!-- Username Field -->
+          <ion-item class="input-item" lines="none">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-input type="text" placeholder="Username" [(ngModel)]="registerData.username" name="username" required
+              minlength="3" class="glowing-input"></ion-input>
+          </ion-item>
+
+          <!-- Email Field -->
+          <ion-item class="input-item" lines="none">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-input type="email" placeholder="Email" [(ngModel)]="registerData.email" name="email" required email
+              class="glowing-input"></ion-input>
+          </ion-item>
+
+          <!-- Password Field -->
+          <ion-item class="input-item" lines="none">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input type="password" placeholder="Password" [(ngModel)]="registerData.password" name="password"
+              required minlength="6" class="glowing-input"></ion-input>
+          </ion-item>
+
+          <!-- Confirm Password Field -->
+          <ion-item class="input-item" lines="none">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input type="password" placeholder="Confirm Password" [(ngModel)]="registerData.confirmPassword"
+              name="confirmPassword" required minlength="6" class="glowing-input"></ion-input>
+          </ion-item>
+
+          <!-- Error Message -->
+          <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+          <!-- Submit Button -->
+          <ion-button type="submit" expand="block" class="register-btn"
+            [disabled]="!registerForm.valid || registerData.password !== registerData.confirmPassword">
+            Register
+          </ion-button>
+        </form>
+
+        <!-- Login Link -->
+        <p class="login-link">
+          Already have an account? <a (click)="goToLogin()">Login</a>
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

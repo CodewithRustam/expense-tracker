@@ -1,2 +1,17 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+:root {
+  --ion-background-color: #ffffff;
+  --ion-font-family: 'Poppins', 'Helvetica', 'Arial', sans-serif;
+  --ion-color-tertiary: #8474e7 !important;
+  --ion-color-contrast: none !important;
+  --ion-border-color: #d0d0d0;
+    --primary-glow: #51012f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #1a1a1a;
+    --ion-border-color: #333;
+  }
+}
