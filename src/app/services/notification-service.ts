@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs'; // Added BehaviorSubject and tap
+import { Observable, BehaviorSubject, Subject } from 'rxjs'; // Added Subject
+import { tap, map } from 'rxjs/operators';
 import { AppNotification } from '../models/app-notification';
 import { AuthService } from './auth-service';
 
@@ -8,66 +9,107 @@ import { AuthService } from './auth-service';
   providedIn: 'root'
 })
 export class NotificationService {
+
   private baseUrl = 'https://financetracker.runasp.net/api/notifications';
 
-  // 1. The Global "State" for unread count
+  // ✅ Global Refresh Stream (The missing part)
+  private refreshSubject = new Subject<void>();
+  public refresh$ = this.refreshSubject.asObservable();
+
+  // ✅ Global unread count state
   private unreadCountSubject = new BehaviorSubject<number>(0);
-  unreadCount$ = this.unreadCountSubject.asObservable();
+  public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
-  // 2. Helper to update the stream
-  updateUnreadCount(count: number) {
+  // ================================
+  // Helper Methods
+  // ================================
+
+  private get userId(): string {
+    return this.authService.getUserId()!;
+  }
+
+  // ✅ Trigger a refresh across the app
+  public triggerRefresh(): void {
+    this.refreshSubject.next();
+  }
+
+  private setUnreadCount(count: number): void {
     this.unreadCountSubject.next(count);
   }
 
+  private decreaseUnreadCount(): void {
+    const current = this.unreadCountSubject.value;
+    if (current > 0) {
+      this.unreadCountSubject.next(current - 1);
+    }
+  }
+
+  // ================================
+  // API Methods
+  // ================================
+
   registerPushToken(deviceToken: string): Observable<any> {
-    const payload = { deviceToken };
-    return this.http.post(`${this.baseUrl}/app-register`, payload);
+    return this.http.post(`${this.baseUrl}/app-register`, { deviceToken });
   }
 
-  // 3. Automatically updates count when fetching
   getAll(): Observable<AppNotification[]> {
-    return this.http.get<AppNotification[]>(`${this.baseUrl}/get-notifications`).pipe(
-      tap(notifications => {
-        const count = notifications.filter(n => !n.isRead).length;
-        this.updateUnreadCount(count);
-      })
-    );
+    return this.http
+      .get<AppNotification[]>(`${this.baseUrl}/get-notifications`)
+      .pipe(
+        tap(notifications => {
+          const unread = notifications.filter(n => !n.isRead).length;
+          this.setUnreadCount(unread);
+        })
+      );
   }
 
-  // 4. Reset count to 0 immediately on success
-  markAllAsRead() {
-    const userid = this.authService.getUserId();
-    return this.http.put(`${this.baseUrl}/mark-all-read?userId=${userid}`, {}).pipe(
-      tap(() => this.updateUnreadCount(0))
-    );
+  markAllAsRead(): Observable<any> {
+    return this.http
+      .put(`${this.baseUrl}/mark-all-read?userId=${this.userId}`, {})
+      .pipe(
+        tap(() => {
+          this.setUnreadCount(0);
+          this.triggerRefresh(); // ✅ Notify listeners
+        })
+      );
   }
 
-  // 5. Reset count to 0 immediately on clear
-  clearAll() {
-    const userId = this.authService.getUserId();
-    return this.http.delete(`${this.baseUrl}/clear-all?userId=${userId}`).pipe(
-      tap(() => this.updateUnreadCount(0))
-    );
+  clearAll(): Observable<any> {
+    return this.http
+      .delete(`${this.baseUrl}/clear-all?userId=${this.userId}`)
+      .pipe(
+        tap(() => {
+          this.setUnreadCount(0);
+          this.triggerRefresh(); // ✅ Notify listeners
+        })
+      );
   }
 
-  deleteNotification(id: number) {
-    const url = `${this.baseUrl}/delete-notification?notificationId=${id}`;
-    return this.http.delete(url).pipe(
-      tap(() => {
-        // Decrease count by 1 locally so the UI updates instantly
-        const current = this.unreadCountSubject.value;
-        if (current > 0) this.updateUnreadCount(current - 1);
-      })
-    );
+  deleteNotification(id: number): Observable<any> {
+    return this.http
+      .delete(`${this.baseUrl}/delete-notification?notificationId=${id}`)
+      .pipe(
+        tap(() => {
+          this.decreaseUnreadCount();
+          this.triggerRefresh(); // ✅ Notify listeners
+        })
+      );
   }
 
-  addNotification(roomId: number, title?: string, body?: string) {
-    const payload = { RoomId: roomId, Title: title, Body: body };
-    return this.http.post(`${this.baseUrl}/send`, payload).subscribe({
-      next: (res) => console.log('✅ Notification Sent:', res),
-      error: (err) => console.error('❌ Error sending notification:', err),
-    });
+  addNotification(roomId: number, title?: string, body?: string): Observable<any> {
+    const payload = {
+      RoomId: roomId,
+      Title: title,
+      Body: body
+    };
+
+    return this.http.post(`${this.baseUrl}/send`, payload).pipe(
+      tap(() => this.triggerRefresh()) // ✅ Refresh when new notification is sent
+    );
   }
 }

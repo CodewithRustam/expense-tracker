@@ -1,20 +1,23 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { ModalController, ToastController } from '@ionic/angular';
-import { AddExpenseResponse, ApiExpense, ExpenseService } from 'src/app/services/expense';
+import { ModalController } from '@ionic/angular';
+import { ExpenseService } from 'src/app/services/expense';
 import { Toastservice } from 'src/app/services/toastservice';
+import { finalize, take } from 'rxjs/operators';
+import { ApiExpense } from 'src/app/models/Expense/ApiExpense';
+
 
 interface Expense {
-  expenseId: number; // Added to match parent component
+  expenseId: number;
   item: string;
   amount: number;
   roomId: number | null;
-  originalDate: string; // Fixed typo from OrigninalDate
-  date: string; // Added to match parent component
-  payerId: number; // Added to match parent component
-  payerName: string; // Added to match parent component
-  category: string; // Added to match parent component
-  iconName: string; // Added to match parent component
-  isEditShow: boolean; // Added to match parent component
+  originalDate: string;
+  date: string;
+  payerId: number;
+  payerName: string;
+  category: string;
+  iconName: string;
+  isEditShow: boolean;
 }
 
 @Component({
@@ -23,7 +26,6 @@ interface Expense {
   styleUrls: ['./edit-expense-modal.component.scss'],
   standalone: false,
   encapsulation: ViewEncapsulation.None
-
 })
 export class EditExpenseModal implements OnInit {
   @Input() expense!: Expense;
@@ -33,39 +35,42 @@ export class EditExpenseModal implements OnInit {
   today: string = new Date().toISOString().split('T')[0];
   originalExpense!: Expense;
   hasChanges: boolean = false;
+  isSubmitting: boolean = false; // Added to prevent double-tap
   filteredGroups: { roomId: number; name: string }[] = [];
+  roomName: string = '';
 
-  constructor(private modalCtrl: ModalController, private toast: Toastservice, private expenseService: ExpenseService) { }
+  constructor(
+    private modalCtrl: ModalController,
+    private toast: Toastservice,
+    private expenseService: ExpenseService
+  ) { }
 
   ngOnInit() {
-    this.originalExpense = { ...this.expense };
+    // Create a deep copy to track changes
+    this.originalExpense = JSON.parse(JSON.stringify(this.expense));
     this.filteredGroups = [...this.groups];
+    this.roomName = this.filteredGroups[0].name;
   }
+
+  // --- UI Helpers ---
 
   formatDate(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
   }
 
   filterRooms(event: any) {
-    const searchTerm = event.target.value.toLowerCase();
-    if (!searchTerm) {
-      this.filteredGroups = [...this.groups];
-    } else {
-      this.filteredGroups = this.groups.filter(g => 
-        g.name.toLowerCase().includes(searchTerm)
-      );
-    }
+    const searchTerm = event.target.value?.toLowerCase() || '';
+    this.filteredGroups = this.groups.filter(g =>
+      g.name.toLowerCase().includes(searchTerm)
+    );
   }
 
-  dismiss() {
-    this.modalCtrl.dismiss();
+  dismiss(data?: any) {
+    this.modalCtrl.dismiss(data);
   }
 
   toggleDatePicker() {
@@ -77,11 +82,12 @@ export class EditExpenseModal implements OnInit {
     this.checkForChanges();
   }
 
-  // Check if any field has changed
+  // --- Change Tracking ---
+
   checkForChanges() {
     this.hasChanges =
       this.expense.item !== this.originalExpense.item ||
-      this.expense.amount !== this.originalExpense.amount ||
+      Number(this.expense.amount) !== Number(this.originalExpense.amount) ||
       this.expense.roomId !== this.originalExpense.roomId ||
       this.expense.originalDate !== this.originalExpense.originalDate;
   }
@@ -90,26 +96,29 @@ export class EditExpenseModal implements OnInit {
     this.checkForChanges();
   }
 
+  // --- API Action ---
+
   async saveExpense() {
     if (!this.hasChanges) {
-      this.modalCtrl.dismiss();
+      this.dismiss();
       return;
     }
 
     const amount = Number(this.expense.amount);
 
+    // Validation
     if (!this.expense.item?.trim()) {
-      await this.toast.error('Please enter the expense item');
+      this.toast.error('Please enter the expense item');
       return;
     }
 
-    if (!this.expense.amount || isNaN(amount) || amount <= 1) {
-      await this.toast.error('Amount must be greater than 1.00');
+    if (isNaN(amount) || amount <= 1) {
+      this.toast.error('Amount must be greater than 1.00');
       return;
     }
 
     if (!this.expense.roomId) {
-      await this.toast.error('Please select a room');
+      this.toast.error('Please select a room');
       return;
     }
 
@@ -117,27 +126,29 @@ export class EditExpenseModal implements OnInit {
       expenseId: this.expense.expenseId,
       roomId: this.expense.roomId,
       memberId: this.expense.payerId,
-      item: this.expense.item,
+      item: this.expense.item.trim(),
       amount: amount,
       date: this.expense.originalDate
     };
 
-    this.expenseService.updateExpense({ ...apiExpense }).subscribe({
-      next: async (res: AddExpenseResponse) => {
-        if (res.success) {
-          this.toast.success(res.message);
+    this.isSubmitting = true;
+
+    this.expenseService.updateExpense(apiExpense)
+      .pipe(
+        take(1),
+        finalize(() => this.isSubmitting = false)
+      )
+      .subscribe({
+        next: (res) => {
+          this.toast.success(res.message || 'Expense updated successfully');
+          // ✅ Close modal. The service's tap() has already triggered the 
+          // global refresh$ stream, so all background pages will auto-reload.
+          this.dismiss({ refresh: true });
+        },
+        error: (err) => {
+          // The service handleError provides the formatted error message
+          this.toast.error(err.message || 'Update failed');
         }
-        else {
-          this.toast.error(res.message);
-        }
-        this.modalCtrl.dismiss({
-          refresh: true,
-          updatedExpense: apiExpense
-        });
-      },
-      error: async (err: AddExpenseResponse) => {
-        this.toast.error('Expense update failed. Please try again.');
-      }
-    });
+      });
   }
 }

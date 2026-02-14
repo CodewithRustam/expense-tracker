@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ModalController, ToastController } from '@ionic/angular';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import { AppNotification } from 'src/app/models/app-notification';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ModalController } from '@ionic/angular';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { NotificationService } from 'src/app/services/notification-service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notification-list',
@@ -10,71 +10,126 @@ import { NotificationService } from 'src/app/services/notification-service';
   styleUrls: ['./notification-list-modal.component.scss'],
   standalone: false
 })
-export class NotificationListModal implements OnInit {
-  notifications: AppNotification[] = [];
+export class NotificationListModal implements OnInit, OnDestroy {
+
+  notifications: any[] = [];
   loading = true;
-  private isSwiping = false;
+  isClearing = false;
+  private refreshSub?: Subscription;
 
   constructor(
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController,
     private notificationService: NotificationService
   ) { }
 
-  async ngOnInit() {
-    await this.loadNotifications();
+  ngOnInit() {
+    this.loadNotifications();
+
+    // Prevent reload during animation
+    this.refreshSub = this.notificationService.refresh$
+      .subscribe(() => {
+        if (!this.isClearing) {
+          this.loadNotifications(true);
+        }
+      });
   }
 
-  async loadNotifications() {
-    this.loading = true;
+  ngOnDestroy() {
+    this.refreshSub?.unsubscribe();
+  }
+
+  loadNotifications(isBackground = false) {
+    if (!isBackground) this.loading = true;
+
     this.notificationService.getAll().subscribe({
       next: (res) => {
-        this.notifications = res;
+        this.notifications = res.sort((a: any, b: any) =>
+          new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+        );
         this.loading = false;
       },
       error: () => this.loading = false
     });
   }
 
-  async onDrag(event: any) {
-    if (!this.isSwiping && Math.abs(event.detail.ratio) > 0.1) {
-      this.isSwiping = true;
-      await Haptics.impact({ style: ImpactStyle.Light });
-    }
-    if (event.detail.ratio === 0) this.isSwiping = false;
-  }
+  // 🧈 BUTTERY SMOOTH CLEAR ALL
+  async clearAll() {
+    if (this.isClearing || this.notifications.length === 0) return;
 
-  async deleteNotification(notif: AppNotification, slidingItem: any) {
-    await Haptics.impact({ style: ImpactStyle.Medium });
-    slidingItem.close();
+    this.isClearing = true;
 
-    setTimeout(() => {
-      const backup = [...this.notifications];
-      this.notifications = this.notifications.filter(n => n.id !== notif.id);
+    try {
+      // 1️⃣ Wait for backend delete
+      await this.notificationService.clearAll().toPromise();
 
-      this.notificationService.deleteNotification(notif.id).subscribe({
-        error: () => this.notifications = backup
-      });
-    }, 250);
-  }
-  cleanBody(body: string) {
-    const rupeeFormatter = new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(0).replace('0', ''); 
-    return body.replace(/[₹\?]/g, rupeeFormatter);
-  }
-  async markAllAsRead() {
-    await Haptics.impact({ style: ImpactStyle.Light });
-    this.notificationService.markAllAsRead().subscribe({
-      next: () => {
-        this.notifications = this.notifications.map(n => ({ ...n, isRead: true }));
+      // 2️⃣ Smooth top-to-bottom cascade animation
+      while (this.notifications.length > 0) {
+        const first = this.notifications[0];
+        first.collapsing = true;
+
+        await new Promise(r => setTimeout(r, 300));
+
+        this.notifications.shift();
       }
-    });
+
+
+      await Haptics.notification({ type: NotificationType.Success });
+
+    } catch (err) {
+      console.error('Clear failed', err);
+    }
+
+    this.isClearing = false;
+  }
+
+  async onSwipeDelete(notif: any, slidingItem: any) {
+
+    await Haptics.impact({ style: ImpactStyle.Medium });
+
+    await slidingItem.close();
+
+    // Add slight delay before collapse (natural pause)
+    await new Promise(r => setTimeout(r, 120));
+
+    notif.collapsing = true;
+
+    // Slower, smoother collapse
+    await new Promise(r => setTimeout(r, 450));
+
+    this.notifications = this.notifications.filter(n => n.id !== notif.id);
+
+    this.notificationService.deleteNotification(notif.id).subscribe();
+  }
+
+
+  trackById(index: number, item: any) {
+    return item.id;
+  }
+
+  cleanBody(body: string) {
+    return body ? body.replace(/[?]/g, '₹') : '';
+  }
+
+  formatTimestamp(dateString: string) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   close() {
     this.modalCtrl.dismiss();
   }
+
+  onDrag(event: any, notif: any) {
+
+    const ratio = Math.abs(event.detail.ratio || 0);
+    const progress = Math.min(ratio, 1);
+
+    const opacity = progress * 0.25; // soft red only
+    notif.swipeColor = `rgba(255, 59, 48, ${opacity})`;
+  }
+  resetColor(notif: any) {
+    notif.swipeColor = '';
+  }
+
 }

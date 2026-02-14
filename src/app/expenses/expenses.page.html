@@ -41,21 +41,30 @@
           <!-- STATS -->
           <div class="hub-stats-row">
             <ng-container *ngIf="!isLoadingExpenses; else statsSkeleton">
-              <ion-icon name="wallet-outline" style="font-size:x-large"></ion-icon>
-              <div class="stat-item">
-                <span class="s-label">Total Spent</span>
-                <span class="s-val">₹{{ totalAllTime | number:'1.0-0' }}</span>
+
+              <!-- Stat 1 -->
+              <div class="stat-block">
+                <ion-icon name="wallet-outline" class="stat-icon"></ion-icon>
+                <div class="stat-item">
+                  <span class="s-label">Total Spent</span>
+                  <span class="s-val">₹{{ totalAllTime | number:'1.0-0' }}</span>
+                </div>
               </div>
 
               <div class="stat-divider"></div>
 
-              <ion-icon name="people-outline" style="font-size:x-large"></ion-icon>
-              <div class="stat-item">
-                <span class="s-label">Avg/Person</span>
-                <span class="s-val">₹{{ averageAmount | number:'1.0-0' }}</span>
+              <!-- Stat 2 -->
+              <div class="stat-block">
+                <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+                <div class="stat-item">
+                  <span class="s-label">Avg/Person</span>
+                  <span class="s-val">₹{{ averageAmount | number:'1.0-0' }}</span>
+                </div>
               </div>
+
             </ng-container>
           </div>
+
 
           <!-- MEMBERS -->
           <div class="hub-members">
@@ -166,7 +175,10 @@
                       </div>
                       <div class="text-group">
                         <span class="tx-name">{{ exp.item }}</span>
-                        <span class="tx-meta">{{ exp.category }} • {{ exp.date }}</span>
+                        <div class="tx-meta-row">
+                          <span class="category-badge">{{ exp.category }}</span>
+                          <span class="tx-date">{{ exp.date }}</span>
+                        </div>
                       </div>
                     </div>
 

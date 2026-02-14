@@ -292,8 +292,9 @@ ion-toolbar {
   margin-left: -15px;
   margin-right: -10px;
   margin-bottom: -5px;
-  position: relative;
   z-index: 2;
+  height: 240px;
+  position: relative;
 }
 
 .balance-decoration {
@@ -344,7 +345,11 @@ ion-toolbar {
 }
 
 .island-card {
-
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-evenly;
 
@@ -352,16 +357,11 @@ ion-toolbar {
 
   gap: 10px;
 
-  background: var(--ion-background-color);
-
-  border: 1px solid var(--glass-border);
-
-  padding: 20px 24px;
+  padding: 20px;
 
   border-radius: 28px;
   transition: all 0.3s ease;
 
-  backdrop-filter: blur(10px);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
@@ -587,4 +587,3 @@ ion-fab-button {
   margin-bottom: 20px;
   border: 1px solid var(--glass-border);
 }
-

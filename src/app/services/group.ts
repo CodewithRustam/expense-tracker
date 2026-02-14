@@ -1,57 +1,65 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { Group } from '../models/group.model';
+import { tap } from 'rxjs/operators';
 import { AuthService } from './auth-service';
+import { Group } from '../models/group.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GroupService {
-  private apiUrl = 'https://financetracker.runasp.net/api/rooms/get-rooms';
 
-  private refreshGroupsSource = new Subject<void>();
-  refreshGroups$ = this.refreshGroupsSource.asObservable();
+  private baseUrl = 'https://financetracker.runasp.net/api/rooms';
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  // 🔥 Global Refresh Stream
+  private refreshSubject = new Subject<void>();
+  refresh$ = this.refreshSubject.asObservable();
 
-  triggerRefresh() {
-    this.refreshGroupsSource.next();
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
+
+  private get userId(): string {
+    return this.authService.getUserId()!;
   }
 
-  getGroups(): Observable<{ data: Group[], success: boolean, message: string }> {
-    return this.http.get<{ data: Group[], success: boolean, message: string }>(
-      this.apiUrl,
-      this.authService.getAuthHeaders()
+  // ================================
+  // REFRESH TRIGGER
+  // ================================
+
+  triggerRefresh(): void {
+    this.refreshSubject.next();
+  }
+
+  // ================================
+  // API METHODS
+  // ================================
+
+  getGroups(): Observable<Group[]> {
+    return this.http.get<Group[]>(`${this.baseUrl}/get-rooms`);
+  }
+
+  getGroupById(id: number): Observable<Group> {
+    return this.http.get<Group>(`${this.baseUrl}/get/${id}`);
+  }
+
+  createGroup(group: Partial<Group>): Observable<any> {
+    return this.http.post(`${this.baseUrl}/create`, group).pipe(
+      tap(() => this.triggerRefresh())
     );
   }
 
-  getGroupById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
-  }
-
-  addGroup(group: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, group);
-  }
-
-  updateGroup(id: number, group: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, group);
+  updateGroup(id: number, group: Partial<Group>): Observable<any> {
+    return this.http.put(`${this.baseUrl}/update/${id}`, group).pipe(
+      tap(() => this.triggerRefresh())
+    );
   }
 
   deleteGroup(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
-  }
-
-  addGroupWithRefresh(group: any): Observable<any> {
-    return new Observable(observer => {
-      this.http.post<any>(this.apiUrl, group).subscribe({
-        next: (res) => {
-          if (res.success) this.triggerRefresh();
-          observer.next(res);
-          observer.complete();
-        },
-        error: (err) => observer.error(err)
-      });
-    });
+    return this.http.delete(`${this.baseUrl}/delete/${id}`).pipe(
+      tap(() => this.triggerRefresh())
+    );
   }
 }

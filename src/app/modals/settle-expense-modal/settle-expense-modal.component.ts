@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController, ToastController } from '@ionic/angular';
-import { ExpenseService, SettlementDetail } from 'src/app/services/expense';
+import { SettlementDetail } from 'src/app/models/Settlement/SettlementDetail';
+import { ExpenseService } from 'src/app/services/expense';
 import { Toastservice } from 'src/app/services/toastservice';
 
 interface SettlementResponse {
@@ -42,7 +43,7 @@ export class SettleExpenseModalComponent implements OnInit {
     if (!searchTerm) {
       this.filteredMembers = [...this.settlementDetails];
     } else {
-      this.filteredMembers = this.settlementDetails.filter(detail => 
+      this.filteredMembers = this.settlementDetails.filter(detail =>
         detail.toMemberName.toLowerCase().includes(searchTerm)
       );
     }

@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { AuthService } from '../services/auth-service';
-import { ExpenseService, UserExpenseResponse } from '../services/expense';
+import { ExpenseService } from '../services/expense';
 import { Subscription } from 'rxjs';
+import { UserExpenseResponse } from '../models/Expense/UserExpenseResponse';
 
 interface Expense {
   name: string;
@@ -19,7 +20,7 @@ interface Expense {
   styleUrls: ['./history.page.scss'],
   standalone: false
 })
-export class HistoryPage {
+export class HistoryPage implements OnInit, OnDestroy {
   expenses: Expense[] = [];
   filteredExpenses: Expense[] = [];
   months: string[] = [];
@@ -48,9 +49,10 @@ export class HistoryPage {
     // Initial load
     this.loadExpenseMonths();
 
-    // Listen for changes from other parts of the app
-    this.refreshSub = this.expenseService.refreshNeeded.subscribe(() => {
-      this.loadExpenseMonths();
+    // ✅ Listen for global changes (Add, Update, Delete, Settle)
+    this.refreshSub = this.expenseService.refresh$.subscribe(() => {
+      // Pass 'true' to indicate a background refresh
+      this.loadExpenseMonths(true);
     });
   }
 
@@ -60,81 +62,81 @@ export class HistoryPage {
     }
   }
 
-  // 🔹 Step 1: Get all months first
-  loadExpenseMonths() {
-    this.isLoading = true;
+  // 🔹 Step 1: Get all months
+  loadExpenseMonths(isBackground = false) {
+    if (!isBackground) this.isLoading = true;
+
     this.expenseService.getExpenseMonths().subscribe({
       next: (response) => {
         if (response.success && response.data?.length) {
           this.months = response.data
             .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
             .map(month => {
-              const [year] = month.split('-');
-              const monthName = new Date(`${month}-01`).toLocaleString('default', { month: 'long' });
+              const [year, monthNum] = month.split('-');
+              const monthName = new Date(Number(year), Number(monthNum) - 1).toLocaleString('default', { month: 'long' });
               return `${monthName} ${year}`;
             });
 
-          this.currentMonthIndex = this.months.length - 1;
-          this.selectedMonth = this.months[this.currentMonthIndex];
+          // Maintain the current selection index if possible during refresh
+          if (!isBackground || this.currentMonthIndex === 0) {
+            this.currentMonthIndex = this.months.length - 1;
+          }
 
-          // Load expenses for latest month
-          this.loadUserExpenses(this.formatApiMonth(this.selectedMonth));
+          this.selectedMonth = this.months[this.currentMonthIndex];
+          this.loadUserExpenses(this.formatApiMonth(this.selectedMonth), isBackground);
         } else {
-          this.presentToast('No months available', 'warning');
+          this.isLoading = false;
+          this.presentToast('No history available', 'warning');
         }
       },
       error: (err) => {
+        this.isLoading = false;
         this.presentToast('Error fetching months', 'danger');
-        console.error('Error fetching months:', err);
       }
     });
   }
 
   // 🔹 Step 2: Load user expenses for a given month
-  loadUserExpenses(month: string) {
-    this.isLoadingExpenses = true;
+  loadUserExpenses(month: string, isBackground = false) {
+    if (!isBackground) this.isLoadingExpenses = true;
 
-    this.expenseService.getUserExpenses(this.formatApiMonth(this.selectedMonth)).subscribe({
+    this.expenseService.getUserExpenses(month).subscribe({
       next: (response) => {
-        if (response.userExpenseResponse?.length) {
-          this.processExpenses(response);
-        } else {
-          this.presentToast('No expenses found for this month', 'warning');
-        }
+        this.processExpenses(response);
+        this.isLoadingExpenses = false;
+        this.isLoading = false;
       },
       error: (err) => {
+        this.isLoadingExpenses = false;
+        this.isLoading = false;
         this.presentToast('Error fetching expenses', 'danger');
-        console.error('Error fetching expenses:', err);
       }
     });
-
   }
 
-  // 🔹 Step 3: Convert API response to local Expense model
+  // 🔹 Step 3: Process API response
   processExpenses(data: { userExpenseResponse: UserExpenseResponse[] }) {
     if (!data.userExpenseResponse || data.userExpenseResponse.length === 0) {
       this.expenses = [];
       this.filteredExpenses = [];
       this.total = 0;
-      this.presentToast('No expenses found for this month', 'warning');
       return;
     }
+
     this.expenses = data.userExpenseResponse.map(exp => ({
       name: exp.item?.trim() || 'Unknown',
       room: exp.roomName?.trim() || 'Unknown',
       total: exp.amount ?? 0,
       date: new Date(exp.expenseDate),
-      type: exp.amount >= 0 ? 'credit' : 'debit',
+      type: exp.amount >= 0 ? 'credit' : 'debit', // Logical mapping
       iconName: exp.iconName || 'fa-solid fa-receipt'
     }));
 
     this.filterExpenses(this.filterType);
   }
 
-
   filterExpenses(type: 'all' | 'credit' | 'debit') {
     this.filterType = type;
-
     let tempExpenses = [...this.expenses];
 
     if (type !== 'all') {
@@ -142,22 +144,15 @@ export class HistoryPage {
     }
 
     this.filteredExpenses = tempExpenses.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    // Calculate total based on current filtered view
     this.total = this.filteredExpenses.reduce(
-      (sum, exp) => sum + (exp.type === 'credit' ? exp.total : -exp.total),
+      (sum, exp) => sum + exp.total,
       0
     );
-    this.isLoading = false;
-    this.isLoadingExpenses = false;
   }
 
-  toggleFilter() {
-    const types: ('all' | 'credit' | 'debit')[] = ['all', 'credit', 'debit'];
-    const currentIndex = types.indexOf(this.filterType);
-    const nextIndex = (currentIndex + 1) % types.length;
-    this.filterExpenses(types[nextIndex]);
-  }
-
-  // 🔹 Step 4: Month navigation triggers API call
+  // 🔹 Navigation Logic
   previousMonth() {
     if (this.currentMonthIndex > 0) {
       this.currentMonthIndex--;
@@ -174,13 +169,19 @@ export class HistoryPage {
     }
   }
 
-  // 🔹 Converts "October 2025" → "2025-10" for API
+  toggleFilter() {
+    const types: ('all' | 'credit' | 'debit')[] = ['all', 'credit', 'debit'];
+    const nextIndex = (types.indexOf(this.filterType) + 1) % types.length;
+    this.filterExpenses(types[nextIndex]);
+  }
+
   private formatApiMonth(displayMonth: string): string {
     const [monthName, year] = displayMonth.split(' ');
     const monthNumber = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
     return `${year}-${monthNumber.toString().padStart(2, '0')}`;
   }
 
+  // 🔹 UI Helpers
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message,
@@ -191,8 +192,11 @@ export class HistoryPage {
     await toast.present();
   }
 
+  onScroll(event: any) {
+    this.isSticky = event.detail.scrollTop > 60;
+  }
+
   getIconColor(iconName: string | undefined): string {
-    if (!iconName) return '#666';
     const iconMap: { [key: string]: string } = {
       'fa-solid fa-leaf': '#27ae60',
       'fa-solid fa-drumstick-bite': '#e74c3c',
@@ -204,13 +208,6 @@ export class HistoryPage {
       'fa-solid fa-seedling': '#2ecc71',
       'fa-solid fa-receipt': '#666'
     };
-    return iconMap[iconName] || '#666';
-  }
-  onScroll(event: any) {
-    const scrollTop = event.detail.scrollTop;
-
-    // Threshold: 60px (approx height of the 'History' header + padding)
-    // When the user scrolls past the header, the dashboard becomes sticky
-    this.isSticky = scrollTop > 60;
+    return iconMap[iconName || ''] || '#666';
   }
 }

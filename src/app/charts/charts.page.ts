@@ -1,16 +1,18 @@
-import { Component, OnDestroy } from '@angular/core';
-import { Platform } from '@ionic/angular';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   ApexNonAxisChartSeries,
   ApexChart,
   ApexDataLabels,
   ApexResponsive,
   ApexLegend,
-  ApexPlotOptions, // Added explicit import
+  ApexPlotOptions,
 } from 'ng-apexcharts';
-import { ExpenseService, MonthlyExpensesTrendResponse, CategoryExpenses, TopSpend } from '../services/expense';
+import { ExpenseService } from '../services/expense';
+import { MonthlyExpensesTrendResponse } from '../models/Expense/MonthlyExpensesTrendResponse';
+import { CategoryExpenses } from '../models/Expense/CategoryExpenses';
+import { TopSpend } from '../models/Expense/TopSpend';
 import { GroupService } from '../services/group';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, from, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 export type ChartOptions = {
@@ -30,7 +32,7 @@ export type ChartOptions = {
   styleUrls: ['./charts.page.scss'],
   standalone: false
 })
-export class ChartsPage implements OnDestroy {
+export class ChartsPage implements OnInit, OnDestroy {
   trendData: MonthlyExpensesTrendResponse = {
     months: [],
     members: [],
@@ -40,14 +42,15 @@ export class ChartsPage implements OnDestroy {
 
   groups: any[] = [];
   selectedGroup: any = null;
-
   currentMonth: string = this.getCurrentMonth();
   currentMonthLabel: string = this.formatMonthLabel(this.currentMonth);
   activeTab: 'categories' | 'topSpends' = 'categories';
 
   chartOptions: ChartOptions;
   isLoading = true;
+
   private destroy$ = new Subject<void>();
+  private refreshSub: Subscription | undefined;
 
   constructor(
     private expenseService: ExpenseService,
@@ -57,40 +60,57 @@ export class ChartsPage implements OnDestroy {
   }
 
   ngOnInit() {
-    this.loadChartData();
+    // 1. ✅ Reactive Refresh Listener
+    // Automatically reloads data whenever expenses or groups change globally
+    this.refreshSub = merge(
+      this.expenseService.refresh$,
+      this.groupService.refresh$
+    ).pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadChartData(true); // Background refresh
+      });
 
-    this.expenseService.onChartRefresh().subscribe(() => {
-      this.loadChartData();
-    });
+    // 2. Initial Load
+    this.loadChartData();
   }
 
   ionViewWillEnter() {
-    this.updateChart();
     this.setupColorSchemeListener();
   }
+
   ionViewWillLeave() {
-    // Empty the series to prevent the chart from "ghosting" or 
-    // bubbling during the next entrance animation.
+    // Prevent animation artifacts when navigating away
     this.chartOptions.series = [];
   }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.refreshSub?.unsubscribe();
   }
 
   // --- Data Loading ---
 
-  loadChartData() {
-    this.isLoading = true;
+  loadChartData(isBackground = false) {
+    if (!isBackground) this.isLoading = true;
+
     this.groupService.getGroups().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res) => {
-        if (res.success && res.data.length > 0) {
-          this.groups = res.data;
-          // Default to first group if not selected
+      next: (res: any) => {
+        // Handle both Array or {success, data} response formats
+        const data = Array.isArray(res) ? res : res.data;
+        const success = Array.isArray(res) ? true : res.success;
+
+        if (success && data?.length > 0) {
+          this.groups = data;
+
+          // Preserve selection on refresh
           if (!this.selectedGroup) {
             this.selectedGroup = this.groups[0];
+          } else {
+            this.selectedGroup = this.groups.find(g => g.roomId === this.selectedGroup.roomId) || this.groups[0];
           }
-          this.loadExpenseTrend();
+
+          this.loadExpenseTrend(isBackground);
         } else {
           this.isLoading = false;
         }
@@ -104,8 +124,9 @@ export class ChartsPage implements OnDestroy {
     this.loadExpenseTrend();
   }
 
-  loadExpenseTrend() {
+  loadExpenseTrend(isBackground = false) {
     if (!this.selectedGroup) return;
+    if (!isBackground) this.isLoading = true;
 
     this.expenseService.getMonthlyExpensesTrend(this.selectedGroup.roomId, this.currentMonth)
       .pipe(takeUntil(this.destroy$))
@@ -117,16 +138,19 @@ export class ChartsPage implements OnDestroy {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error(err);
+          console.error('Trend API Error:', err);
           this.isLoading = false;
         }
       });
   }
 
   updateChart() {
-    // Map member expenses to chart
-    this.chartOptions.series = this.trendData.members.map(member => member.monthlyExpenses[0] || 0);
-    this.chartOptions.labels = this.trendData.members.map(member => member.name || 'Unknown');
+    // Reactively update chart series and labels
+    this.chartOptions = {
+      ...this.chartOptions,
+      series: this.trendData.members.map(member => member.monthlyExpenses[0] || 0),
+      labels: this.trendData.members.map(member => member.name || 'Unknown')
+    };
   }
 
   // --- Date Logic ---
@@ -181,14 +205,12 @@ export class ChartsPage implements OnDestroy {
   getMonthlyTotal(): number {
     return this.trendData.members.reduce((total, member) => total + (member.monthlyExpenses[0] || 0), 0);
   }
-
   getLatestDate(monthlyTotals: number[]): Date {
     const [year, month] = this.currentMonth.split('-').map(Number);
     return new Date(year, month - 1, 1);
   }
 
   getIconColor(iconName: string | undefined): string {
-    if (!iconName) return '#666';
     const iconMap: { [key: string]: string } = {
       'fa-solid fa-leaf': '#27ae60',
       'fa-solid fa-drumstick-bite': '#e74c3c',
@@ -197,10 +219,13 @@ export class ChartsPage implements OnDestroy {
       'fa-solid fa-mug-hot': '#3498db',
       'fa-solid fa-utensils': '#e67e22',
       'fa-solid fa-box-open': '#7f8c8d',
-      'fa-solid fa-seedling': '#2ecc71',
-      'fa-solid fa-receipt': '#666'
+      'fa-solid fa-seedling': '#2ecc71'
     };
-    return iconMap[iconName] || '#666';
+    return iconMap[iconName || ''] || '#666';
+  }
+
+  hasData(): boolean {
+    return this.trendData?.members?.some(m => (m.monthlyExpenses[0] || 0) > 0);
   }
 
   // --- Chart Config ---
@@ -211,27 +236,13 @@ export class ChartsPage implements OnDestroy {
 
     return {
       series: [],
-      chart: { type: 'donut', height: 320, background: 'transparent' },
+      chart: { type: 'donut', height: 320, background: 'transparent', animations: { enabled: true } },
       labels: [],
-      colors: [
-        '#3b82f6', // Blue
-        '#64748b', // Slate
-        '#10b981', // Emerald
-        '#6366f1', // Indigo
-        '#8b5cf6', // Violet
-      ],
-      dataLabels:
-      {
+      colors: ['#3b82f6', '#64748b', '#10b981', '#6366f1', '#8b5cf6'],
+      dataLabels: {
         enabled: true,
-        formatter: (val: any) => {
-          return val.toFixed(0) + '%'; // Shows "25%" instead of "25.0000%"
-        },
-        style: {
-          fontSize: '12px',
-          fontFamily: 'Poppins, sans-serif',
-          fontWeight: '600',
-          colors: ['#fff'] // White text usually looks best on colored slices
-        },
+        formatter: (val: any) => val.toFixed(0) + '%',
+        style: { fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: '600', colors: ['#fff'] },
         dropShadow: { enabled: false }
       },
       plotOptions: {
@@ -240,14 +251,13 @@ export class ChartsPage implements OnDestroy {
             size: '55%',
             labels: {
               show: true,
-              name: { color: textColor, fontSize: '14px', fontFamily: 'Poppins, sans-serif' },
+              name: { color: textColor, fontSize: '14px' },
               value: {
-                color: textColor, fontSize: '20px', fontWeight: 700, fontFamily: 'Poppins, sans-serif',
+                color: textColor, fontSize: '20px', fontWeight: 700,
                 formatter: (val: string) => `₹${Number(val).toLocaleString()}`
               },
               total: {
-                show: true, showAlways: true, label: 'Total', color: textColor, fontSize: '14px', fontWeight: 600,
-                // FIX 1: Explicitly type 'w' as any
+                show: true, label: 'Total', color: textColor,
                 formatter: (w: any) => {
                   const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
                   return `₹${total.toLocaleString()}`;
@@ -262,7 +272,6 @@ export class ChartsPage implements OnDestroy {
         position: 'bottom',
         labels: { colors: textColor },
         fontFamily: 'Poppins, sans-serif',
-        // FIX 2: Cast markers to any to bypass strict type check for 'radius'
         markers: { radius: 12 } as any
       },
       responsive: [{ breakpoint: 480, options: { chart: { height: 280 } } }]
@@ -272,79 +281,25 @@ export class ChartsPage implements OnDestroy {
   setupColorSchemeListener() {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
       const color = e.matches ? '#ffffff' : '#333333';
-      this.updateChartColors(color);
-    });
-  }
-
-  updateChartColors(textColor: string) {
-    // We create a NEW object but explicitly preserve the structural settings
-    // This prevents the "thin/small" bug
-    this.chartOptions = {
-      ...this.chartOptions,
-
-      // 1. Force Height Again
-      chart: {
-        ...this.chartOptions.chart,
-        height: 320,
-        background: 'transparent'
-      },
-
-      // 2. Update Colors
-      dataLabels: {
-        ...this.chartOptions.dataLabels,
-        style: { ...this.chartOptions.dataLabels.style, colors: ['#fff'] } // Keep text white inside slices
-      },
-
-      // 3. Force Donut Size & Update Text Colors
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '55%', // <--- CRITICAL: Prevents it from becoming thin
-            labels: {
-              show: true,
-              name: {
-                color: textColor,
-                fontSize: '12px',
-                fontFamily: 'Poppins, sans-serif'
-              },
-              value: {
-                color: textColor,
-                fontSize: '16px',
-                fontWeight: 700,
-                fontFamily: 'Poppins, sans-serif',
-                formatter: (val: string) => `₹${Number(val).toLocaleString()}`
-              },
-              total: {
-                show: true,
-                showAlways: true,
-                label: 'Total',
-                color: textColor,
-                fontSize: '12px',
-                fontWeight: 600,
-                formatter: (w: any) => {
-                  const total = w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0);
-                  return `₹${total.toLocaleString()}`;
-                }
+      this.chartOptions = {
+        ...this.chartOptions,
+        plotOptions: {
+          ...this.chartOptions.plotOptions,
+          pie: {
+            ...this.chartOptions.plotOptions.pie,
+            donut: {
+              ...this.chartOptions.plotOptions.pie?.donut,
+              labels: {
+                ...this.chartOptions.plotOptions.pie?.donut?.labels,
+                name: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.name, color: color },
+                value: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.value, color: color },
+                total: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.total, color: color }
               }
             }
           }
-        }
-      },
-
-      legend: {
-        ...this.chartOptions.legend,
-        labels: { colors: textColor }
-      }
-    };
-
-    // 4. Force a lightweight update without full re-render if possible
-    // (Angular change detection will handle the rest)
-  }
-
-  hasData(): boolean {
-    // Check if trendData exists and if the total is greater than 0
-    if (!this.trendData || !this.trendData.members) return false;
-    const total = this.trendData.members.reduce((sum, member) => sum + (member.monthlyExpenses[0] || 0), 0);
-    return total > 0;
+        },
+        legend: { ...this.chartOptions.legend, labels: { colors: color } }
+      };
+    });
   }
 }

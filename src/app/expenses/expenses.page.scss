@@ -38,17 +38,11 @@ ion-header {
 /* Make ion-item fully transparent */
 .ledger-glass-panel {
   --background: transparent !important;
-  /* default background */
   --background-activated: transparent !important;
-  /* when tapped */
   --background-focused: transparent !important;
-  /* focus state */
   --background-hover: transparent !important;
-  /* hover state */
   --ripple-color: transparent !important;
-  /* removes click ripple */
   --box-shadow: none !important;
-  /* remove internal shadows */
 }
 
 
@@ -80,38 +74,17 @@ ion-header {
 }
 
 .edit-btn-mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-top: 4px;
-  padding: 5px 8px;
-
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-
-  border-radius: 8px;
-  border: 1px solid rgba(99, 102, 241, 0.35);
-
-  background: rgba(99, 102, 241, 0.12);
-  color: #b5bedf;
-
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgb(133 147 237 / 44%);
+  backdrop-filter: blur(8px);
   cursor: pointer;
-  user-select: none;
-
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.15s ease;
+  transition: all 0.2s ease;
 }
 
-/* Hover */
 .edit-btn-mini:hover {
-  background: rgba(99, 102, 241, 0.22);
-  color: #eef2ff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  transform: scale(1.05);
 }
 
 /* Active (click) */
@@ -127,31 +100,23 @@ ion-header {
 
 
 .ledger-slider {
-  align-items: center;
-  border: 1px solid var(--glass-border);
-  padding: 20px 10px;
-  border-radius: 28px;
+  display: block;
+  border-radius: 24px;
   position: relative;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 10px;
 
-  @media (prefers-color-scheme: dark) {
-    background: rgba(30, 32, 45, 0.6);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+  /* Glass effect */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 
-  &:active {
-    transform: scale(0.98);
-  }
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 
-  @media (prefers-color-scheme: dark) {
-    &:active {
-      background: rgba(30, 32, 45, 0.9);
-    }
-  }
+  padding: 18px 14px;
 }
 
 .edit-btn-mini:hover {
@@ -168,9 +133,10 @@ ion-header {
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.5px;
-  background: linear-gradient(to bottom right, #fff, #94a3b8);
+  background: linear-gradient(to bottom right, #e46565, #1ddb34);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: #4535358a;
+  -webkit-text-fill-color: rgb(104 58 58 / 54%);
+
 }
 
 .month-capsule {
@@ -199,34 +165,56 @@ ion-header {
 .hub-stats-row {
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
   margin-bottom: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px;
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
   border-radius: 16px;
   border: 1px solid var(--glass-border);
 
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-  }
+  padding: 14px 18px;
+}
 
-  .s-label {
-    font-size: 0.55rem;
-    color: var(--ion-color-medium);
-    text-transform: uppercase;
-  }
+/* EACH STAT BLOCK */
+.stat-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  .s-val {
-    font-size: 0.95rem;
-    font-weight: 800;
-  }
+/* ICON */
+.stat-icon {
+  font-size: 22px;
+  opacity: 0.85;
+}
 
-  .stat-divider {
-    width: 1px;
-    height: 18px;
-    background: var(--glass-border);
-  }
+/* TEXT CONTAINER */
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+/* LABEL */
+.s-label {
+  font-size: 0.6rem;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* VALUE */
+.s-val {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* DIVIDER */
+.stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--glass-border);
 }
 
 .hub-members {
@@ -251,7 +239,7 @@ ion-header {
   align-items: center;
   gap: 5px;
   opacity: 0.4;
-  transition: 0.3s ease;
+  transition: 0.8s ease;
 
   .avatar-sq {
     width: 34px;
@@ -279,7 +267,7 @@ ion-header {
       background: var(--secondary-glow);
       color: #fff;
       border-color: #fff;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 15px rgba(113, 115, 230, 0.4);
     }
   }
 }
@@ -343,7 +331,7 @@ ion-header {
   font-weight: 800;
   --border-radius: 10px;
   margin: 0;
-  --background: var(--ion-color-warning);
+  --background: #a1ea6de3;
 }
 
 /* ================= STICKY HISTORY BAR ================= */
@@ -381,7 +369,7 @@ ion-header {
 
 /* ================= THE LEDGER (Optimized Transaction List) ================= */
 .ledger-container {
-  padding: 1rem 1rem 0.3rem 1rem;
+  padding: 1rem 1rem 2.3rem 1rem;
 }
 
 
@@ -393,14 +381,25 @@ ion-header {
 }
 
 .icon-wrapper {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  border: 1px solid var(--glass-border);
+  min-width: 42px;
+  /* important */
+  flex-shrink: 0;
+  /* prevent shrinking */
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .icon-wrapper {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 
@@ -473,28 +472,38 @@ ion-header {
   }
 }
 
-.transaction-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
+ion-item-sliding {
+  margin-bottom: 12px;
+  border-radius: 24px;
+  overflow: hidden;
+  /* IMPORTANT for rounded swipe background */
 }
 
-/* LEFT = 30% */
+
+/* TRANSACTION ROW */
+.transaction-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+}
+
+/* LEFT SIDE */
 .row-left {
-  flex: 0 0 70%;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  flex: 1;
   min-width: 0;
-  /* VERY important for ellipsis */
 }
 
 /* RIGHT = 70% */
 .row-right {
-  flex: 0 0 30%;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 4px;
 }
 
 /* TEXT SAFETY */
@@ -502,18 +511,19 @@ ion-header {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  font-size: 16px;
-  font-weight: 600;
 }
 
+
 .tx-name {
+  font-size: 15px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .tx-meta {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted, #94a3b8);
   white-space: nowrap;
   overflow: hidden;
@@ -522,14 +532,62 @@ ion-header {
 
 /* AMOUNT */
 .tx-amount {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .tx-amount.pos {
   color: #2ecc71;
-  font-weight: 800;
 }
+
+.tx-amount:not(.pos) {
+  color: #ff4d4f;
+}
+
+.tx-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  min-width: 0;
+}
+
+/* Small Card Style */
+.category-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+
+  background: rgb(153 173 203 / 45%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  max-width: 120px;
+  /* 🔥 important */
+  overflow: hidden;
+  /* 🔥 required */
+  text-overflow: ellipsis;
+  /* 🔥 required */
+  white-space: nowrap;
+  /* single line */
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .category-badge {
+    background: rgb(131 112 226 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Date Style */
+.tx-date {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  white-space: nowrap;
+}
+
 
 .settledlbl {
   display: inline-flex;
@@ -668,7 +726,7 @@ ion-skeleton-text {
 .amount-badge {
   width: fit-content;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: 7px;
   font-size: 12px;
   font-weight: 500;
 }
@@ -683,4 +741,14 @@ ion-skeleton-text {
   background: rgba(34, 197, 94, 0.15);
   /* green */
   color: #22c55e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ledger-slider {
+    background: rgba(25, 30, 50, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  }
 }

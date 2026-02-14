@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Added OnDestroy
 import { ActivatedRoute } from '@angular/router';
-import { ExpenseService, ExpenseResponse } from '../services/expense';
+import { ExpenseService } from '../services/expense'; // Ensure ExpenseData is exported in service
 import { IonItemSliding, ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth-service';
 import { EditExpenseModal } from '../modals/edit-expense-modal/edit-expense-modal.component';
@@ -9,8 +9,9 @@ import { Toastservice } from '../services/toastservice';
 import { GlobalModalComponent } from '../modals/global-modal/global-modal.component';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { GroupService } from '../services/group';
-import { distinctUntilChanged, map } from 'rxjs';
+import { Subscription, distinctUntilChanged, map } from 'rxjs';
 
+// Local interfaces used for UI display
 interface Expense {
   expenseId: number;
   roomId: number;
@@ -22,27 +23,7 @@ interface Expense {
   category: string;
   iconName: string;
   isEditShow: boolean;
-  originalDate: string
-}
-
-interface ExpenseData {
-  roomId: number;
-  roomName?: string;
-  membersSummary: {
-    memberId: number;
-    memberName: string;
-    totalMemberExpense: number;
-    netBalance: number;
-    badgeText: string;
-    badgeAmount: number;
-    amountReceived: number;
-    amountPaid: number;
-    isSettleShow: boolean;
-  }[];
-  availableMonths?: string[];
-  selectedMonth: string;
-  totalMontlyExpense: number;
-  expenses: Expense[];
+  originalDate: string;
 }
 
 @Component({
@@ -51,21 +32,9 @@ interface ExpenseData {
   styleUrls: ['./expenses.page.scss'],
   standalone: false,
 })
-export class ExpensesPage implements OnInit {
+export class ExpensesPage implements OnInit, OnDestroy {
   months: string[] = [];
-  users: {
-    memberId: number;
-    memberName: string;
-    totalMemberExpense: number;
-    amountReceived: number;
-    amountPaid: number;
-    netBalance: number;
-    badgeText: string;
-    badgeAmount: number;
-    isSettleShow: boolean
-    expenses: Expense[];
-  }[] = [];
-
+  users: any[] = []; // Simplified for brevity, keep your specific interface if preferred
   selectedMonth: string = '';
   selectedUser: number | undefined;
   roomId: number | undefined;
@@ -79,8 +48,10 @@ export class ExpensesPage implements OnInit {
   isNextMonthDisabled = false;
   isPrevMonthDisabled = false;
   isSticky: boolean = false;
-  private isSwiping = false;
-  private hasInitialLoadRun = false;
+  private currentUserId: number | undefined;
+
+  // Track subscriptions to prevent leaks
+  private refreshSub: Subscription | undefined;
 
   constructor(
     private expenseService: ExpenseService,
@@ -92,6 +63,16 @@ export class ExpensesPage implements OnInit {
   ) { }
 
   ngOnInit() {
+    const token = this.authService.getToken();
+    if (token) {
+      const decoded = this.authService.decodeToken(token);
+      console.log(decoded);
+      // Ensure your token payload has a field for 'id' or 'memberId'
+      // Note: Cast to number if your memberId in DB is numeric
+      this.currentUserId = decoded?.nameid ? +decoded.nameid : undefined;
+    }
+
+    // 1. Listen for Route Changes
     this.route.queryParamMap
       .pipe(
         map(params => params.get('roomId')),
@@ -103,7 +84,6 @@ export class ExpensesPage implements OnInit {
           this.toast.error('No room selected');
           return;
         }
-
         if (this.authService.isTokenExpired()) {
           this.authService.clearTokenAndRedirect();
           return;
@@ -112,15 +92,29 @@ export class ExpensesPage implements OnInit {
         this.roomId = roomId;
         this.loadInitialData();
       });
+
+    // 2. ✅ Subscribe to Global Refresh Stream
+    // Any time add/update/delete/settle happens, this triggers
+    this.refreshSub = this.expenseService.refresh$.subscribe(() => {
+      this.loadMonthlyExpenses();
+    });
+  }
+
+  ngOnDestroy() {
+    this.refreshSub?.unsubscribe();
   }
 
   loadInitialData() {
     if (!this.roomId) return;
+
+    // ✅ Reset selection so populateExpenses recalculates for the new room
+    this.selectedUser = undefined;
+
     this.isLoadingExpenses = true;
     this.isLoading = true;
 
     this.expenseService.getExpenses(this.roomId).subscribe({
-      next: (response: ExpenseResponse) => {
+      next: (response: any) => {
         this.isLoading = false;
         if (response.success && response.data) {
           this.populateExpenses(response.data);
@@ -129,7 +123,7 @@ export class ExpensesPage implements OnInit {
         }
         this.isLoadingExpenses = false;
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         this.isLoadingExpenses = false;
         this.toast.error('Failed to load expenses');
@@ -137,28 +131,20 @@ export class ExpensesPage implements OnInit {
     });
   }
 
-  populateExpenses(data: ExpenseData) {
+  populateExpenses(data: any) {
     if (data.roomName) this.roomName = data.roomName;
+
     if (data.availableMonths?.length) {
-      this.months = data.availableMonths.map(month => {
+      this.months = data.availableMonths.map((month: string) => {
         const [year, monthNum] = month.split('-');
         return new Date(Number(year), Number(monthNum) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
       });
     }
 
-    // Updated to use roomId and roomName from ExpenseData
     this.groups = [{ roomId: this.roomId, name: this.roomName || 'Unnamed Room' }];
 
-    this.users = data.membersSummary.map(member => ({
-      memberId: member.memberId,
-      memberName: member.memberName,
-      netBalance: member.netBalance,
-      totalMemberExpense: member.totalMemberExpense,
-      badgeText: member.badgeText,
-      badgeAmount: member.badgeAmount,
-      amountReceived: member.amountReceived,
-      amountPaid: member.amountPaid,
-      isSettleShow: member.isSettleShow,
+    this.users = data.membersSummary.map((member: any) => ({
+      ...member,
       expenses: []
     }));
 
@@ -167,12 +153,15 @@ export class ExpensesPage implements OnInit {
       : this.months[this.months.length - 1] || '';
 
     const currentIndex = this.months.indexOf(this.selectedMonth);
-    if (currentIndex === 0) {
-      this.isNextMonthDisabled = true;
-      this.isPrevMonthDisabled = false;
-    }
+    this.isNextMonthDisabled = (currentIndex === 0);
+    this.isPrevMonthDisabled = (currentIndex === this.months.length - 1);
 
-    this.selectedUser = this.users[0]?.memberId;
+    // 1. Try to find the logged-in user in the room members
+    // 2. If not found (or first load), fallback to the first user in the list
+    if (!this.selectedUser) {
+      const currentUserInRoom = this.users.find(u => u.memberId === this.currentUserId);
+      this.selectedUser = currentUserInRoom ? currentUserInRoom.memberId : this.users[0]?.memberId;
+    }
 
     this.expenses = data.expenses;
     this.assignExpensesToUsers(data.expenses);
@@ -180,8 +169,6 @@ export class ExpensesPage implements OnInit {
 
   loadMonthlyExpenses() {
     if (!this.roomId || !this.selectedMonth) return;
-    this.users.forEach(u => u.expenses = []);
-
     this.isLoadingExpenses = true;
 
     const [monthName, year] = this.selectedMonth.split(' ');
@@ -189,18 +176,15 @@ export class ExpensesPage implements OnInit {
     const formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
 
     this.expenseService.getExpenses(this.roomId, formattedMonth).subscribe({
-      next: (response: ExpenseResponse) => {
+      next: (response: any) => {
         this.isLoadingExpenses = false;
-
         if (response.success && response.data) {
           this.populateExpenses(response.data);
-        } else {
-          this.toast.error(response.message || 'Failed to load monthly expenses');
         }
       },
-      error: (error) => {
+      error: () => {
         this.isLoadingExpenses = false;
-        this.toast.error(`Error fetching monthly expenses for ${this.selectedMonth}`);
+        this.toast.error(`Error fetching monthly expenses`);
       }
     });
   }
@@ -211,48 +195,28 @@ export class ExpensesPage implements OnInit {
       const user = this.users.find(u => u.memberId === exp.payerId);
       if (user) {
         const date = new Date(exp.date);
-        const orgDate = exp.date.split('T')[0];
         user.expenses.push({
-          expenseId: exp.expenseId,
-          roomId: exp.roomId,
-          item: exp.item,
-          payerId: exp.payerId,
-          payerName: exp.payerName,
+          ...exp,
           date: date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
-          amount: exp.amount,
-          iconName: exp.iconName,
-          category: exp.category,
-          isEditShow: exp.isEditShow,
-          originalDate: orgDate
+          originalDate: exp.date.split('T')[0]
         });
       }
     });
   }
 
-  selectUser(id: number) {
-    this.selectedUser = id;
-  }
-
+  // Navigation Logic
   get totalAllTime(): number {
     return this.users.reduce((sum, user) => sum + user.totalMemberExpense, 0);
   }
-
   get averageAmount(): number {
     return this.users.length ? this.totalAllTime / this.users.length : 0;
   }
-
   previousMonth() {
     const currentIndex = this.months.indexOf(this.selectedMonth);
     if (currentIndex < this.months.length - 1) {
       this.selectedMonth = this.months[currentIndex + 1];
       this.loadMonthlyExpenses();
     }
-
-    // Disable previous button when on the last month
-    this.isPrevMonthDisabled = currentIndex + 1 === this.months.length - 1;
-
-    // Enable next button again
-    this.isNextMonthDisabled = false;
   }
 
   nextMonth() {
@@ -261,124 +225,32 @@ export class ExpensesPage implements OnInit {
       this.selectedMonth = this.months[currentIndex - 1];
       this.loadMonthlyExpenses();
     }
-
-    // Disable next button when on the first month
-    this.isNextMonthDisabled = currentIndex - 1 === 0;
-
-    // Enable previous button again
-    this.isPrevMonthDisabled = false;
   }
 
-
-  getIconColor(iconName: string | undefined): string {
-    if (!iconName) return '#666';
-    const iconMap: { [key: string]: string } = {
-      'fa-solid fa-leaf': '#27ae60',
-      'fa-solid fa-drumstick-bite': '#e74c3c',
-      'fa-solid fa-burn': '#f1c40f',
-      'fa-solid fa-bread-slice': '#8e44ad',
-      'fa-solid fa-mug-hot': '#3498db',
-      'fa-solid fa-utensils': '#e67e22',
-      'fa-solid fa-box-open': '#7f8c8d',
-      'fa-solid fa-seedling': '#2ecc71',
-      'fa-solid fa-receipt': '#666'
-    };
-    return iconMap[iconName] || '#666';
-  }
   async openEditExpenseModal(expense: Expense) {
-    const formattedExpense = {
-      ...expense
-    };
-
     const modal = await this.modalCtrl.create({
       component: EditExpenseModal,
-      componentProps: {
-        expense: formattedExpense,
-        groups: this.groups
-      },
-      breakpoints: [0, 0.85],
-      initialBreakpoint: 0.85,
-      handle: false,
-      presentingElement: await this.modalCtrl.getTop(),
+      componentProps: { expense, groups: this.groups },
+      breakpoints: [0, 0.75],
+      initialBreakpoint: 0.75,
       cssClass: 'edit-modal'
     });
 
-    modal.onDidDismiss().then((result) => {
-      if (result.data && result.data.refresh) {
-        this.loadMonthlyExpenses();
-      } else if (result.data) {
-        // Update the local expenses array with the updated expense
-        const index = this.expenses.findIndex(e => e.expenseId === result.data.expenseId);
-        if (index !== -1) {
-          const updatedExpense = {
-            ...this.expenses[index],
-            ...result.data,
-            date: new Date(result.data.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
-            originalDate: result.data.date
-          };
-          this.expenses[index] = updatedExpense;
-          this.assignExpensesToUsers(this.expenses);
-        }
-      }
-
-      this.groupService.triggerRefresh();
-      this.expenseService.notifyDataChanged();
-    });
-    return await modal.present();
-  }
-  async openSettleModal(user: {
-    memberId: number;
-    memberName: string;
-    netBalance: number;
-  }) {
-    if (!this.roomId) {
-      this.toast.error('No room selected');
-      return;
-    }
-
-    // Convert "October 2025" → "YYYY-MM"
-    let formattedMonth: string | undefined;
-    if (this.selectedMonth) {
-      const [monthName, year] = this.selectedMonth.split(' ');
-      const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
-      formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
-    }
-
-    const modal = await this.modalCtrl.create({
-      component: SettleExpenseModalComponent,
-      componentProps: {
-        roomId: this.roomId,
-        user,
-        formattedMonth
-      },
-      breakpoints: [0, 0.5],
-      initialBreakpoint: 0.77,
-      handle: false,
-      //cssClass: 'settle-modal',
-    });
-
     await modal.present();
-
-    // Handle confirmation on modal close
-    modal.onDidDismiss().then((result) => {
-      if (result.data?.confirmed && result.data.settlements) {
-        this.loadInitialData();
-      }
-    });
+    // ✅ No need to call loadMonthlyExpenses here; 
+    // the Service triggers the refresh$ stream automatically on success.
   }
 
   hasExpensesInSelectedMonth(): boolean {
     return this.users.some(user => user.expenses?.length);
   }
+
   async deleteExpense(expense: any, slidingItem: IonItemSliding) {
     const modal = await this.modalCtrl.create({
       component: GlobalModalComponent,
-      cssClass: 'global-modal',
-      mode: 'ios',
       componentProps: {
-        message: `Do you want to remove this item?<br><strong>${expense.item}</strong>`,
+        message: `Do you want to remove <strong>${expense.item}</strong>?`,
         confirmText: 'Delete',
-        cancelText: 'Cancel',
         danger: true
       }
     });
@@ -387,24 +259,17 @@ export class ExpensesPage implements OnInit {
     const { data } = await modal.onDidDismiss();
 
     if (data === true) {
-      // --- TRIGGER MEDIUM HAPTIC ON CONFIRM ---
       await Haptics.impact({ style: ImpactStyle.Medium });
 
       this.expenseService.deleteExpense(expense.expenseId).subscribe({
         next: (res) => {
           slidingItem.close();
           if (res.success) {
-            const user = this.users.find(u => u.memberId === this.selectedUser);
-            if (user) {
-              user.expenses = user.expenses.filter(e => e.expenseId !== expense.expenseId);
-            }
-            this.expenseService.notifyDataChanged();
             this.toast.success(res.message);
-          } else {
-            this.toast.warning(res.message);
+            // ✅ Data will auto-refresh via refresh$ subscription
           }
         },
-        error: (err) => {
+        error: () => {
           slidingItem.close();
           this.toast.error('Could not delete expense');
         }
@@ -414,21 +279,29 @@ export class ExpensesPage implements OnInit {
     }
   }
 
-  onScroll(event: any) {
-    const scrollTop = event.detail.scrollTop;
-    this.isSticky = scrollTop > 150;
+  async openSettleModal(user: any) {
+    let formattedMonth: string | undefined;
+    if (this.selectedMonth) {
+      const [monthName, year] = this.selectedMonth.split(' ');
+      const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
+      formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
+    }
+
+    const modal = await this.modalCtrl.create({
+      component: SettleExpenseModalComponent,
+      componentProps: { roomId: this.roomId, user, formattedMonth },
+      initialBreakpoint: 0.77,
+    });
+
+    await modal.present();
+    // ✅ Refresh handled by service stream
   }
 
-  async onItemDrag(event: any) {
-    const ratio = event.detail.ratio;
-
-    if (!this.isSwiping && Math.abs(ratio) > 0.1) {
-      this.isSwiping = true;
-      await Haptics.impact({ style: ImpactStyle.Light });
-    }
-
-    if (ratio === 0) {
-      this.isSwiping = false;
-    }
+  // UI Helpers
+  selectUser(id: number) { this.selectedUser = id; }
+  onScroll(event: any) { this.isSticky = event.detail.scrollTop > 150; }
+  getIconColor(iconName: string | undefined): string {
+    const iconMap: any = { 'fa-solid fa-leaf': '#27ae60', 'fa-solid fa-drumstick-bite': '#e74c3c', 'fa-solid fa-burn': '#f1c40f' };
+    return iconMap[iconName!] || '#666';
   }
 }

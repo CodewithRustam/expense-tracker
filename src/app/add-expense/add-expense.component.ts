@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { AddExpenseResponse, ExpenseService } from '../services/expense';
+import { ExpenseService } from '../services/expense';
 import { Group } from '../models/group.model';
+import { ApiExpense } from '../models/Expense/ApiExpense';
 import { Toastservice } from '../services/toastservice';
 import { finalize, take } from 'rxjs/operators';
 
@@ -13,7 +14,6 @@ import { finalize, take } from 'rxjs/operators';
 })
 export class AddExpenseModalComponent implements OnInit {
   @Input() groups: Group[] = [];
-  @Input() users: { id: number, name: string }[] = [];
 
   // Constants
   readonly MAX_ITEM_LENGTH = 30;
@@ -31,7 +31,7 @@ export class AddExpenseModalComponent implements OnInit {
   filteredGroups: Group[] = [];
   showDatePicker = false;
   today = new Date().toISOString().split('T')[0];
-  isSubmitting = false; // Prevents double clicks
+  isSubmitting = false;
 
   constructor(
     private modalCtrl: ModalController,
@@ -43,17 +43,12 @@ export class AddExpenseModalComponent implements OnInit {
     this.initializeRooms();
   }
 
-  /**
-   * Sets up room list and selects default room
-   */
   private initializeRooms() {
     this.filteredGroups = [...this.groups];
-
     if (this.groups.length > 0) {
       const defaultRoom = this.groups.find(
         g => g.name.toLowerCase() === this.DEFAULT_ROOM_NAME.toLowerCase()
       );
-      // Select 'General' if exists, otherwise first room
       this.newExpense.roomId = defaultRoom ? defaultRoom.roomId : this.groups[0].roomId;
     }
   }
@@ -61,6 +56,48 @@ export class AddExpenseModalComponent implements OnInit {
   dismiss(data?: any) {
     this.modalCtrl.dismiss(data);
   }
+
+  // --- Logic ---
+
+  async addExpense() {
+    const sanitizedItem = this.newExpense.item.trim();
+    const amountVal = parseFloat(this.newExpense.amount);
+
+    if (!this.validateInput(sanitizedItem, amountVal)) return;
+
+    this.isSubmitting = true;
+
+    // Prepare payload matching ApiExpense interface
+    const payload: ApiExpense = {
+      item: sanitizedItem,
+      amount: amountVal,
+      date: this.newExpense.date,
+      roomId: this.newExpense.roomId,
+      memberId: 0 // Backend usually identifies user via Token, but interface requires it
+    };
+
+    this.expenseService.addExpense(payload)
+      .pipe(
+        take(1),
+        finalize(() => this.isSubmitting = false)
+      )
+      .subscribe({
+        next: (res) => {
+          // res.success check is already handled in service error handler 
+          // but we check res.success here for specific business logic if needed
+          this.toast.success('Expense added successfully.');
+          this.dismiss(res);
+          // ✅ Note: No need to call notifyDataChanged() here. 
+          // The service does it automatically!
+        },
+        error: (err) => {
+          // The service's handleError maps the error to a standard format
+          this.toast.error(err.message || 'Failed to add expense');
+        }
+      });
+  }
+
+  // --- UI Helpers ---
 
   filterRooms(event: any) {
     const val = (event.target.value || '').toLowerCase();
@@ -71,102 +108,39 @@ export class AddExpenseModalComponent implements OnInit {
 
   formatDate(date: string): string {
     if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
   }
 
-  /**
-   * Main submission logic
-   */
-  async addExpense() {
-    // 1. Sanitize Data
-    const sanitizedItem = this.newExpense.item.trim();
-    const amountVal = parseFloat(this.newExpense.amount);
-
-    // 2. Validate
-    if (!this.validateInput(sanitizedItem, amountVal)) {
-      return;
-    }
-
-    // 3. Prepare Payload (update model with sanitized strings)
-    this.newExpense.item = sanitizedItem;
-    const payload = { ...this.newExpense, amount: amountVal.toString() };
-
-    this.isSubmitting = true;
-
-    // 4. API Call
-    this.expenseService.addExpense(payload)
-      .pipe(
-        take(1), // Ensure observable completes
-        finalize(() => this.isSubmitting = false) // Reset loading state
-      )
-      .subscribe({
-        next: (res: AddExpenseResponse) => {
-          if (res.success) {
-            this.toast.success('Expense added successfully.');
-            this.dismiss(res);
-          } else {
-            this.toast.error(res.message || 'Could not add expense. Please try again.');
-          }
-        },
-        error: (err: any) => {
-          console.error('Expense Error:', err);
-          const msg = err?.error?.message || 'Network error. Please check your connection.';
-          this.toast.error(msg);
-        }
-      });
+  confirmDate() {
+    setTimeout(() => { this.showDatePicker = false; }, 150);
   }
 
-  /**
-   * Centralized validation rules
-   */
+  // --- Validation ---
+
   private validateInput(item: string, amount: number): boolean {
-    // Basic Empty Checks
     if (!item || !this.newExpense.amount || !this.newExpense.roomId) {
       this.toast.error('Please complete all required fields.');
       return false;
     }
 
-    // Item Length
-    if (item.length < this.MIN_ITEM_LENGTH) {
-      this.toast.error(`Item name is too short (min ${this.MIN_ITEM_LENGTH} chars).`);
-      return false;
-    }
-    if (item.length > this.MAX_ITEM_LENGTH) {
-      this.toast.error(`Item name is too long (max ${this.MAX_ITEM_LENGTH} chars).`);
+    if (item.length < this.MIN_ITEM_LENGTH || item.length > this.MAX_ITEM_LENGTH) {
+      this.toast.error(`Item name must be ${this.MIN_ITEM_LENGTH}-${this.MAX_ITEM_LENGTH} characters.`);
       return false;
     }
 
-    // Amount Validation
     if (isNaN(amount) || amount <= this.MIN_AMOUNT) {
-      this.toast.error(`Please enter a valid amount greater than ₹${this.MIN_AMOUNT}.`);
+      this.toast.error(`Enter an amount greater than ₹${this.MIN_AMOUNT}.`);
       return false;
     }
 
-    // Spam/Nonsense Filters
-    const repeatingRegex = /(.)\1{4,}/; // e.g. "aaaaa"
-    const noVowelsRegex = /^[^aeiouAEIOU]+$/; // e.g. "klmnj"
-
-    if (repeatingRegex.test(item)) {
+    // Anti-spam filters
+    if (/(.)\1{4,}/.test(item)) {
       this.toast.error('Please enter a valid item description.');
-      return false;
-    }
-
-    // Allow acronyms only if short (e.g., "KFC" is okay, "BKJDFHG" is not)
-    if (item.length > 5 && noVowelsRegex.test(item)) {
-      this.toast.error('Item description appears invalid. Please check spelling.');
       return false;
     }
 
     return true;
   }
-  confirmDate() {
-
-    setTimeout(() => {
-
-      this.showDatePicker = false;
-
-    }, 150);
-
-  }
-} 
+}

@@ -14,91 +14,10 @@ ion-content {
   --background: var(--ion-background-color);
 }
 
-/* --- 1. ROOM SECTION --- */
-.room-container {
-  padding-top: 10px;
-}
-
-.section-label {
-  padding-left: 24px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--ion-color-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.room-scroll-wrapper {
-  overflow-x: auto;
-  padding: 14px 20px 20px 20px;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.room-track {
-  display: flex;
-  gap: 20px;
-}
-
-.room-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  min-width: 64px;
-
-  .avatar-wrapper {
-    width: 60px;
-    height: 60px;
-    background: var(--ion-color-step-100);
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-    .initials {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--ion-text-color);
-    }
-  }
-
-  .room-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--ion-color-medium);
-    text-align: center;
-    max-width: 70px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &.active {
-    .avatar-wrapper {
-      background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
-      ;
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.3);
-
-      .initials {
-        color: var(--ion-color-primary-contrast);
-      }
-    }
-
-    .room-name {
-      color: var(--ion-color-primary);
-      font-weight: 700;
-    }
-  }
-}
 
 /* --- 2. FORM CARD --- */
 .form-card {
+  margin-top: 20px;
   background: var(--ion-item-background);
   margin: 0 20px;
   border-radius: 20px;

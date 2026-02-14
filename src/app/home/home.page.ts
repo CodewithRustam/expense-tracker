@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController, Platform } from '@ionic/angular';
 import { AddExpenseModalComponent } from '../add-expense/add-expense.component';
@@ -8,8 +8,9 @@ import { AuthService } from '../services/auth-service';
 import { NotificationService } from '../services/notification-service';
 import { NotificationListModal } from '../modals/notification-list-modal/notification-list-modal.component';
 import { AppComponent } from '../app.component';
-import { StatusBarService } from '../services/status-bar';
 import { ExpenseService } from '../services/expense';
+import { Subscription, merge } from 'rxjs';
+
 
 import {
   ApexAxisChartSeries,
@@ -35,16 +36,14 @@ export type ChartOptions = {
   colors: string[];
   grid: ApexGrid;
 };
-
 @Component({
   selector: 'app-groups',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: false
 })
-export class HomePage {
+export class HomePage implements OnInit, OnDestroy {
   greetingText: string = 'Hello,';
-  greetingImage: string = '';
   groups: Group[] = [];
   isLoading: boolean = true;
   userName: string = 'User';
@@ -53,21 +52,22 @@ export class HomePage {
   public chartOptions: Partial<ChartOptions> | any;
   selectedGroup: Group | null = null;
 
+  private refreshSubscription: Subscription | undefined;
+
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
     private groupService: GroupService,
-    private expenseExp: ExpenseService,
+    private expenseService: ExpenseService,
     private authService: AuthService,
     private notificationService: NotificationService,
     private appComponent: AppComponent,
-    private platform: Platform,
-    private statusBar: StatusBarService
+    private platform: Platform
   ) {
     this.initChart();
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.updateGreeting();
     this.setUserNameFromToken();
 
@@ -75,100 +75,54 @@ export class HomePage {
       this.appComponent.initPush();
     }
 
-    // This automatically updates this.unreadCount whenever the service updates
+    // 1. Listen for Unread Notifications
     this.notificationService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
     });
 
-    // 3. Setup the "Refresh Listener" for Groups/Notifications
-    this.groupService.refreshGroups$.subscribe(() => {
-      // SILENT background refresh: No resetState(), no skeletons
+    // 2. ✅ Unified Reactive Refresh
+    // Listen to BOTH group changes and expense changes
+    this.refreshSubscription = merge(
+      this.groupService.refresh$,
+      this.expenseService.refresh$
+    ).subscribe(() => {
+      // Background refresh on data changes
       this.loadGroups(true);
       this.loadNotifications(true);
     });
 
-    // 4. Initial "Hard" Load
-    this.resetState(); // Show skeletons only for the first load
+    // 3. Initial Load
     this.loadGroups();
     this.loadNotifications();
   }
 
-  resetState() {
-    this.isLoading = true;
-    this.groups = [];
-    this.selectedGroup = null;
-    if (this.chartOptions) {
-      this.chartOptions.series = [];
-    }
-  }
-
-  initChart() {
-    this.chartOptions = {
-      series: [],
-      chart: {
-        type: "bar",
-        height: 240,
-        toolbar: { show: false },
-        animations: { enabled: true, easing: 'easeinout', speed: 800 }
-      },
-      plotOptions: {
-        bar: {
-          borderRadius: 4,
-          columnWidth: "75%",
-          distributed: true,
-        }
-      },
-      dataLabels: { enabled: false },
-      colors: ["#6366f1", "#4ade80", "#f87171", "#fbbf24", "#a855f7", "#2dd4bf"],
-      xaxis: {
-        categories: [],
-        labels: {
-          style: { colors: "#94a3b8", fontSize: '11px', fontWeight: 500 }
-        },
-        axisBorder: { show: false },
-        axisTicks: { show: false }
-      },
-      yaxis: {
-        show: true,
-        labels: {
-          style: { colors: "#94a3b8", fontSize: '10px' },
-          formatter: (val: number) => {
-            return val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val;
-          }
-        }
-      },
-      grid: {
-        show: true,
-        borderColor: "rgba(255, 255, 255, 0.05)",
-        strokeDashArray: 4,
-        position: 'back',
-        xaxis: { lines: { show: false } },
-        yaxis: { lines: { show: true } }
-      },
-      tooltip: {
-        theme: "dark",
-        y: { formatter: (val: number) => `₹${val.toLocaleString('en-IN')}` }
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'dark',
-          type: "vertical",
-          opacityFrom: 1,
-          opacityTo: 0.9,
-        }
-      }
-    };
+  ngOnDestroy() {
+    this.refreshSubscription?.unsubscribe();
   }
 
   loadGroups(isBackground = false) {
-    if (!isBackground) this.isLoading = true;
+    if (!isBackground) {
+      this.isLoading = true;
+      this.groups = [];
+    }
 
     this.groupService.getGroups().subscribe({
-      next: (res) => {
-        if (res.success && res.data.length > 0) {
-          this.groups = res.data;
-          this.selectedGroup = this.groups[0];
+      next: (res: any) => {
+        // Handle both Array response or {success, data} response
+        const data = Array.isArray(res) ? res : res.data;
+        const success = Array.isArray(res) ? true : res.success;
+
+        if (success && data?.length > 0) {
+          this.groups = data;
+
+          // Only auto-select first group if none is selected yet
+          if (!this.selectedGroup) {
+            this.selectedGroup = this.groups[0];
+          } else {
+            // Update the reference to the currently selected group to get new totals
+            this.selectedGroup = this.groups.find(g => g.roomId === this.selectedGroup?.roomId) || this.groups[0];
+          }
+
           this.fetchTrendData(this.selectedGroup.roomId);
         }
         this.isLoading = false;
@@ -180,19 +134,11 @@ export class HomePage {
     });
   }
 
-  onGroupChange(event: any) {
-    this.selectedGroup = event.detail.value;
-    if (this.selectedGroup) {
-      this.fetchTrendData(this.selectedGroup.roomId);
-    }
-  }
-
   fetchTrendData(roomId: number) {
-    this.expenseExp.getRoomTrend(roomId).subscribe({
+    this.expenseService.getRoomTrend(roomId).subscribe({
       next: (res: any) => {
         if (res.success && res.data) {
           const trendData = res.data;
-
           const categories = trendData.map((item: any) => item.monthName);
           const seriesData = trendData.map((item: any) => item.total);
 
@@ -213,16 +159,41 @@ export class HomePage {
     });
   }
 
+  async openAddExpense() {
+    if (this.isLoading) return;
+    const modal = await this.modalCtrl.create({
+      component: AddExpenseModalComponent,
+      componentProps: { groups: this.groups },
+      breakpoints: [0, 0.88],
+      initialBreakpoint: 0.88,
+      handle: false,
+    });
+
+    await modal.present();
+    // ✅ No manual refresh logic needed here! 
+    // The modal internal logic calls addExpense(), 
+    // which triggers refresh$, which this page listens to.
+  }
+
+  onGroupChange(event: any) {
+    this.selectedGroup = event.detail.value;
+    if (this.selectedGroup) {
+      this.fetchTrendData(this.selectedGroup.roomId);
+    }
+  }
+
+  loadNotifications(isBackground: boolean = false) {
+    this.notificationService.getAll().subscribe();
+  }
+
+  // ... (Rest of UI helper methods like updateGreeting, getGroupColorClass, etc. remain the same)
+
   updateGreeting() {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) this.greetingText = 'Good Morning,';
     else if (hour >= 12 && hour < 17) this.greetingText = 'Good Afternoon,';
     else if (hour >= 17 && hour < 21) this.greetingText = 'Good Evening,';
     else this.greetingText = 'Good Night,';
-  }
-
-  loadNotifications(isBackground: boolean = false) {
-    this.notificationService.getAll().subscribe();
   }
 
   async openNotifications() {
@@ -236,31 +207,6 @@ export class HomePage {
 
   getTotalBalance(): number {
     return this.groups.reduce((sum, group) => sum + (group.totalAmount || 0), 0);
-  }
-
-  async openAddExpense() {
-    if (this.isLoading) return;
-    const modal = await this.modalCtrl.create({
-      component: AddExpenseModalComponent,
-      componentProps: { groups: this.groups },
-      breakpoints: [0, 0.88],
-      initialBreakpoint: 0.88,
-      handle: false,
-    });
-    await modal.present();
-    const { data } = await modal.onWillDismiss();
-    if (data) {
-      this.groupService.triggerRefresh();
-      this.expenseExp.notifyDataChanged();
-    }
-  }
-
-  getGroupColorClass(type: string): string {
-    const t = type?.toLowerCase() || '';
-    if (t.includes('travel')) return 'travel';
-    if (t.includes('food')) return 'food';
-    if (t.includes('home')) return 'home';
-    return '';
   }
 
   goToDetails(group: Group) {
@@ -277,5 +223,57 @@ export class HomePage {
       const decoded = this.authService.decodeToken(token);
       if (decoded?.unique_name) this.userName = decoded.unique_name;
     }
+  }
+
+  getGroupColorClass(type: string): string {
+    const t = type?.toLowerCase() || '';
+    if (t.includes('travel')) return 'travel';
+    if (t.includes('food')) return 'food';
+    if (t.includes('home')) return 'home';
+    return '';
+  }
+
+  initChart() {
+    this.chartOptions = {
+      series: [],
+      chart: {
+        type: "bar",
+        height: 240,
+        toolbar: { show: false },
+        animations: { enabled: true, easing: 'easeinout', speed: 800 }
+      },
+      plotOptions: {
+        bar: { borderRadius: 4, columnWidth: "75%", distributed: true }
+      },
+      dataLabels: { enabled: false },
+      colors: ["#6366f1", "#4ade80", "#f87171", "#fbbf24", "#a855f7", "#2dd4bf"],
+      xaxis: {
+        categories: [],
+        labels: { style: { colors: "#94a3b8", fontSize: '11px', fontWeight: 500 } },
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: {
+        show: true,
+        labels: {
+          style: { colors: "#94a3b8", fontSize: '10px' },
+          formatter: (val: number) => val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val
+        }
+      },
+      grid: {
+        show: true,
+        borderColor: "rgba(255, 255, 255, 0.05)",
+        strokeDashArray: 4,
+        yaxis: { lines: { show: true } }
+      },
+      tooltip: {
+        theme: "dark",
+        y: { formatter: (val: number) => `₹${val.toLocaleString('en-IN')}` }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: { shade: 'dark', type: "vertical", opacityFrom: 1, opacityTo: 0.9 }
+      }
+    };
   }
 }

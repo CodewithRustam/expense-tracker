@@ -10,24 +10,17 @@
 </ion-header>
 
 <ion-content>
-
-  <div class="room-container">
-    <div class="section-label">Assigned Room</div>
-
-    <div class="room-scroll-wrapper">
-      <div class="room-track">
-        <div *ngFor="let g of filteredGroups" class="room-item" [class.active]="expense.roomId === g.roomId"
-          (click)="expense.roomId = g.roomId; onInputChange()">
-          <div class="avatar-wrapper">
-            <span class="initials">{{ g.name.substring(0,1) }}</span>
-          </div>
-          <span class="room-name">{{ g.name }}</span>
-        </div>
+  <div class="form-card">
+    <div class="input-row">
+      <div class="icon-square primary-tint">
+        <ion-icon name="home"></ion-icon>
+      </div>
+      <div class="input-body">
+        <ion-label>Room Name</ion-label>
+        <ion-input [value]="roomName" readonly></ion-input>
       </div>
     </div>
-  </div>
-
-  <div class="form-card">
+    <div class="divider"></div>
 
     <div class="input-row">
       <div class="icon-square primary-tint">

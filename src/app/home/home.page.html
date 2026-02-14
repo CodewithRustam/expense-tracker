@@ -79,15 +79,9 @@
             </div>
 
             <div class="group-selector">
-              <ion-select
-                interface="popover"
-                [value]="selectedGroup"
-                (ionChange)="onGroupChange($event)"
-                toggleIcon="chevron-down-outline"
-                class="custom-select">
-                <ion-select-option
-                  *ngFor="let group of groups"
-                  [value]="group">
+              <ion-select interface="popover" [value]="selectedGroup" (ionChange)="onGroupChange($event)"
+                toggleIcon="chevron-down-outline" class="custom-select">
+                <ion-select-option *ngFor="let group of groups" [value]="group">
                   {{ group.name }}
                 </ion-select-option>
               </ion-select>
@@ -95,18 +89,10 @@
           </div>
 
           <div class="chart-wrapper">
-            <apx-chart
-              *ngIf="chartOptions?.series?.length"
-              [series]="chartOptions.series"
-              [chart]="chartOptions.chart"
-              [xaxis]="chartOptions.xaxis"
-              [yaxis]="chartOptions.yaxis"
-              [plotOptions]="chartOptions.plotOptions"
-              [dataLabels]="chartOptions.dataLabels"
-              [colors]="chartOptions.colors"
-              [grid]="chartOptions.grid"
-              [tooltip]="chartOptions.tooltip"
-              [fill]="chartOptions.fill">
+            <apx-chart *ngIf="chartOptions?.series?.length" [series]="chartOptions.series" [chart]="chartOptions.chart"
+              [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [plotOptions]="chartOptions.plotOptions"
+              [dataLabels]="chartOptions.dataLabels" [colors]="chartOptions.colors" [grid]="chartOptions.grid"
+              [tooltip]="chartOptions.tooltip" [fill]="chartOptions.fill">
             </apx-chart>
           </div>
 
@@ -149,31 +135,23 @@
           <ng-template #groupContent>
 
             <div class="group-list" *ngIf="groups.length > 0; else emptyState">
-              <div
-                class="group-card island-card"
-                *ngFor="let group of groups"
-                (click)="goToDetails(group)">
-
-                <div
-                  class="card-icon-wrapper"
-                  [ngClass]="getGroupColorClass(group.type)">
+              <div class="group-card island-card" *ngFor="let group of groups" (click)="goToDetails(group)">
+                <div class="card-icon-wrapper" [ngClass]="getGroupColorClass(group.type)">
                   <ion-icon [name]="group.iconName || 'people-outline'"></ion-icon>
                 </div>
 
-                <div class="card-info">
-                  <h4 class="group-name">{{ group.name }}</h4>
-                  <div class="group-meta">
-                    <span class="group-type">{{ group.type }}</span>
-                    <span class="group-date">{{ group.month }}</span>
+                <div class="card-info" style="flex: 1; margin-left: 16px;">
+                  <h4 class="group-name" style="margin: 0; font-size: 1.1rem;">{{ group.name }}</h4>
+                  <div class="group-meta" style="display: flex; gap: 8px; font-size: 0.8rem; opacity: 0.6;">
+                    <span>{{ group.type }}</span>
+                    <span>•</span>
+                    <span>{{ group.month }}</span>
                   </div>
                 </div>
 
                 <div class="card-amount">
-                  <span class="amount-value">
-                    ₹{{ group.totalAmount | number:'1.0-1' }}
-                  </span>
+                  <span class="amount-value" style="font-weight: 700;">₹{{ group.totalAmount }}</span>
                 </div>
-
               </div>
             </div>
 
