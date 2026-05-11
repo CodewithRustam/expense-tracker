@@ -1,112 +1,168 @@
-/* --- GLOBAL VARIABLES --- */
-ion-toolbar {
-  --background: var(--ion-background-color);
-  --border-width: 0;
-
-  ion-title {
-    font-weight: 700;
-    font-size: 1.2rem;
-    padding-left: 20px;
-  }
-}
-
 ion-content {
-  --background: var(--ion-background-color);
+  --background: var(--ion-item-background);
 }
 
-/* --- 1. ROOM SECTION --- */
-.room-container {
-  padding-top: 10px;
-  margin-bottom: 24px;
+ion-header {
+  box-shadow: none !important;
+  border-bottom: none !important;
 }
 
+ion-toolbar {
+  --min-height: 56px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+}
+
+ion-header.ion-no-border::after {
+  display: none !important;
+}
+
+/* ===============================
+   INLINE ROOM SELECTOR – 2026 UI
+================================= */
+
+.room-container-inline {
+  margin-top: 15px;
+}
+
+/* Label */
 .section-label {
-  padding-left: 24px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
+  padding-left: 20px;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--ion-color-medium);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
-.room-scroll-wrapper {
+/* Scroll Area */
+.room-inline-scroll {
   overflow-x: auto;
-  padding: 14px 20px 20px 20px;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  padding: 6px 16px 14px 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
-.room-track {
-  display: flex;
-  gap: 20px;
+.room-inline-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.room-item {
+/* Track */
+.room-inline-track {
   display: flex;
-  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===============================
+   CHIP DESIGN
+================================= */
+
+.room-chip {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 64px;
+  gap: 10px;
 
-  .avatar-wrapper {
-    width: 60px;
-    height: 60px;
-    background: var(--ion-color-step-100);
-    /* Adaptive Grey */
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding: 10px 16px;
+  border-radius: 18px;
 
-    .initials {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--ion-text-color);
-    }
-  }
+  background: rgba(var(--ion-color-step-100-rgb), 0.7);
+  backdrop-filter: blur(14px);
 
-  .room-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--ion-color-medium);
-    text-align: center;
-    max-width: 70px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  border: 1px solid rgba(255, 255, 255, 0.05);
 
-  &.active {
-    .avatar-wrapper {
-      background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+  cursor: pointer;
 
-      .initials {
-        color: var(--ion-color-primary-contrast);
-      }
-    }
-
-    .room-name {
-      color: var(--ion-color-primary);
-      font-weight: 700;
-    }
-  }
+  transition:
+    transform 0.25s cubic-bezier(.2, .8, .2, 1),
+    background 0.25s ease,
+    box-shadow 0.25s ease;
 }
+
+/* Hover */
+.room-chip:hover {
+  transform: translateY(-2px);
+}
+
+/* Avatar */
+.chip-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #667eea, #764ba2);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+
+  flex-shrink: 0;
+}
+
+/* Name */
+.chip-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Active Indicator Dot */
+.active-indicator {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  background: transparent;
+  transition: all 0.25s ease;
+}
+
+/* ===============================
+   ACTIVE STATE – PREMIUM
+================================= */
+
+.room-chip.active {
+  background: linear-gradient(135deg,
+      rgba(99, 102, 241, 0.25),
+      rgba(139, 92, 246, 0.18));
+
+  box-shadow:
+    0 6px 18px rgba(99, 102, 241, 0.22),
+    inset 0 0 0 1px rgba(99, 102, 241, 0.25);
+
+  transform: translateY(-3px) scale(1.02);
+}
+
+.room-chip.active .chip-name {
+  color: #6366f1;
+  font-weight: 700;
+}
+
+.room-chip.active .active-indicator {
+  background: #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.7);
+}
+
 
 /* --- 2. FORM CARD --- */
 .form-card {
   background: var(--ion-item-background);
-  /* Adaptive Card Background */
-  margin: 0 20px;
+  margin: 10px 20px 0px 20px;
   border-radius: 20px;
-  padding: 8px 20px;
-  border: 1px solid var(--ion-color-step-100);
-  /* Subtle border for dark mode definition */
+  padding: 0 20px;
+  border: 1px solid rgb(154 136 136 / 8%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
@@ -211,8 +267,7 @@ ion-datetime {
 
 /* --- 4. FOOTER --- */
 .footer-pad {
-  padding: 20px;
-  background: var(--ion-background-color);
+  padding: 0 20px;
 }
 
 .main-btn {
@@ -240,5 +295,26 @@ ion-datetime {
   &:active {
     transform: scale(0.98);
     --box-shadow: 0 5px 15px -3px rgba(99, 102, 241, 0.5);
+  }
+}
+
+
+.error-text {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 4px;
+  font-weight: 500;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

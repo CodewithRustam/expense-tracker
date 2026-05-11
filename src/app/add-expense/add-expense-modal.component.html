@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border">
+<ion-header>
   <ion-toolbar>
     <ion-title>New Expense</ion-title>
     <ion-buttons slot="end">
@@ -10,24 +10,6 @@
 </ion-header>
 
 <ion-content>
-
-  <div class="room-container">
-    <div class="section-label">Assign Room</div>
-
-    <div class="room-scroll-wrapper">
-      <div class="room-track">
-        <div *ngFor="let g of filteredGroups" class="room-item" [class.active]="newExpense.roomId === g.roomId"
-          (click)="newExpense.roomId = g.roomId">
-
-          <div class="avatar-wrapper">
-            <span class="initials">{{ g.name.substring(0,1) }}</span>
-          </div>
-          <span class="room-name">{{ g.name }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="form-card">
 
     <div class="input-row">
@@ -36,7 +18,13 @@
       </div>
       <div class="input-body">
         <ion-label>Item Name</ion-label>
-        <ion-input [(ngModel)]="newExpense.item" placeholder="e.g. Groceries"></ion-input>
+        <ion-input [ngModel]="newExpense.item" (ionInput)="onItemInput($event)" inputmode="text"
+          autocapitalize="sentences" enterkeyhint="next" placeholder="e.g. Groceries">
+        </ion-input>
+
+        <div class="error-text" *ngIf="itemError">
+          {{ itemError }}
+        </div>
       </div>
     </div>
 
@@ -48,7 +36,13 @@
       </div>
       <div class="input-body">
         <ion-label>Amount</ion-label>
-        <ion-input type="number" [(ngModel)]="newExpense.amount" placeholder="0.00" class="amount-input"></ion-input>
+        <ion-input #amountInput type="text" inputmode="numeric" [ngModel]="newExpense.amount"
+          (ionInput)="onAmountInput($event)" (ionBlur)="onAmountBlur()" placeholder="0">
+        </ion-input>
+
+        <div class="error-text" *ngIf="amountError">
+          {{ amountError }}
+        </div>
       </div>
     </div>
 
@@ -66,7 +60,28 @@
     </div>
 
   </div>
+  <div class="room-container-inline">
+    <div class="section-label">Assign Room</div>
 
+    <div class="room-inline-scroll">
+      <div class="room-inline-track">
+
+        <div *ngFor="let g of filteredGroups" class="room-chip" [class.active]="newExpense.roomId === g.roomId"
+          (click)="newExpense.roomId = g.roomId">
+          <div class="chip-avatar">
+            {{ g.name.substring(0,1) }}
+          </div>
+
+          <span class="chip-name">
+            {{ g.name }}
+          </span>
+
+          <div class="active-indicator"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
   <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
     [breakpoints]="[0, 0.42]">
     <ng-template>
@@ -79,7 +94,7 @@
   </ion-modal>
 
   <div class="footer-pad">
-    <ion-button expand="block" class="main-btn" (click)="addExpense()">
+    <ion-button expand="block" class="main-btn" [disabled]="!isFormValid || isSubmitting" (click)="addExpense()">
       Add Expense
     </ion-button>
   </div>

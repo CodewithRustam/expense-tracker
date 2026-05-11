@@ -60,8 +60,6 @@ export class ChartsPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // 1. ✅ Reactive Refresh Listener
-    // Automatically reloads data whenever expenses or groups change globally
     this.refreshSub = merge(
       this.expenseService.refresh$,
       this.groupService.refresh$
@@ -70,12 +68,12 @@ export class ChartsPage implements OnInit, OnDestroy {
         this.loadChartData(true); // Background refresh
       });
 
-    // 2. Initial Load
     this.loadChartData();
   }
 
   ionViewWillEnter() {
     this.setupColorSchemeListener();
+    this.updateChart();
   }
 
   ionViewWillLeave() {

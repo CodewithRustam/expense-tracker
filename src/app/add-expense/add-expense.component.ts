@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { IonInput, ModalController } from '@ionic/angular';
 import { ExpenseService } from '../services/expense';
 import { Group } from '../models/group.model';
 import { ApiExpense } from '../models/Expense/ApiExpense';
@@ -16,7 +16,7 @@ export class AddExpenseModalComponent implements OnInit {
   @Input() groups: Group[] = [];
 
   // Constants
-  readonly MAX_ITEM_LENGTH = 30;
+  readonly MAX_ITEM_LENGTH = 20;
   readonly MIN_ITEM_LENGTH = 3;
   readonly DEFAULT_ROOM_NAME = 'General';
   readonly MIN_AMOUNT = 1;
@@ -32,6 +32,19 @@ export class AddExpenseModalComponent implements OnInit {
   showDatePicker = false;
   today = new Date().toISOString().split('T')[0];
   isSubmitting = false;
+  itemError = '';
+  amountError = '';
+
+  itemValid = false;
+  amountValid = false;
+
+  isFormValid = false;
+
+  private itemDebounce: any;
+  private amountDebounce: any;
+
+  @ViewChild('amountInput', { static: false }) amountInput!: IonInput;
+
 
   constructor(
     private modalCtrl: ModalController,
@@ -41,6 +54,7 @@ export class AddExpenseModalComponent implements OnInit {
 
   ngOnInit() {
     this.initializeRooms();
+    this.validateForm();
   }
 
   private initializeRooms() {
@@ -57,23 +71,22 @@ export class AddExpenseModalComponent implements OnInit {
     this.modalCtrl.dismiss(data);
   }
 
-  // --- Logic ---
-
   async addExpense() {
-    const sanitizedItem = this.newExpense.item.trim();
-    const amountVal = parseFloat(this.newExpense.amount);
 
-    if (!this.validateInput(sanitizedItem, amountVal)) return;
+    if (!this.isFormValid || this.isSubmitting) return;
 
     this.isSubmitting = true;
 
-    // Prepare payload matching ApiExpense interface
+    const amountVal = Number(
+      this.newExpense.amount.toString().replace(/,/g, '')
+    );
+
     const payload: ApiExpense = {
-      item: sanitizedItem,
+      item: this.newExpense.item.trim(),
       amount: amountVal,
       date: this.newExpense.date,
       roomId: this.newExpense.roomId,
-      memberId: 0 // Backend usually identifies user via Token, but interface requires it
+      memberId: 0
     };
 
     this.expenseService.addExpense(payload)
@@ -83,15 +96,10 @@ export class AddExpenseModalComponent implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          // res.success check is already handled in service error handler 
-          // but we check res.success here for specific business logic if needed
           this.toast.success('Expense added successfully.');
           this.dismiss(res);
-          // ✅ Note: No need to call notifyDataChanged() here. 
-          // The service does it automatically!
         },
         error: (err) => {
-          // The service's handleError maps the error to a standard format
           this.toast.error(err.message || 'Failed to add expense');
         }
       });
@@ -143,4 +151,100 @@ export class AddExpenseModalComponent implements OnInit {
 
     return true;
   }
+
+  onItemInput(event: any) {
+
+    const raw = event.target.value || '';
+
+    // Allow only letters, comma and space
+    const cleaned = raw.replace(/[^a-zA-Z,\s]/g, '');
+
+    // Auto capitalize first letter + after comma
+    const formatted = cleaned
+      .toLowerCase()
+      .replace(/(^\s*\w|,\s*\w)/g, (c: string) => c.toUpperCase());
+
+    // Update input without flicker
+    event.target.value = formatted;
+    this.newExpense.item = formatted;
+
+    const trimmed = formatted.trim();
+
+    const validations = [
+      { check: !trimmed, msg: 'Item name is required' },
+      { check: trimmed.length < this.MIN_ITEM_LENGTH, msg: `Minimum ${this.MIN_ITEM_LENGTH} characters required` },
+      { check: trimmed.length > this.MAX_ITEM_LENGTH, msg: `Maximum ${this.MAX_ITEM_LENGTH} characters allowed` },
+      { check: trimmed.split(',').some((w: string) => this.looksRandom(w.trim())), msg: 'Item name looks invalid' },
+      { check: /(.)\1{4,}/.test(trimmed), msg: 'Invalid item name' }
+    ];
+
+    this.itemError = validations.find(v => v.check)?.msg || '';
+    this.itemValid = !this.itemError;
+
+    this.validateForm();
+  }
+
+  onAmountInput(event: any) {
+
+    const raw = event.target.value || '';
+
+    // Allow only digits
+    const numericOnly = raw.replace(/[^0-9]/g, '');
+
+    event.target.value = numericOnly;
+    this.newExpense.amount = numericOnly;
+
+    const amount = Number(numericOnly);
+
+    const validations = [
+      { check: !numericOnly, msg: 'Amount is required' },
+      { check: amount <= this.MIN_AMOUNT, msg: `Enter amount greater than ₹${this.MIN_AMOUNT}` }
+    ];
+
+    this.amountError = validations.find(v => v.check)?.msg || '';
+    this.amountValid = !this.amountError;
+
+    this.validateForm();
+  }
+
+  onAmountBlur() {
+
+    const value = Number(this.newExpense.amount);
+
+    this.amountValid &&
+      (this.newExpense.amount = new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value));
+  }
+
+  private validateForm() {
+    this.isFormValid =
+      this.itemValid &&
+      this.amountValid &&
+      !!this.newExpense.roomId;
+  }
+  private looksRandom(word: string): boolean {
+
+    const lower = word.toLowerCase();
+
+    const vowels = lower.match(/[aeiou]/g)?.length || 0;
+    const consonants = lower.match(/[bcdfghjklmnpqrstvwxyz]/g)?.length || 0;
+
+    const consonantCluster = /[^aeiou\s,]{5,}/.test(lower);
+
+    const consonantRatio = consonants / (vowels + consonants || 1);
+
+    const switchCount = (lower.match(/([a-z])(?=[^a-z]*\1)/g)?.length || 0);
+
+    const rules = [
+      vowels === 0,
+      consonantCluster,
+      consonantRatio > 0.8,
+      switchCount > lower.length / 2
+    ];
+
+    return rules.some(r => r);
+  }
+
 }

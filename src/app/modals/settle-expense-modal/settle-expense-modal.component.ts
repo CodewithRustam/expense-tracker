@@ -4,7 +4,7 @@ import { SettlementDetail } from 'src/app/models/Settlement/SettlementDetail';
 import { ExpenseService } from 'src/app/services/expense';
 import { Toastservice } from 'src/app/services/toastservice';
 
-interface SettlementResponse {
+export interface SettlementResponse {
   success: boolean;
   message?: string;
   data?: {
@@ -23,6 +23,9 @@ export class SettleExpenseModalComponent implements OnInit {
   @Input() roomId!: number;
   @Input() formattedMonth!: string;
 
+  @Input() preloadedSettlements: SettlementDetail[] = [];
+  @Input() isPreloaded = false;
+
   settlementDetails: SettlementDetail[] = [];
   filteredMembers: SettlementDetail[] = [];
   selectedMember: SettlementDetail | null = null;
@@ -35,7 +38,14 @@ export class SettleExpenseModalComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.loadSettlementDetails();
+    if (this.isPreloaded && this.preloadedSettlements.length > 0) {
+      this.settlementDetails = this.preloadedSettlements;
+      this.filteredMembers = [...this.settlementDetails];
+      this.selectedMember = this.settlementDetails[0] ?? null; // or find logic
+      this.isLoading = false;
+    } else {
+      this.loadSettlementDetails(); // fallback — keep your original method
+    }
   }
 
   filterMembers(event: any) {

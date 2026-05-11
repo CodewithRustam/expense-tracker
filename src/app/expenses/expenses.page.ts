@@ -4,12 +4,13 @@ import { ExpenseService } from '../services/expense'; // Ensure ExpenseData is e
 import { IonItemSliding, ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth-service';
 import { EditExpenseModal } from '../modals/edit-expense-modal/edit-expense-modal.component';
-import { SettleExpenseModalComponent } from '../modals/settle-expense-modal/settle-expense-modal.component';
+import { SettleExpenseModalComponent, SettlementResponse } from '../modals/settle-expense-modal/settle-expense-modal.component';
 import { Toastservice } from '../services/toastservice';
 import { GlobalModalComponent } from '../modals/global-modal/global-modal.component';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { GroupService } from '../services/group';
 import { Subscription, distinctUntilChanged, map } from 'rxjs';
+import { SettlementDetail } from '../models/Settlement/SettlementDetail';
 
 // Local interfaces used for UI display
 interface Expense {
@@ -25,6 +26,12 @@ interface Expense {
   isEditShow: boolean;
   originalDate: string;
 }
+
+interface ExpenseDateGroup {
+  date: string;
+  expenses: any[];
+}
+
 
 @Component({
   selector: 'app-expenses',
@@ -49,7 +56,11 @@ export class ExpensesPage implements OnInit, OnDestroy {
   isPrevMonthDisabled = false;
   isSticky: boolean = false;
   private currentUserId: number | undefined;
+  groupedExpensesMap: { [userId: number]: ExpenseDateGroup[] } = {};
 
+  // in ExpensesPage
+  settlementDataByUser: { [memberId: number]: SettlementDetail[] } = {};
+  settlementLoadingByUser: { [memberId: number]: boolean } = {};
   // Track subscriptions to prevent leaks
   private refreshSub: Subscription | undefined;
 
@@ -97,6 +108,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     // Any time add/update/delete/settle happens, this triggers
     this.refreshSub = this.expenseService.refresh$.subscribe(() => {
       this.loadMonthlyExpenses();
+      this.prepareGroupedExpenses();
     });
   }
 
@@ -165,6 +177,16 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     this.expenses = data.expenses;
     this.assignExpensesToUsers(data.expenses);
+    this.prepareGroupedExpenses();
+
+    this.users.forEach(user => {
+      this.loadSettlementsForUser(user.memberId);
+    });
+
+    // OR — only preload for currently selected user
+    if (this.selectedUser) {
+      this.loadSettlementsForUser(this.selectedUser);
+    }
   }
 
   loadMonthlyExpenses() {
@@ -279,24 +301,40 @@ export class ExpensesPage implements OnInit, OnDestroy {
     }
   }
 
-  async openSettleModal(user: any) {
-    let formattedMonth: string | undefined;
-    if (this.selectedMonth) {
-      const [monthName, year] = this.selectedMonth.split(' ');
-      const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
-      formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
+  private getFormattedMonth(): string | undefined {
+    if (!this.selectedMonth) {
+      return undefined;
     }
+
+    const [monthName, year] = this.selectedMonth.split(' ');
+    const tempDate = new Date(`${monthName} 1, ${year}`);
+    if (isNaN(tempDate.getTime())) {
+      return undefined; // invalid month name
+    }
+
+    const monthIndex = tempDate.getMonth() + 1;
+    return `${year}-${monthIndex.toString().padStart(2, '0')}`;
+  }
+
+  async openSettleModal(user: any) {
+    const formattedMonth = this.getFormattedMonth(); // reuse your logic
+
+    const preloadedSettlements = this.settlementDataByUser[user.memberId] || [];
 
     const modal = await this.modalCtrl.create({
       component: SettleExpenseModalComponent,
-      componentProps: { roomId: this.roomId, user, formattedMonth },
+      componentProps: {
+        roomId: this.roomId,
+        user,
+        formattedMonth,
+        preloadedSettlements,           // ← new
+        isPreloaded: preloadedSettlements.length > 0
+      },
       initialBreakpoint: 0.77,
     });
 
     await modal.present();
-    // ✅ Refresh handled by service stream
   }
-
   // UI Helpers
   selectUser(id: number) { this.selectedUser = id; }
   onScroll(event: any) { this.isSticky = event.detail.scrollTop > 150; }
@@ -304,4 +342,104 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const iconMap: any = { 'fa-solid fa-leaf': '#27ae60', 'fa-solid fa-drumstick-bite': '#e74c3c', 'fa-solid fa-burn': '#f1c40f' };
     return iconMap[iconName!] || '#666';
   }
+
+  groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
+
+    if (!expenses || expenses.length === 0) return [];
+
+    /* STEP 1 — SORT BY DATE DESC (LATEST FIRST) */
+    const sortedExpenses = [...expenses].sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    /* STEP 2 — GROUP */
+    const groups: { [key: string]: any[] } = {};
+
+    sortedExpenses.forEach(exp => {
+
+      const dateKey = this.formatGroupDate(exp.date);
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+
+      groups[dateKey].push(exp);
+    });
+
+    /* STEP 3 — KEEP GROUP ORDER */
+    return Object.keys(groups)
+      .sort((a, b) => this.getDatePriority(a) - this.getDatePriority(b))
+      .map(date => ({
+        date,
+        expenses: groups[date]
+      }));
+
+  }
+
+  formatGroupDate(dateStr: string): string {
+
+    const d = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+
+    return d.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+
+  private getDatePriority(label: string): number {
+
+    if (label === 'Today') return 0;
+    if (label === 'Yesterday') return 1;
+
+    return 2;
+  }
+
+  getGroupedExpenses(user: any): ExpenseDateGroup[] {
+    return this.groupExpensesByDate(user.expenses);
+  }
+  prepareGroupedExpenses() {
+
+    if (!this.users) return;
+
+    this.users.forEach(user => {
+      this.groupedExpensesMap[user.memberId] =
+        this.groupExpensesByDate(user.expenses || []);
+    });
+
+  }
+  // in loadSettlementsForUser() or wherever you had the placeholder
+  loadSettlementsForUser(memberId: number) {
+    console.log("settlements called for member " + memberId + ":", this.settlementDataByUser[memberId]);
+
+
+    console.log('selected month: ' + this.selectedMonth);
+
+    if (!this.selectedMonth) return;
+
+    const [monthName, year] = this.selectedMonth.split(' ');
+    const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
+    const formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
+
+    console.log('formatted month: ' + formattedMonth);
+    this.settlementLoadingByUser[memberId] = true;
+
+    this.expenseService
+      .getSettlementDetails(this.roomId!, memberId, formattedMonth)
+      .subscribe({
+        next: (response: SettlementResponse) => {
+          this.settlementDataByUser[memberId] = response?.data?.settlements || [];
+          this.settlementLoadingByUser[memberId] = false;
+        },
+        error: () => {
+          this.settlementLoadingByUser[memberId] = false;
+        }
+      });
+  }
+
 }

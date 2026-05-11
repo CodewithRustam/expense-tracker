@@ -293,15 +293,6 @@ ion-header {
   text-overflow: ellipsis;
 }
 
-.item-room {
-  font-size: 0.60rem;
-  color: var(--ion-text-color-step-600);
-  border: 1px solid #9f9fbe;
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: #7b85d72e;
-}
-
 .card-amount {
   display: flex;
   flex-direction: column;
@@ -382,5 +373,28 @@ ion-skeleton-text {
 @media (prefers-color-scheme: dark) {
   ion-skeleton-text {
     --background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Small Card Style */
+.room-badge {
+  font-size: 8px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgb(153 173 203 / 45%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .room-badge {
+    background: rgb(21 66 21 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }

@@ -1,29 +1,32 @@
-/* --- GLOBAL VARIABLES --- */
-ion-toolbar {
-  --background: var(--ion-background-color);
-  --border-width: 0;
-
-  ion-title {
-    font-weight: 700;
-    font-size: 1.2rem;
-    padding-left: 20px;
-  }
+ion-header {
+  box-shadow: none !important;
+  border-bottom: none !important;
 }
 
+ion-toolbar {
+  --min-height: 56px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+}
+
+ion-header.ion-no-border::after {
+  display: none !important;
+}
+
+
 ion-content {
-  --background: var(--ion-background-color);
+  --background: var(--ion-item-background);
 }
 
 
 /* --- 2. FORM CARD --- */
 .form-card {
-  margin-top: 20px;
   background: var(--ion-item-background);
-  margin: 0 20px;
+  margin: 4px 20px 0 20px;
   border-radius: 20px;
   padding: 8px 20px;
   border: 1px solid var(--ion-color-step-100);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 20px rgb(122 112 112 / 6%);
 }
 
 .input-row {
@@ -150,11 +153,4 @@ ion-datetime {
     transform: scale(0.98);
     --box-shadow: 0 5px 15px -3px rgba(99, 102, 241, 0.5);
   }
-
-  /* Disabled state adjustment so it doesn't look broken */
-  // &.button-disabled {
-  //   --background: var(--ion-color-step-300);
-  //   --box-shadow: none;
-  //   opacity: 0.6;
-  // }
 }

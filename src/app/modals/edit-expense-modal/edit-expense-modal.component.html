@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border">
+<ion-header>
   <ion-toolbar>
     <ion-title>Edit Expense</ion-title>
     <ion-buttons slot="end">
@@ -62,12 +62,13 @@
 
   </div>
 
-  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" class="auto-height">
-
+  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
+    [breakpoints]="[0, 0.42]">
     <ng-template>
       <div class="datetime-wrapper">
         <ion-datetime [(ngModel)]="expense.originalDate" presentation="date" [max]="today" [min]="'2000-01-01'"
-          size="cover" (ionChange)="showDatePicker = false; onInputChange()"> </ion-datetime>
+          size="cover" (ionChange)="showDatePicker = false; onInputChange()">
+        </ion-datetime>
       </div>
     </ng-template>
   </ion-modal>

@@ -95,7 +95,18 @@ export class HomePage implements OnInit, OnDestroy {
     this.loadGroups();
     this.loadNotifications();
   }
-
+  ionViewWillEnter() {
+    // This runs every time the view becomes active (including tab switches)
+    if (this.groups.length === 0) {
+      // first time / real data load needed
+      this.loadGroups();
+    } else {
+      // already have groups → just refresh chart for current selection
+      if (this.selectedGroup) {
+        this.fetchTrendData(this.selectedGroup.roomId);
+      }
+    }
+  }
   ngOnDestroy() {
     this.refreshSubscription?.unsubscribe();
   }
@@ -164,9 +175,8 @@ export class HomePage implements OnInit, OnDestroy {
     const modal = await this.modalCtrl.create({
       component: AddExpenseModalComponent,
       componentProps: { groups: this.groups },
-      breakpoints: [0, 0.88],
-      initialBreakpoint: 0.88,
-      handle: false,
+      breakpoints: [0, 0.77],
+      initialBreakpoint: 0.77
     });
 
     await modal.present();

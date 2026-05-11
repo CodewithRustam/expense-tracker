@@ -3,34 +3,26 @@
   font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
 }
 
-.custom-modal-header {
-  --background: var(--ion-color-tertiary);
-  --color: var(--ion-color-primary-contrast);
-  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-
-  ion-title {
-    font-weight: 700;
-    font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-  }
-
-  .header-btn {
-    --color: var(--ion-color-tertiary-contrast);
-    font-weight: 600;
-    font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-  }
+ion-header {
+  box-shadow: none !important;
+  border-bottom: none !important;
 }
 
-/* 2. SCROLL FIX & ADAPTIVE BACKGROUNDS */
+ion-toolbar {
+  --min-height: 56px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+}
+
+ion-header.ion-no-border::after {
+  display: none !important;
+}
+
+
 ion-content {
-  --background: var(--ion-background-color);
-  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-
-  /* This forces the shadow-root scroll to work even at 0.70 breakpoint */
-  &::part(scroll) {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
+  --background: var(--ion-item-background);
 }
+
 
 .scroll-fix-wrapper {
   min-height: 101%;
@@ -220,14 +212,22 @@ ion-content {
 
 /* 6. CONFIRM BUTTON */
 .confirm-btn {
-  margin-top: 24px;
-  border-radius: 14px;
-  font-weight: 600;
-  height: 46px;
-  --border-radius: 14px;
-  --background: var(--ion-color-tertiary);
-  --color: var(--ion-color-primary-contrast);
-  --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 78, 84, 200), 0.4);
+  --background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
+  --color: #ffffff;
+  --border-radius: 18px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  --box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+  transition: transform 0.2s ease;
+  margin-top: 30px;
+
+  &:active {
+    transform: scale(0.98);
+    --box-shadow: 0 5px 15px -3px rgba(99, 102, 241, 0.5);
+  }
 }
 
 .confirm-btn[disabled] {
@@ -269,9 +269,11 @@ ion-content {
   0% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.5;
   }
@@ -304,6 +306,7 @@ ion-content {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

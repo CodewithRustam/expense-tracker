@@ -100,23 +100,8 @@ ion-header {
 
 
 .ledger-slider {
-  display: block;
-  border-radius: 24px;
-  position: relative;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  cursor: pointer;
-
-  /* Glass effect */
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
-
-  padding: 18px 14px;
+  padding: 0;
+  border-bottom: none;
 }
 
 .edit-btn-mini:hover {
@@ -323,15 +308,33 @@ ion-header {
       font-weight: 800;
     }
   }
+
+  /* 🔥 When received > 0 */
+  .inline-mode {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-left: 16px;
+  }
 }
 
 .btn-settle {
-  height: 30px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  --border-radius: 10px;
+  height: 32px;
+  --border-radius: 8px;
   margin: 0;
-  --background: #a1ea6de3;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #ffffff;
+  --background: linear-gradient(135deg, #7d8fff 0%, #4e098b 100%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Add a slight "press" effect when clicked */
+.btn-settle:active {
+  transform: scale(0.95);
 }
 
 /* ================= STICKY HISTORY BAR ================= */
@@ -369,7 +372,7 @@ ion-header {
 
 /* ================= THE LEDGER (Optimized Transaction List) ================= */
 .ledger-container {
-  padding: 1rem 1rem 2.3rem 1rem;
+  padding: 0.5rem 1rem 2.3rem 1rem;
 }
 
 
@@ -388,17 +391,23 @@ ion-header {
   align-items: center;
   justify-content: center;
   min-width: 42px;
-  /* important */
   flex-shrink: 0;
-  /* prevent shrinking */
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  /* Light Theme Glass */
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+
+  /* Premium Border */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  transition: all 0.25s ease;
 }
 
+/* DARK MODE */
 @media (prefers-color-scheme: dark) {
   .icon-wrapper {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -473,12 +482,14 @@ ion-header {
 }
 
 ion-item-sliding {
-  margin-bottom: 12px;
   border-radius: 24px;
   overflow: hidden;
   /* IMPORTANT for rounded swipe background */
 }
 
+:host .calendar-body {
+  margin-bottom: -3rem !important;
+}
 
 /* TRANSACTION ROW */
 .transaction-row {
@@ -487,6 +498,7 @@ ion-item-sliding {
   align-items: center;
   width: 100%;
   gap: 20px;
+  margin-bottom: 8px;
 }
 
 /* LEFT SIDE */
@@ -554,29 +566,23 @@ ion-item-sliding {
 
 /* Small Card Style */
 .category-badge {
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 12px;
-
+  padding: 4px 8px;
+  border-radius: 6px;
   background: rgb(153 173 203 / 45%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-
   max-width: 120px;
-  /* 🔥 important */
   overflow: hidden;
-  /* 🔥 required */
   text-overflow: ellipsis;
-  /* 🔥 required */
   white-space: nowrap;
-  /* single line */
 }
 
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
   .category-badge {
-    background: rgb(131 112 226 / 16%);
+    background: rgb(21 66 21 / 16%);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
@@ -743,12 +749,73 @@ ion-skeleton-text {
   color: #22c55e;
 }
 
+.sticky-date {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  backdrop-filter: blur(14px);
+  background: rgba(var(--ion-background-color-rgb), 0.75);
+}
+
+.ledger-date-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+
+  color: var(--ion-color-medium);
+
+  padding: 8px 20px 10px 14px;
+}
+
+.ledger-group {
+  border: 1px solid rgba(120, 120, 120, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ion-item-background, #fff);
+  margin-bottom: 8px;
+}
+
 @media (prefers-color-scheme: dark) {
-  .ledger-slider {
-    background: rgba(25, 30, 50, 0.45);
+  .ledger-group {
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.ledger-group-date {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 11px 0px 16px;
+  letter-spacing: 0.3px;
+}
+
+.timeline-item {
+  position: relative;
+}
+
+.ledger-slider .ledger-glass-panel {
+  position: relative;
+  padding: 2px 14px 5px 14px;
+}
+
+/* Divider line */
+.ledger-slider:not(:last-child) .ledger-glass-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 85px;
+  /* 👈 pushes line after icon area */
+  right: 28px;
+  height: 1px;
+  margin-top: 15px;
+  background: rgba(120, 120, 120, 0.18);
+}
+
+/* Dark mode divider */
+@media (prefers-color-scheme: dark) {
+  .ledger-slider:not(:last-child) .ledger-glass-panel::after {
+    background: rgba(255, 255, 255, 0.08);
   }
 }

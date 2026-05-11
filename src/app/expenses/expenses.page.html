@@ -90,12 +90,20 @@
                     <h2 class="m-amt">₹{{ user.totalMemberExpense | number:'1.2-2' }}</h2>
                   </div>
                   <div class="m-right" [ngClass]="user.netBalance >= 0 ? 'pos' : 'neg'">
-                    <div class="status-stack" *ngIf="user.badgeText !== 'Settled up'; else settledTpl">
+                    <div class="status-stack" [ngClass]="{'inline-mode': user.amountReceived > 0}"
+                      *ngIf="user.badgeText !== 'Settled up'; else settledTpl">
+
                       <span class="st-label">
                         {{ user.netBalance >= 0 ? 'Gets Back' : 'Owes' }}
                       </span>
+
                       <span class="st-val">
                         ₹{{ (user.netBalance < 0 ? -user.netBalance : user.netBalance) | number:'1.0-0' }} </span>
+
+                          <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
+                            Received: {{ user.amountReceived | currency:'INR':'symbol':'1.2-2' }}
+                          </span>
+
                     </div>
 
                     <ng-template #settledTpl>
@@ -164,37 +172,65 @@
 
         <!-- DATA -->
         <ng-container *ngIf="!isLoadingExpenses">
+
           <ng-container *ngFor="let user of users">
             <ng-container *ngIf="selectedUser === user.memberId">
-              <ion-item-sliding *ngFor="let exp of user.expenses" class="ledger-slider">
-                <ion-item lines="none" class="ledger-glass-panel">
-                  <div class="transaction-row">
-                    <div class="row-left">
-                      <div class="icon-wrapper">
-                        <i [class]="exp.iconName" [style.color]="getIconColor(exp.iconName)"></i>
-                      </div>
-                      <div class="text-group">
-                        <span class="tx-name">{{ exp.item }}</span>
-                        <div class="tx-meta-row">
-                          <span class="category-badge">{{ exp.category }}</span>
-                          <span class="tx-date">{{ exp.date }}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div class="row-right">
-                      <div class="tx-amount" [class.pos]="exp.amount > 0">
-                        ₹{{ exp.amount | number:'1.0-0' }}
-                      </div>
-                      <div *ngIf="exp.isEditShow" class="edit-btn-mini" (click)="openEditExpenseModal(exp)">
-                        Edit
-                      </div>
-                    </div>
+              <ng-container *ngFor="let group of groupedExpensesMap[user.memberId]">
+
+                <div class="ledger-group">
+
+                  <!-- GROUP DATE HEADER INSIDE CARD -->
+                  <div class="ledger-group-date">
+                    {{ group.date }}
                   </div>
-                </ion-item>
-              </ion-item-sliding>
+
+                  <ion-item-sliding *ngFor="let exp of group.expenses; let i = index"
+                    class="ledger-slider timeline-item">
+
+                    <ion-item lines="none" class="ledger-glass-panel">
+
+                      <div class="transaction-row">
+
+                        <div class="row-left">
+                          <div class="icon-wrapper">
+                            <i [class]="exp.iconName" [style.color]="getIconColor(exp.iconName)">
+                            </i>
+                          </div>
+
+                          <div class="text-group">
+                            <span class="tx-name">{{ exp.item }}</span>
+
+                            <div class="tx-meta-row">
+                              <span class="category-badge">{{ exp.category }}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row-right">
+                          <div class="tx-amount" [class.pos]="exp.amount > 0">
+                            ₹{{ exp.amount | number:'1.0-0' }}
+                          </div>
+
+                          <div *ngIf="exp.isEditShow" class="edit-btn-mini" (click)="openEditExpenseModal(exp)">
+                            Edit
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </ion-item>
+
+                  </ion-item-sliding>
+
+                </div>
+
+              </ng-container>
+
+
             </ng-container>
           </ng-container>
+
         </ng-container>
 
         <!-- EMPTY -->
