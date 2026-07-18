@@ -1,0 +1,193 @@
+/* Remove padding from the main ion-content so the wrapper can handle it */
+.add-member-content {
+    --background: transparent;
+}
+
+/* The Wrapper handles all spacing:
+  16px Top, 24px Right, (Safe Area + 36px) Bottom, 24px Left
+*/
+.modal-wrapper {
+    padding: 30px 24px calc(env(safe-area-inset-bottom) + 36px) 24px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* -------------------------
+   Header & Drag Handle
+-------------------------- */
+.modal-handle {
+    width: 44px;
+    height: 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 auto 28px auto;
+    /* Centered */
+}
+
+.modal-header {
+    position: relative;
+    /* Crucial for absolute positioning the close button */
+    text-align: center;
+    margin-bottom: 32px;
+
+    h2 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: 0.3px;
+        color: #ffffff;
+    }
+
+    p {
+        font-size: 0.85rem;
+        opacity: 0.6;
+        margin: 0;
+        line-height: 1.4;
+        color: #ffffff;
+    }
+
+    /* The Cross Button Styling */
+    .btn-close {
+        position: absolute;
+        top: -12px;
+        right: -16px;
+        /* Pulls it tight against the top right edge */
+        margin: 0;
+        --border-radius: 50%;
+        --padding-start: 8px;
+        --padding-end: 8px;
+
+        ion-icon {
+            font-size: 26px;
+            /* Nice, readable size */
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease;
+        }
+
+        /* Hover/Active state if you want it to light up when tapped */
+        &:active ion-icon {
+            color: #ffffff;
+        }
+    }
+}
+
+/* -------------------------
+   Input Fields
+-------------------------- */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    /* 16px gap between the Name input and the Email input */
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+
+    /* The Email input (last one) gets a bigger gap before the buttons */
+    &:last-of-type {
+        margin-bottom: 32px;
+    }
+
+    /* Subtle glow effect when focused */
+    &:focus-within {
+        border-color: rgba(125, 143, 255, 0.5);
+    }
+
+    /* ERROR STATE: Triggered by Reactive Forms */
+    &.has-error {
+        border-color: rgba(255, 107, 107, 0.5);
+        background: rgba(255, 107, 107, 0.05);
+
+        ion-icon {
+            color: #ff6b6b;
+        }
+    }
+
+    ion-icon {
+        font-size: 20px;
+        opacity: 0.6;
+        color: #ffffff;
+        transition: color 0.3s ease;
+    }
+
+    input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-size: 1rem;
+        width: 100%;
+
+        /* ADD THESE TWO LINES */
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+    }
+}
+
+/* -------------------------
+   Validation Error Texts
+-------------------------- */
+.field-error {
+    display: flex;
+    flex-direction: column;
+    color: #ff6b6b;
+    font-size: 0.75rem;
+    margin: -12px 12px 20px 12px;
+    /* Pulls it up tight under the input */
+    font-weight: 500;
+}
+
+.server-error {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+/* -------------------------
+   Action Buttons
+-------------------------- */
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.btn-confirm {
+    --border-radius: 14px;
+    --background: linear-gradient(135deg, #7d8fff 0%, #4e098b 100%);
+    --padding-top: 18px;
+    --padding-bottom: 18px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    margin: 0;
+
+    /* Slight fade when the button is disabled (loading) */
+    &[disabled] {
+        opacity: 0.7;
+    }
+}
+
+.btn-cancel {
+    --color: var(--ion-color-medium);
+    --border-radius: 14px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+}

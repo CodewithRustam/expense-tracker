@@ -51,6 +51,8 @@ export class ChartsPage implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private refreshSub: Subscription | undefined;
+  private colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  private colorSchemeHandler = (e: MediaQueryListEvent) => this.applyTextColor(e.matches);
 
   constructor(
     private expenseService: ExpenseService,
@@ -68,11 +70,15 @@ export class ChartsPage implements OnInit, OnDestroy {
         this.loadChartData(true); // Background refresh
       });
 
+    // Registered once here (not on every ionViewWillEnter) and cleaned up
+    // in ngOnDestroy — previously this was added on every tab visit with
+    // no corresponding removal, leaking a listener each time.
+    this.colorSchemeMedia.addEventListener('change', this.colorSchemeHandler);
+
     this.loadChartData();
   }
 
   ionViewWillEnter() {
-    this.setupColorSchemeListener();
     this.updateChart();
   }
 
@@ -85,6 +91,7 @@ export class ChartsPage implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.refreshSub?.unsubscribe();
+    this.colorSchemeMedia.removeEventListener('change', this.colorSchemeHandler);
   }
 
   // --- Data Loading ---
@@ -229,29 +236,32 @@ export class ChartsPage implements OnInit, OnDestroy {
   // --- Chart Config ---
 
   getDefaultChartOptions(): ChartOptions {
-    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const textColor = isDark ? '#ffffff' : '#333333';
+    const isDark = this.colorSchemeMedia.matches;
+    const textColor = isDark ? '#f2f2f7' : '#17172b';
 
     return {
       series: [],
-      chart: { type: 'donut', height: 320, background: 'transparent', animations: { enabled: true } },
+      // A donut chart distinguishes unrelated categories, so (unlike a time
+      // trend) a qualitative multi-hue palette is the right encoding here —
+      // just kept muted/cohesive rather than neon-bright.
+      colors: ['#4f46e5', '#0d9488', '#d97706', '#e11d48', '#7c3aed', '#0284c7', '#65a30d'],
+      chart: { type: 'donut', height: 260, background: 'transparent', animations: { enabled: true, speed: 400 }, fontFamily: "'Poppins', sans-serif" },
       labels: [],
-      colors: ['#3b82f6', '#64748b', '#10b981', '#6366f1', '#8b5cf6'],
       dataLabels: {
         enabled: true,
         formatter: (val: any) => val.toFixed(0) + '%',
-        style: { fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: '600', colors: ['#fff'] },
+        style: { fontSize: '11px', fontFamily: 'Poppins, sans-serif', fontWeight: 600, colors: ['#fff'] },
         dropShadow: { enabled: false }
       },
       plotOptions: {
         pie: {
           donut: {
-            size: '55%',
+            size: '62%',
             labels: {
               show: true,
-              name: { color: textColor, fontSize: '14px' },
+              name: { color: textColor, fontSize: '12px', fontWeight: 500 },
               value: {
-                color: textColor, fontSize: '20px', fontWeight: 700,
+                color: textColor, fontSize: '18px', fontWeight: 600,
                 formatter: (val: string) => `₹${Number(val).toLocaleString()}`
               },
               total: {
@@ -270,34 +280,34 @@ export class ChartsPage implements OnInit, OnDestroy {
         position: 'bottom',
         labels: { colors: textColor },
         fontFamily: 'Poppins, sans-serif',
-        markers: { radius: 12 } as any
+        fontSize: '12px',
+        markers: { radius: 4 } as any,
+        itemMargin: { horizontal: 8, vertical: 4 }
       },
-      responsive: [{ breakpoint: 480, options: { chart: { height: 280 } } }]
+      responsive: [{ breakpoint: 480, options: { chart: { height: 240 } } }]
     };
   }
 
-  setupColorSchemeListener() {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      const color = e.matches ? '#ffffff' : '#333333';
-      this.chartOptions = {
-        ...this.chartOptions,
-        plotOptions: {
-          ...this.chartOptions.plotOptions,
-          pie: {
-            ...this.chartOptions.plotOptions.pie,
-            donut: {
-              ...this.chartOptions.plotOptions.pie?.donut,
-              labels: {
-                ...this.chartOptions.plotOptions.pie?.donut?.labels,
-                name: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.name, color: color },
-                value: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.value, color: color },
-                total: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.total, color: color }
-              }
+  private applyTextColor(isDark: boolean) {
+    const color = isDark ? '#f2f2f7' : '#17172b';
+    this.chartOptions = {
+      ...this.chartOptions,
+      plotOptions: {
+        ...this.chartOptions.plotOptions,
+        pie: {
+          ...this.chartOptions.plotOptions.pie,
+          donut: {
+            ...this.chartOptions.plotOptions.pie?.donut,
+            labels: {
+              ...this.chartOptions.plotOptions.pie?.donut?.labels,
+              name: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.name, color },
+              value: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.value, color },
+              total: { ...this.chartOptions.plotOptions.pie?.donut?.labels?.total, color }
             }
           }
-        },
-        legend: { ...this.chartOptions.legend, labels: { colors: color } }
-      };
-    });
+        }
+      },
+      legend: { ...this.chartOptions.legend, labels: { colors: color } }
+    };
   }
 }

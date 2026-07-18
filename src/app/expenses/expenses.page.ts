@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'; // Added OnDestroy
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ExpenseService } from '../services/expense'; // Ensure ExpenseData is exported in service
+import { ExpenseService } from '../services/expense';
 import { IonItemSliding, ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth-service';
 import { EditExpenseModal } from '../modals/edit-expense-modal/edit-expense-modal.component';
@@ -11,8 +11,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { GroupService } from '../services/group';
 import { Subscription, distinctUntilChanged, map } from 'rxjs';
 import { SettlementDetail } from '../models/Settlement/SettlementDetail';
+import { AddMemberModalComponent } from '../modals/add-member-modal/add-member-modal.component';
 
-// Local interfaces used for UI display
 interface Expense {
   expenseId: number;
   roomId: number;
@@ -32,7 +32,6 @@ interface ExpenseDateGroup {
   expenses: any[];
 }
 
-
 @Component({
   selector: 'app-expenses',
   templateUrl: './expenses.page.html',
@@ -41,7 +40,7 @@ interface ExpenseDateGroup {
 })
 export class ExpensesPage implements OnInit, OnDestroy {
   months: string[] = [];
-  users: any[] = []; // Simplified for brevity, keep your specific interface if preferred
+  users: any[] = [];
   selectedMonth: string = '';
   selectedUser: number | undefined;
   roomId: number | undefined;
@@ -58,10 +57,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
   private currentUserId: number | undefined;
   groupedExpensesMap: { [userId: number]: ExpenseDateGroup[] } = {};
 
-  // in ExpensesPage
   settlementDataByUser: { [memberId: number]: SettlementDetail[] } = {};
   settlementLoadingByUser: { [memberId: number]: boolean } = {};
-  // Track subscriptions to prevent leaks
   private refreshSub: Subscription | undefined;
 
   constructor(
@@ -77,13 +74,9 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const token = this.authService.getToken();
     if (token) {
       const decoded = this.authService.decodeToken(token);
-      console.log(decoded);
-      // Ensure your token payload has a field for 'id' or 'memberId'
-      // Note: Cast to number if your memberId in DB is numeric
       this.currentUserId = decoded?.nameid ? +decoded.nameid : undefined;
     }
 
-    // 1. Listen for Route Changes
     this.route.queryParamMap
       .pipe(
         map(params => params.get('roomId')),
@@ -104,8 +97,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
         this.loadInitialData();
       });
 
-    // 2. ✅ Subscribe to Global Refresh Stream
-    // Any time add/update/delete/settle happens, this triggers
     this.refreshSub = this.expenseService.refresh$.subscribe(() => {
       this.loadMonthlyExpenses();
       this.prepareGroupedExpenses();
@@ -119,7 +110,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
   loadInitialData() {
     if (!this.roomId) return;
 
-    // ✅ Reset selection so populateExpenses recalculates for the new room
     this.selectedUser = undefined;
 
     this.isLoadingExpenses = true;
@@ -168,8 +158,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
     this.isNextMonthDisabled = (currentIndex === 0);
     this.isPrevMonthDisabled = (currentIndex === this.months.length - 1);
 
-    // 1. Try to find the logged-in user in the room members
-    // 2. If not found (or first load), fallback to the first user in the list
     if (!this.selectedUser) {
       const currentUserInRoom = this.users.find(u => u.memberId === this.currentUserId);
       this.selectedUser = currentUserInRoom ? currentUserInRoom.memberId : this.users[0]?.memberId;
@@ -179,11 +167,10 @@ export class ExpensesPage implements OnInit, OnDestroy {
     this.assignExpensesToUsers(data.expenses);
     this.prepareGroupedExpenses();
 
-    this.users.forEach(user => {
-      this.loadSettlementsForUser(user.memberId);
-    });
-
-    // OR — only preload for currently selected user
+    // Only preload settlements for the currently selected user; other users'
+    // settlement data loads lazily when selected (see selectUser()). Previously
+    // this looped over every user AND loaded the selected user again, firing
+    // duplicate network requests on every page load.
     if (this.selectedUser) {
       this.loadSettlementsForUser(this.selectedUser);
     }
@@ -226,7 +213,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
     });
   }
 
-  // Navigation Logic
   get totalAllTime(): number {
     return this.users.reduce((sum, user) => sum + user.totalMemberExpense, 0);
   }
@@ -259,8 +245,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
     });
 
     await modal.present();
-    // ✅ No need to call loadMonthlyExpenses here; 
-    // the Service triggers the refresh$ stream automatically on success.
   }
 
   hasExpensesInSelectedMonth(): boolean {
@@ -288,7 +272,6 @@ export class ExpensesPage implements OnInit, OnDestroy {
           slidingItem.close();
           if (res.success) {
             this.toast.success(res.message);
-            // ✅ Data will auto-refresh via refresh$ subscription
           }
         },
         error: () => {
@@ -309,7 +292,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const [monthName, year] = this.selectedMonth.split(' ');
     const tempDate = new Date(`${monthName} 1, ${year}`);
     if (isNaN(tempDate.getTime())) {
-      return undefined; // invalid month name
+      return undefined;
     }
 
     const monthIndex = tempDate.getMonth() + 1;
@@ -317,7 +300,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   async openSettleModal(user: any) {
-    const formattedMonth = this.getFormattedMonth(); // reuse your logic
+    const formattedMonth = this.getFormattedMonth();
 
     const preloadedSettlements = this.settlementDataByUser[user.memberId] || [];
 
@@ -327,7 +310,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
         roomId: this.roomId,
         user,
         formattedMonth,
-        preloadedSettlements,           // ← new
+        preloadedSettlements,
         isPreloaded: preloadedSettlements.length > 0
       },
       initialBreakpoint: 0.77,
@@ -335,8 +318,17 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     await modal.present();
   }
+
   // UI Helpers
-  selectUser(id: number) { this.selectedUser = id; }
+  selectUser(id: number) {
+    this.selectedUser = id;
+    // Lazy-load settlement details the first time this user is viewed,
+    // instead of loading every user's settlements up front on page load.
+    if (!this.settlementDataByUser[id] && !this.settlementLoadingByUser[id]) {
+      this.loadSettlementsForUser(id);
+    }
+  }
+
   onScroll(event: any) { this.isSticky = event.detail.scrollTop > 150; }
   getIconColor(iconName: string | undefined): string {
     const iconMap: any = { 'fa-solid fa-leaf': '#27ae60', 'fa-solid fa-drumstick-bite': '#e74c3c', 'fa-solid fa-burn': '#f1c40f' };
@@ -344,40 +336,31 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
-
     if (!expenses || expenses.length === 0) return [];
 
-    /* STEP 1 — SORT BY DATE DESC (LATEST FIRST) */
     const sortedExpenses = [...expenses].sort((a, b) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
-    /* STEP 2 — GROUP */
     const groups: { [key: string]: any[] } = {};
 
     sortedExpenses.forEach(exp => {
-
       const dateKey = this.formatGroupDate(exp.date);
-
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }
-
       groups[dateKey].push(exp);
     });
 
-    /* STEP 3 — KEEP GROUP ORDER */
     return Object.keys(groups)
       .sort((a, b) => this.getDatePriority(a) - this.getDatePriority(b))
       .map(date => ({
         date,
         expenses: groups[date]
       }));
-
   }
 
   formatGroupDate(dateStr: string): string {
-
     const d = new Date(dateStr);
     const today = new Date();
     const yesterday = new Date();
@@ -393,40 +376,30 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   private getDatePriority(label: string): number {
-
     if (label === 'Today') return 0;
     if (label === 'Yesterday') return 1;
-
     return 2;
   }
 
   getGroupedExpenses(user: any): ExpenseDateGroup[] {
     return this.groupExpensesByDate(user.expenses);
   }
+
   prepareGroupedExpenses() {
-
     if (!this.users) return;
-
     this.users.forEach(user => {
       this.groupedExpensesMap[user.memberId] =
         this.groupExpensesByDate(user.expenses || []);
     });
-
   }
-  // in loadSettlementsForUser() or wherever you had the placeholder
+
   loadSettlementsForUser(memberId: number) {
-    console.log("settlements called for member " + memberId + ":", this.settlementDataByUser[memberId]);
-
-
-    console.log('selected month: ' + this.selectedMonth);
-
     if (!this.selectedMonth) return;
 
     const [monthName, year] = this.selectedMonth.split(' ');
     const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
     const formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
 
-    console.log('formatted month: ' + formattedMonth);
     this.settlementLoadingByUser[memberId] = true;
 
     this.expenseService
@@ -442,4 +415,25 @@ export class ExpensesPage implements OnInit, OnDestroy {
       });
   }
 
+  async openAddMemberModal() {
+    if (!this.roomId) return;
+
+    const modal = await this.modalCtrl.create({
+      component: AddMemberModalComponent,
+      componentProps: { roomId: this.roomId },
+      breakpoints: [0, 0.5, 0.55, 1],
+      initialBreakpoint: 0.55,
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data?.added) {
+      // groupService.refresh$ (if addMember triggers it) will handle this automatically.
+    }
+  }
+
+  openRoomSettings() {
+    // navigate to a dedicated room settings page for add/remove members, rename room, leave room
+  }
 }

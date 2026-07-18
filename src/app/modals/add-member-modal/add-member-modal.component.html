@@ -1,0 +1,46 @@
+<ion-content class="add-member-content">
+  <div class="modal-wrapper">
+    <div class="modal-header">
+      <h2>Add Member</h2>
+      <p>Invite someone by their name and email</p>
+      <ion-button class="btn-close" fill="clear" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <form [formGroup]="memberForm" (ngSubmit)="onAddMember()">
+
+      <div class="input-group" [class.has-error]="f['name'].invalid && f['name'].touched">
+        <ion-icon name="person-outline"></ion-icon>
+        <input type="text" placeholder="Name (e.g., Rustam)" formControlName="name" />
+      </div>
+
+      <div class="field-error" *ngIf="f['name'].invalid && f['name'].touched">
+        <span *ngIf="f['name'].errors?.['required']">Name is required.</span>
+        <span *ngIf="f['name'].errors?.['minlength']">Name must be at least 2 characters.</span>
+        <span *ngIf="f['name'].errors?.['maxlength']">Name cannot exceed 50 characters.</span>
+        <span *ngIf="f['name'].errors?.['pattern']">Name can only contain letters and spaces.</span>
+      </div>
+
+      <div class="input-group" [class.has-error]="f['email'].invalid && f['email'].touched">
+        <ion-icon name="mail-outline"></ion-icon>
+        <input type="email" placeholder="Email address" formControlName="email" />
+      </div>
+      <div class="field-error" *ngIf="f['email'].invalid && f['email'].touched">
+        <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
+        <span *ngIf="f['email'].errors?.['email'] || f['email'].errors?.['pattern']">Please enter a valid email
+          format.</span>
+      </div>
+
+      <div class="server-error" *ngIf="serverErrorMsg">{{ serverErrorMsg }}</div>
+
+      <div class="actions-container">
+        <ion-button expand="block" type="submit" class="btn-confirm" [disabled]="isSubmitting">
+          <ion-spinner name="dots" *ngIf="isSubmitting"></ion-spinner>
+          <span *ngIf="!isSubmitting">Add Member</span>
+        </ion-button>
+      </div>
+
+    </form>
+  </div>
+</ion-content>

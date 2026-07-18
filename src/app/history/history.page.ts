@@ -128,7 +128,7 @@ export class HistoryPage implements OnInit, OnDestroy {
       room: exp.roomName?.trim() || 'Unknown',
       total: exp.amount ?? 0,
       date: new Date(exp.expenseDate),
-      type: exp.amount >= 0 ? 'credit' : 'debit', // Logical mapping
+      type: exp.amount >= 0 ? 'debit' : 'credit', // Logical mapping
       iconName: exp.iconName || 'fa-solid fa-receipt'
     }));
 

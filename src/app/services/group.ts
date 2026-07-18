@@ -3,7 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuthService } from './auth-service';
-import { Group } from '../models/group.model';
+import { Group } from '../models/group.model'; // You might need to update this model to match RoomResponse
+
+// 1. Interfaces matching your C# RoomViewModel & InviteMemberViewModel
+export interface InviteMemberPayload {
+  name: string;
+  email: string;
+}
+
+export interface CreateRoomPayload {
+  name: string;
+  members: InviteMemberPayload[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -21,10 +32,6 @@ export class GroupService {
     private authService: AuthService
   ) { }
 
-  private get userId(): string {
-    return this.authService.getUserId()!;
-  }
-
   // ================================
   // REFRESH TRIGGER
   // ================================
@@ -37,16 +44,23 @@ export class GroupService {
   // API METHODS
   // ================================
 
-  getGroups(): Observable<Group[]> {
-    return this.http.get<Group[]>(`${this.baseUrl}/get-rooms`);
+  getGroups(): Observable<any> {
+    // Hits: GET /api/rooms/get-rooms
+    return this.http.get<any>(`${this.baseUrl}/get-rooms`);
   }
 
-  getGroupById(id: number): Observable<Group> {
-    return this.http.get<Group>(`${this.baseUrl}/get/${id}`);
+  getGroupById(id: number, month?: string): Observable<any> {
+    const url = month
+      ? `${this.baseUrl}/details/${id}?month=${month}`
+      : `${this.baseUrl}/details/${id}`;
+
+    return this.http.get<any>(url);
   }
 
-  createGroup(group: Partial<Group>): Observable<any> {
-    return this.http.post(`${this.baseUrl}/create`, group).pipe(
+  // 🔥 UPDATED CREATE ENDPOINT 🔥
+  createGroup(payload: CreateRoomPayload): Observable<any> {
+    // Hits: POST /api/rooms/create
+    return this.http.post(`${this.baseUrl}/create`, payload).pipe(
       tap(() => this.triggerRefresh())
     );
   }

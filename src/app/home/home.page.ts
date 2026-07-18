@@ -21,7 +21,8 @@ import {
   ApexFill,
   ApexPlotOptions,
   ApexYAxis,
-  ApexGrid
+  ApexGrid,
+  ApexLegend
 } from "ng-apexcharts";
 
 export type ChartOptions = {
@@ -35,6 +36,7 @@ export type ChartOptions = {
   plotOptions: ApexPlotOptions;
   colors: string[];
   grid: ApexGrid;
+  legend: ApexLegend;
 };
 @Component({
   selector: 'app-groups',
@@ -196,8 +198,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.notificationService.getAll().subscribe();
   }
 
-  // ... (Rest of UI helper methods like updateGreeting, getGroupColorClass, etc. remain the same)
-
   updateGreeting() {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) this.greetingText = 'Good Morning,';
@@ -223,6 +223,10 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['tabs/expenses'], { queryParams: { roomId: group.roomId } });
   }
 
+  openAnalytics() {
+    this.router.navigate(['tabs/charts']);
+  }
+
   goToProfile() {
     this.router.navigate(['tabs/profile']);
   }
@@ -244,45 +248,59 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   initChart() {
+    // Single-hue, opacity-graded palette instead of a six-color rainbow —
+    // this is a spend trend, not a categorical comparison, so one accent
+    // color read as "intensity" communicates the shape of the trend better
+    // than six unrelated hues fighting for attention.
+    const monthShades = [
+      '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1', '#4f46e5', '#4338ca',
+      '#3730a3', '#312e81'
+    ];
+
     this.chartOptions = {
       series: [],
       chart: {
         type: "bar",
-        height: 240,
+        height: 220,
         toolbar: { show: false },
-        animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        animations: { enabled: true, easing: 'easeinout', speed: 500 },
+        fontFamily: "'Poppins', sans-serif"
       },
       plotOptions: {
-        bar: { borderRadius: 4, columnWidth: "75%", distributed: true }
+        bar: { borderRadius: 6, columnWidth: "55%", distributed: true }
       },
       dataLabels: { enabled: false },
-      colors: ["#6366f1", "#4ade80", "#f87171", "#fbbf24", "#a855f7", "#2dd4bf"],
+      legend: { show: false },
+      colors: monthShades,
       xaxis: {
         categories: [],
-        labels: { style: { colors: "#94a3b8", fontSize: '11px', fontWeight: 500 } },
+        labels: {
+          style: { colors: "#9797ab", fontSize: '11px', fontWeight: 500 }
+        },
         axisBorder: { show: false },
         axisTicks: { show: false }
       },
       yaxis: {
         show: true,
         labels: {
-          style: { colors: "#94a3b8", fontSize: '10px' },
-          formatter: (val: number) => val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val
+          style: { colors: "#9797ab", fontSize: '10px' },
+          formatter: (val: number) => val >= 1000 ? '₹' + (val / 1000).toFixed(1) + 'k' : '₹' + val
         }
       },
       grid: {
         show: true,
-        borderColor: "rgba(255, 255, 255, 0.05)",
+        borderColor: "rgba(151, 151, 171, 0.18)",
         strokeDashArray: 4,
-        yaxis: { lines: { show: true } }
+        yaxis: { lines: { show: true } },
+        padding: { left: 4, right: 4 }
       },
       tooltip: {
         theme: "dark",
         y: { formatter: (val: number) => `₹${val.toLocaleString('en-IN')}` }
       },
       fill: {
-        type: 'gradient',
-        gradient: { shade: 'dark', type: "vertical", opacityFrom: 1, opacityTo: 0.9 }
+        type: 'solid',
+        opacity: 1
       }
     };
   }

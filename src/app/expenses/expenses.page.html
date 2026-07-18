@@ -1,158 +1,147 @@
 <ion-header class="ion-no-border" [translucent]="true">
-  <ion-buttons slot="start">
-    <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
-    <ion-title>Expense Dashboard</ion-title>
-  </ion-buttons>
-  <div class="top-gradient-mask"></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Expenses</ion-title>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
 
-  <!-- ================= DESKTOP SHELL ================= -->
   <div class="expense-desktop-shell">
 
-    <!-- ============== LEFT SIDE ================= -->
-    <div class="expense-left">
+    <!-- ============== SUMMARY + MEMBERS ================= -->
+    <div class="hub-container">
+      <div class="glass-hub">
 
-      <div class="hub-container">
-        <div class="glass-hub">
-
-          <!-- HEADER -->
-          <div class="hub-header-row">
-            <ng-container *ngIf="!isLoading; else headerSkeleton">
-              <h1 class="room-name" title="{{ roomName }}">
-                {{ roomName }}
-              </h1>
-
-              <div class="month-capsule">
-                <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled">
-                  <i class="fa-solid fa-chevron-left"></i>
-                </ion-button>
-
-                <span class="selected-month">{{ selectedMonth }}</span>
-
-                <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled">
-                  <i class="fa-solid fa-chevron-right"></i>
-                </ion-button>
+        <!-- HEADER -->
+        <div class="hub-header-row">
+          <ng-container *ngIf="!isLoading; else headerSkeleton">
+            <div class="room-title-group">
+              <h1 class="room-name" title="{{ roomName }}">{{ roomName }}</h1>
+              <div class="room-settings-btn" (click)="openRoomSettings()" role="button" aria-label="Room settings">
+                <i class="fa-solid fa-gear"></i>
               </div>
-            </ng-container>
-          </div>
-
-          <!-- STATS -->
-          <div class="hub-stats-row">
-            <ng-container *ngIf="!isLoadingExpenses; else statsSkeleton">
-
-              <!-- Stat 1 -->
-              <div class="stat-block">
-                <ion-icon name="wallet-outline" class="stat-icon"></ion-icon>
-                <div class="stat-item">
-                  <span class="s-label">Total Spent</span>
-                  <span class="s-val">₹{{ totalAllTime | number:'1.0-0' }}</span>
-                </div>
-              </div>
-
-              <div class="stat-divider"></div>
-
-              <!-- Stat 2 -->
-              <div class="stat-block">
-                <ion-icon name="people-outline" class="stat-icon"></ion-icon>
-                <div class="stat-item">
-                  <span class="s-label">Avg/Person</span>
-                  <span class="s-val">₹{{ averageAmount | number:'1.0-0' }}</span>
-                </div>
-              </div>
-
-            </ng-container>
-          </div>
-
-
-          <!-- MEMBERS -->
-          <div class="hub-members">
-            <div class="member-track">
-              <ng-container *ngIf="!isLoading; else membersSkeleton">
-                <div class="member-chip" *ngFor="let u of users" (click)="selectUser(u.memberId)"
-                  [class.active]="selectedUser === u.memberId">
-
-                  <div class="avatar-sq">{{ u.memberName.charAt(0) }}</div>
-                  <span class="chip-name">{{ u.memberName.split(' ')[0] }}</span>
-                </div>
-              </ng-container>
             </div>
-          </div>
 
-          <!-- PERSONAL CARD -->
-          <div class="hub-personal-zone">
-            <ng-container *ngIf="!isLoadingExpenses; else cardSkeleton">
-              <ng-container *ngFor="let user of users">
-                <div class="holo-mini-card" *ngIf="selectedUser === user.memberId">
-                  <div class="m-left">
-                    <span class="m-tag">My Total</span>
-                    <h2 class="m-amt">₹{{ user.totalMemberExpense | number:'1.2-2' }}</h2>
-                  </div>
-                  <div class="m-right" [ngClass]="user.netBalance >= 0 ? 'pos' : 'neg'">
-                    <div class="status-stack" [ngClass]="{'inline-mode': user.amountReceived > 0}"
-                      *ngIf="user.badgeText !== 'Settled up'; else settledTpl">
+            <div class="month-capsule">
+              <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled"
+                aria-label="Previous month">
+                <i class="fa-solid fa-chevron-left"></i>
+              </ion-button>
+              <span class="selected-month">{{ selectedMonth }}</span>
+              <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled" aria-label="Next month">
+                <i class="fa-solid fa-chevron-right"></i>
+              </ion-button>
+            </div>
+          </ng-container>
+        </div>
 
-                      <span class="st-label">
-                        {{ user.netBalance >= 0 ? 'Gets Back' : 'Owes' }}
-                      </span>
+        <!-- STATS -->
+        <div class="hub-stats-row">
+          <ng-container *ngIf="!isLoadingExpenses; else statsSkeleton">
+            <div class="stat-block">
+              <ion-icon name="wallet-outline" class="stat-icon"></ion-icon>
+              <div class="stat-item">
+                <span class="s-label">Total spent</span>
+                <span class="s-val">₹{{ totalAllTime | number:'1.0-0' }}</span>
+              </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-block">
+              <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+              <div class="stat-item">
+                <span class="s-label">Avg / person</span>
+                <span class="s-val">₹{{ averageAmount | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
 
-                      <span class="st-val">
-                        ₹{{ (user.netBalance < 0 ? -user.netBalance : user.netBalance) | number:'1.0-0' }} </span>
+        <!-- MEMBERS -->
+        <div class="hub-members">
+          <div class="member-track">
+            <ng-container *ngIf="!isLoading; else membersSkeleton">
+              <div class="member-chip" *ngFor="let u of users" (click)="selectUser(u.memberId)"
+                [class.active]="selectedUser === u.memberId"
+                [class.status-owe]="u.netBalance < 0 && u.badgeText !== 'Settled up'"
+                [class.status-get]="u.netBalance >= 0 && u.badgeText !== 'Settled up'"
+                [class.status-settled]="u.badgeText === 'Settled up'">
+                <div class="avatar-sq">{{ u.memberName.charAt(0) }}</div>
+                <span class="chip-name">{{ u.memberName.split(' ')[0] }}</span>
+              </div>
 
-                          <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
-                            Received: {{ user.amountReceived | currency:'INR':'symbol':'1.2-2' }}
-                          </span>
-
-                    </div>
-
-                    <ng-template #settledTpl>
-                      <div class="settled-stack">
-                        <span class="settledlbl">
-                          <ion-icon name="checkmark-circle-outline"></ion-icon>
-                          Settled
-                        </span>
-
-                        <span *ngIf="user.amountPaid > 0" class="amount-badge paid-badge">
-                          Paid: {{ user.amountPaid | currency:'INR':'symbol':'1.2-2' }}
-                        </span>
-
-                        <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
-                          Received: {{ user.amountReceived | currency:'INR':'symbol':'1.2-2' }}
-                        </span>
-                      </div>
-                    </ng-template>
-
-                    <ion-button *ngIf="user.netBalance < 0 && user.isSettleShow" size="small" class="btn-settle"
-                      (click)="openSettleModal(user)">
-                      Settle
-                    </ion-button>
-                  </div>
-                </div>
-              </ng-container>
+              <div class="member-chip add-chip" (click)="openAddMemberModal()" role="button" aria-label="Add member">
+                <div class="avatar-sq add-sq"><i class="fa-solid fa-plus"></i></div>
+                <span class="chip-name">Add</span>
+              </div>
             </ng-container>
           </div>
-
         </div>
-      </div>
 
+        <!-- PERSONAL CARD -->
+        <div class="hub-personal-zone">
+          <ng-container *ngIf="!isLoadingExpenses; else cardSkeleton">
+            <ng-container *ngFor="let user of users">
+              <div class="personal-row" *ngIf="selectedUser === user.memberId">
+                <div class="m-left">
+                  <span class="m-tag">{{ user.memberName.split(' ')[0] }}'s total</span>
+                  <h2 class="m-amt">₹{{ user.totalMemberExpense | number:'1.2-2' }}</h2>
+                </div>
+
+                <div class="m-right" [ngClass]="user.netBalance >= 0 ? 'pos' : 'neg'">
+                  <div class="status-stack" [ngClass]="{'inline-mode': user.amountReceived > 0}"
+                    *ngIf="user.badgeText !== 'Settled up'; else settledTpl">
+                    <span class="st-label">{{ user.netBalance >= 0 ? 'Gets back' : 'Owes' }}</span>
+                    <span class="st-val">₹{{ (user.netBalance < 0 ? -user.netBalance : user.netBalance) | number:'1.0-0'
+                        }}</span>
+                        <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
+                          Received ₹{{ user.amountReceived | number:'1.0-0' }}
+                        </span>
+                  </div>
+
+                  <ng-template #settledTpl>
+                    <div class="settled-stack">
+                      <span class="settledlbl">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        Settled up
+                      </span>
+                      <span *ngIf="user.amountPaid > 0" class="amount-badge paid-badge">
+                        Paid ₹{{ user.amountPaid | number:'1.0-0' }}
+                      </span>
+                      <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
+                        Received ₹{{ user.amountReceived | number:'1.0-0' }}
+                      </span>
+                    </div>
+                  </ng-template>
+
+                  <ion-button *ngIf="user.netBalance < 0 && user.isSettleShow" size="small" class="btn-settle"
+                    (click)="openSettleModal(user)">
+                    Settle
+                  </ion-button>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+
+      </div>
     </div>
 
-    <!-- ============== RIGHT SIDE ================= -->
-    <div class="expense-right">
-
-      <div class="sticky-history-bar">
-        <div class="history-content">
-          <span>Transaction History</span>
-          <div class="h-line"></div>
-        </div>
+    <!-- ============== TRANSACTION HISTORY ================= -->
+    <div class="sticky-history-bar">
+      <div class="history-content">
+        <span>Transactions</span>
+        <div class="h-line"></div>
       </div>
+    </div>
 
-      <div class="ledger-container">
+    <div class="ledger-container">
 
-        <!-- LOADING -->
-        <ng-container *ngIf="isLoadingExpenses">
-          <ion-item-sliding *ngFor="let i of [1,2,3,4,5]" class="ledger-slider">
+      <ng-container *ngIf="isLoadingExpenses">
+        <div class="ledger-card">
+          <ion-item-sliding *ngFor="let i of [1,2,3,4]" class="ledger-slider">
             <ion-item lines="none" class="ledger-glass-panel">
               <div class="transaction-row">
                 <div class="row-left">
@@ -168,80 +157,63 @@
               </div>
             </ion-item>
           </ion-item-sliding>
-        </ng-container>
+        </div>
+      </ng-container>
 
-        <!-- DATA -->
-        <ng-container *ngIf="!isLoadingExpenses">
-
+      <ng-container *ngIf="!isLoadingExpenses">
+        <div class="ledger-card">
           <ng-container *ngFor="let user of users">
             <ng-container *ngIf="selectedUser === user.memberId">
 
               <ng-container *ngFor="let group of groupedExpensesMap[user.memberId]">
+                <div class="ledger-group-date">{{ group.date }}</div>
 
-                <div class="ledger-group">
-
-                  <!-- GROUP DATE HEADER INSIDE CARD -->
-                  <div class="ledger-group-date">
-                    {{ group.date }}
-                  </div>
-
-                  <ion-item-sliding *ngFor="let exp of group.expenses; let i = index"
-                    class="ledger-slider timeline-item">
-
-                    <ion-item lines="none" class="ledger-glass-panel">
-
-                      <div class="transaction-row">
-
-                        <div class="row-left">
-                          <div class="icon-wrapper">
-                            <i [class]="exp.iconName" [style.color]="getIconColor(exp.iconName)">
-                            </i>
-                          </div>
-
-                          <div class="text-group">
-                            <span class="tx-name">{{ exp.item }}</span>
-
-                            <div class="tx-meta-row">
-                              <span class="category-badge">{{ exp.category }}</span>
-                            </div>
+                <ion-item-sliding #slidingItem *ngFor="let exp of group.expenses" class="ledger-slider timeline-item">
+                  <ion-item lines="none" class="ledger-glass-panel">
+                    <div class="transaction-row">
+                      <div class="row-left">
+                        <div class="icon-wrapper">
+                          <i [class]="exp.iconName" [style.color]="getIconColor(exp.iconName)"></i>
+                        </div>
+                        <div class="text-group">
+                          <span class="tx-name">{{ exp.item }}</span>
+                          <div class="tx-meta-row">
+                            <span class="category-badge">{{ exp.category }}</span>
                           </div>
                         </div>
-
-                        <div class="row-right">
-                          <div class="tx-amount" [class.pos]="exp.amount > 0">
-                            ₹{{ exp.amount | number:'1.0-0' }}
-                          </div>
-
-                          <div *ngIf="exp.isEditShow" class="edit-btn-mini" (click)="openEditExpenseModal(exp)">
-                            Edit
-                          </div>
-                        </div>
-
                       </div>
 
-                    </ion-item>
+                      <div class="row-right">
+                        <div class="tx-amount" [class.pos]="exp.amount > 0">
+                          ₹{{ exp.amount | number:'1.0-0' }}
+                        </div>
+                        <button *ngIf="exp.isEditShow" class="edit-icon-btn" (click)="openEditExpenseModal(exp)"
+                          aria-label="Edit expense">
+                          <i class="fa-solid fa-pen"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </ion-item>
 
-                  </ion-item-sliding>
-
-                </div>
-
+                  <ion-item-options side="end">
+                    <ion-item-option color="danger" (click)="deleteExpense(exp, slidingItem)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-item-option>
+                  </ion-item-options>
+                </ion-item-sliding>
               </ng-container>
-
 
             </ng-container>
           </ng-container>
+        </div>
+      </ng-container>
 
-        </ng-container>
-
-        <!-- EMPTY -->
-        <ng-container *ngIf="!isLoadingExpenses && !hasExpensesInSelectedMonth()">
-          <div class="empty-ledger">
-            <i class="fa-solid fa-ghost"></i>
-            <p>No transactions found</p>
-          </div>
-        </ng-container>
-
-      </div>
+      <ng-container *ngIf="!isLoadingExpenses && !hasExpensesInSelectedMonth()">
+        <div class="empty-ledger">
+          <i class="fa-solid fa-ghost"></i>
+          <p>No transactions this month</p>
+        </div>
+      </ng-container>
 
     </div>
 
@@ -255,7 +227,8 @@
 </ng-template>
 
 <ng-template #statsSkeleton>
-  <ion-skeleton-text animated style="width:120px;height:20px"></ion-skeleton-text>
+  <ion-skeleton-text animated style="width:100%;height:44px"></ion-skeleton-text>
+  <ion-skeleton-text animated style="width:100%;height:44px"></ion-skeleton-text>
 </ng-template>
 
 <ng-template #membersSkeleton>
@@ -265,7 +238,7 @@
 </ng-template>
 
 <ng-template #cardSkeleton>
-  <div class="holo-mini-card">
+  <div class="personal-row">
     <ion-skeleton-text animated style="width:140px;height:24px"></ion-skeleton-text>
   </div>
 </ng-template>
