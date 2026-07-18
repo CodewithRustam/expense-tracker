@@ -7,7 +7,6 @@ import { AuthService, ApiResponse } from '../services/auth-service';
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.page.html',
-  styleUrls: ['./reset-password.page.scss'],
   standalone: false
 })
 export class ResetPasswordPage implements OnInit {

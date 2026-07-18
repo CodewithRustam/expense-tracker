@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-notification-list',
   templateUrl: './notification-list-modal.component.html',
-  styleUrls: ['./notification-list-modal.component.scss'],
   standalone: false
 })
 export class NotificationListModal implements OnInit, OnDestroy {

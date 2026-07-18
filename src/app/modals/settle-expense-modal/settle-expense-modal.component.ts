@@ -15,7 +15,6 @@ export interface SettlementResponse {
 @Component({
   selector: 'app-settle-expense-modal',
   templateUrl: './settle-expense-modal.component.html',
-  styleUrls: ['./settle-expense-modal.component.scss'],
   standalone: false
 })
 export class SettleExpenseModalComponent implements OnInit {

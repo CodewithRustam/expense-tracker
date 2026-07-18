@@ -9,7 +9,6 @@ import { finalize, take } from 'rxjs/operators';
 @Component({
   selector: 'app-add-expense-modal',
   templateUrl: './add-expense-modal.component.html',
-  styleUrls: ['./add-expense-modal.component.scss'],
   standalone: false
 })
 export class AddExpenseModalComponent implements OnInit {

@@ -8,7 +8,6 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
   standalone: false
 })
 export class LoginPage implements OnInit {

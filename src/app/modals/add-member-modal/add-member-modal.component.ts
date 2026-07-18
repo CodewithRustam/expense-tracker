@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-add-member-modal',
   templateUrl: './add-member-modal.component.html',
-  styleUrls: ['./add-member-modal.component.scss'],
   standalone: false
 })
 export class AddMemberModalComponent implements OnInit {

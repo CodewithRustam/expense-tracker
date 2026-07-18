@@ -21,7 +21,7 @@
 <ion-content>
 
   <ng-container *ngIf="isLoading; else mainContent">
-    <div class="skeleton-wrapper">
+    <div class="page-container">
       <div class="chart-card skeleton-card" style="display:block; height: 360px;">
         <div style="display:flex; justify-content:space-between; margin-bottom: 16px;">
           <div>
@@ -36,7 +36,7 @@
         <ion-skeleton-text animated style="width: 100%; height: 200px; border-radius: 8px;"></ion-skeleton-text>
       </div>
 
-      <div style="margin-top: 20px;">
+      <div class="list-wrapper" style="margin-top: 16px;">
         <div *ngFor="let i of [1,2,3]" class="row-item skeleton-card">
           <ion-skeleton-text animated class="skeleton-icon"></ion-skeleton-text>
           <div style="flex:1">
@@ -55,12 +55,8 @@
       <!-- ================= CHART CARD ================= -->
       <div class="chart-card">
 
+        <!-- Group Selector and Month Nav -->
         <div class="hero-header-row">
-          <div class="hero-info">
-            <span class="balance-label">Total spent</span>
-            <h1 class="balance-amount">₹{{ getMonthlyTotal() | number:'1.0-0' }}</h1>
-          </div>
-
           <div class="internal-group-selector">
             <ion-select interface="popover" [value]="selectedGroup" (ionChange)="onGroupChange($event)"
               toggleIcon="chevron-down-outline" class="custom-select">
@@ -69,9 +65,7 @@
               </ion-select-option>
             </ion-select>
           </div>
-        </div>
 
-        <div class="hero-month-row">
           <div class="month-nav-pill">
             <button class="nav-btn" (click)="previousMonth()" [disabled]="isLoading" aria-label="Previous month">
               <ion-icon name="chevron-back-outline"></ion-icon>

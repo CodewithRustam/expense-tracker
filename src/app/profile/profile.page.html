@@ -1,20 +1,17 @@
-<ion-header class="ion-no-border glass-header" [translucent]="true">
-  <ion-buttons slot="start">
-    <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
+<ion-header class="ion-no-border" [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
+    </ion-buttons>
     <ion-title>Profile</ion-title>
-  </ion-buttons>
-  <div class="top-gradient-mask"></div>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content [scrollEvents]="true">
-  <div class="ambient-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
-
+<ion-content>
   <div class="content-wrapper">
+    
+    <!-- PROFILE HERO CARD -->
     <div class="profile-hero">
-      <div class="avatar-glow"></div>
       <div class="avatar-container">
         <ion-avatar>
           <img
@@ -31,42 +28,47 @@
 
       <div class="stats-row">
         <div class="stat-item">
-          <span class="stat-val">12</span>
+          <span class="stat-val">{{ totalGroups }}</span>
           <span class="stat-label">Groups</span>
         </div>
         <div class="divider"></div>
         <div class="stat-item">
-          <span class="stat-val">₹4.2k</span>
+          <span class="stat-val">₹{{ totalSpent | number:'1.0-0' }}</span>
           <span class="stat-label">Spent</span>
         </div>
       </div>
     </div>
 
+    <!-- GENERAL SECTION -->
     <div class="section-header">
       <h3 class="section-title">General</h3>
     </div>
 
-    <div class="settings-list">
-      <div class="setting-card island-card ion-activatable" *ngFor="let item of settings">
-        <div class="icon-box">
-          <ion-icon [name]="item.icon"></ion-icon>
+    <!-- SETTINGS CARD LIST -->
+    <div class="chart-card settings-card-wrapper">
+      <div class="row-list">
+        <div class="row-item ion-activatable" *ngFor="let item of settings">
+          <div class="icon-box">
+            <ion-icon [name]="item.icon"></ion-icon>
+          </div>
+          <div class="text-group">
+            <span class="item-name">{{ item.label }}</span>
+          </div>
+          <ion-icon name="chevron-forward" class="chevron"></ion-icon>
+          <ion-ripple-effect></ion-ripple-effect>
         </div>
-        <div class="card-info">
-          <h4 class="setting-name">{{ item.label }}</h4>
-        </div>
-        <ion-icon name="chevron-forward" class="chevron"></ion-icon>
-        <ion-ripple-effect></ion-ripple-effect>
-      </div>
 
-      <div class="setting-card island-card logout ion-activatable" (click)="logout()">
-        <div class="icon-box danger">
-          <ion-icon name="log-out-outline"></ion-icon>
+        <div class="row-item logout ion-activatable" (click)="logout()">
+          <div class="icon-box danger">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </div>
+          <div class="text-group">
+            <span class="item-name danger-text">Logout</span>
+          </div>
+          <ion-ripple-effect></ion-ripple-effect>
         </div>
-        <div class="card-info">
-          <h4 class="setting-name danger-text">Logout</h4>
-        </div>
-        <ion-ripple-effect></ion-ripple-effect>
       </div>
     </div>
+
   </div>
 </ion-content>

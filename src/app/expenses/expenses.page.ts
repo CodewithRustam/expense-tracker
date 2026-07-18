@@ -35,7 +35,6 @@ interface ExpenseDateGroup {
 @Component({
   selector: 'app-expenses',
   templateUrl: './expenses.page.html',
-  styleUrls: ['./expenses.page.scss'],
   standalone: false,
 })
 export class ExpensesPage implements OnInit, OnDestroy {
@@ -252,8 +251,14 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   async deleteExpense(expense: any, slidingItem: IonItemSliding) {
+    // Close the slider immediately to prevent UI glitches during modal animation
+    await slidingItem.close();
+
     const modal = await this.modalCtrl.create({
       component: GlobalModalComponent,
+      backdropDismiss: true,
+      cssClass: 'global-modal',
+      mode: 'ios',
       componentProps: {
         message: `Do you want to remove <strong>${expense.item}</strong>?`,
         confirmText: 'Delete',
@@ -269,18 +274,14 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
       this.expenseService.deleteExpense(expense.expenseId).subscribe({
         next: (res) => {
-          slidingItem.close();
           if (res.success) {
             this.toast.success(res.message);
           }
         },
         error: () => {
-          slidingItem.close();
           this.toast.error('Could not delete expense');
         }
       });
-    } else {
-      slidingItem.close();
     }
   }
 

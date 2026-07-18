@@ -29,7 +29,6 @@ export type ChartOptions = {
 @Component({
   selector: 'app-charts',
   templateUrl: './charts.page.html',
-  styleUrls: ['./charts.page.scss'],
   standalone: false
 })
 export class ChartsPage implements OnInit, OnDestroy {
@@ -244,7 +243,7 @@ export class ChartsPage implements OnInit, OnDestroy {
       // A donut chart distinguishes unrelated categories, so (unlike a time
       // trend) a qualitative multi-hue palette is the right encoding here —
       // just kept muted/cohesive rather than neon-bright.
-      colors: ['#4f46e5', '#0d9488', '#d97706', '#e11d48', '#7c3aed', '#0284c7', '#65a30d'],
+      colors: ['#6366f1', '#818cf8', '#a5b4fc', '#4f46e5', '#c7d2fe', '#3730a3', '#e0e7ff'],
       chart: { type: 'donut', height: 260, background: 'transparent', animations: { enabled: true, speed: 400 }, fontFamily: "'Poppins', sans-serif" },
       labels: [],
       dataLabels: {

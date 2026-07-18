@@ -1,7 +1,9 @@
-<div class="modal-glass-card">
+<div class="modal-glass-card" [class.is-danger]="danger">
 
-  <div class="modal-icon">
-    <i class="fa-solid fa-triangle-exclamation"></i>
+  <div class="modal-icon-wrapper">
+    <div class="modal-icon">
+      <i class="fa-solid" [class.fa-triangle-exclamation]="danger" [class.fa-circle-question]="!danger"></i>
+    </div>
   </div>
 
   <p class="modal-message" [innerHTML]="message"></p>

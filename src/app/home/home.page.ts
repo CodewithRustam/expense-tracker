@@ -41,7 +41,6 @@ export type ChartOptions = {
 @Component({
   selector: 'app-groups',
   templateUrl: './home.page.html',
-  styleUrls: ['./home.page.scss'],
   standalone: false
 })
 export class HomePage implements OnInit, OnDestroy {
@@ -155,17 +154,17 @@ export class HomePage implements OnInit, OnDestroy {
           const categories = trendData.map((item: any) => item.monthName);
           const seriesData = trendData.map((item: any) => item.total);
 
-          this.chartOptions.series = [{
-            name: this.selectedGroup?.name || 'Expenses',
-            data: seriesData
-          }];
-
-          this.chartOptions.xaxis = {
-            ...this.chartOptions.xaxis,
-            categories: categories
+          this.chartOptions = {
+            ...this.chartOptions,
+            series: [{
+              name: this.selectedGroup?.name || 'Expenses',
+              data: seriesData
+            }],
+            xaxis: {
+              ...this.chartOptions.xaxis,
+              categories
+            }
           };
-
-          this.chartOptions = { ...this.chartOptions };
         }
       },
       error: (err) => console.error('Trend API Error:', err)
@@ -248,34 +247,52 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   initChart() {
-    // Single-hue, opacity-graded palette instead of a six-color rainbow —
-    // this is a spend trend, not a categorical comparison, so one accent
-    // color read as "intensity" communicates the shape of the trend better
-    // than six unrelated hues fighting for attention.
-    const monthShades = [
-      '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1', '#4f46e5', '#4338ca',
-      '#3730a3', '#312e81'
-    ];
-
     this.chartOptions = {
       series: [],
       chart: {
-        type: "bar",
-        height: 220,
+        type: 'area',
+        height: 215,
         toolbar: { show: false },
-        animations: { enabled: true, easing: 'easeinout', speed: 500 },
+        sparkline: { enabled: false },
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800,
+          animateGradually: { enabled: true, delay: 100 }
+        },
         fontFamily: "'Poppins', sans-serif"
-      },
-      plotOptions: {
-        bar: { borderRadius: 6, columnWidth: "55%", distributed: true }
       },
       dataLabels: { enabled: false },
       legend: { show: false },
-      colors: monthShades,
+      stroke: {
+        curve: 'smooth',
+        width: 3,
+        colors: ['#6366f1']
+      },
+      markers: {
+        size: 4,
+        colors: ['#ffffff'],
+        strokeColors: ['#6366f1'],
+        strokeWidth: 2,
+        hover: { size: 6 }
+      },
+      colors: ['#6366f1'],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          type: 'vertical',
+          colorStops: [
+            { offset: 0, color: '#6366f1', opacity: 0.35 },
+            { offset: 60, color: '#818cf8', opacity: 0.1 },
+            { offset: 100, color: '#c7d2fe', opacity: 0 }
+          ]
+        }
+      },
       xaxis: {
         categories: [],
         labels: {
-          style: { colors: "#9797ab", fontSize: '11px', fontWeight: 500 }
+          style: { colors: '#9797ab', fontSize: '11px', fontWeight: 500 }
         },
         axisBorder: { show: false },
         axisTicks: { show: false }
@@ -283,24 +300,22 @@ export class HomePage implements OnInit, OnDestroy {
       yaxis: {
         show: true,
         labels: {
-          style: { colors: "#9797ab", fontSize: '10px' },
+          style: { colors: '#9797ab', fontSize: '10px' },
           formatter: (val: number) => val >= 1000 ? '₹' + (val / 1000).toFixed(1) + 'k' : '₹' + val
         }
       },
       grid: {
         show: true,
-        borderColor: "rgba(151, 151, 171, 0.18)",
+        borderColor: 'rgba(151,151,171,0.12)',
         strokeDashArray: 4,
         yaxis: { lines: { show: true } },
-        padding: { left: 4, right: 4 }
+        xaxis: { lines: { show: false } },
+        padding: { left: 4, right: 8, top: 0, bottom: 0 }
       },
       tooltip: {
-        theme: "dark",
+        theme: 'light',
+        x: { show: true },
         y: { formatter: (val: number) => `₹${val.toLocaleString('en-IN')}` }
-      },
-      fill: {
-        type: 'solid',
-        opacity: 1
       }
     };
   }

@@ -62,9 +62,10 @@
 
       <div class="chart-wrapper">
         <apx-chart *ngIf="chartOptions?.series?.length" [series]="chartOptions.series" [chart]="chartOptions.chart"
-          [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis" [plotOptions]="chartOptions.plotOptions"
+          [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis"
           [dataLabels]="chartOptions.dataLabels" [colors]="chartOptions.colors" [grid]="chartOptions.grid"
-          [tooltip]="chartOptions.tooltip" [fill]="chartOptions.fill">
+          [tooltip]="chartOptions.tooltip" [fill]="chartOptions.fill" [legend]="chartOptions.legend"
+          [stroke]="chartOptions.stroke" [markers]="chartOptions.markers">
         </apx-chart>
       </div>
 

@@ -23,7 +23,6 @@ interface Expense {
 @Component({
   selector: 'app-edit-expense-modal',
   templateUrl: './edit-expense-modal.component.html',
-  styleUrls: ['./edit-expense-modal.component.scss'],
   standalone: false,
   encapsulation: ViewEncapsulation.None
 })
