@@ -331,10 +331,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   onScroll(event: any) { this.isSticky = event.detail.scrollTop > 150; }
-  getIconColor(iconName: string | undefined): string {
-    const iconMap: any = { 'fa-solid fa-leaf': '#27ae60', 'fa-solid fa-drumstick-bite': '#e74c3c', 'fa-solid fa-burn': '#f1c40f' };
-    return iconMap[iconName!] || '#666';
-  }
+
+
 
   groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
     if (!expenses || expenses.length === 0) return [];

@@ -1,0 +1,50 @@
+<div class="hub-personal-zone">
+  <ng-container *ngIf="!isLoadingExpenses; else cardSkeleton">
+    <ng-container *ngFor="let user of users">
+      <div class="personal-row" *ngIf="selectedUser === user.memberId">
+        <div class="m-left">
+          <span class="m-tag">{{ user.memberName | firstName }}'s total</span>
+          <h2 class="m-amt">₹{{ user.totalMemberExpense | number:'1.2-2' }}</h2>
+        </div>
+
+        <div class="m-right" [ngClass]="user.netBalance >= 0 ? 'pos' : 'neg'">
+          <div class="status-stack" [ngClass]="{'inline-mode': user.amountReceived > 0}"
+            *ngIf="user.badgeText !== 'Settled up'; else settledTpl">
+            <span class="st-label">{{ user.netBalance >= 0 ? 'Gets back' : 'Owes' }}</span>
+            <span class="st-val">₹{{ (user.netBalance < 0 ? -user.netBalance : user.netBalance) | number:'1.0-0' }}</span>
+            <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
+              Received ₹{{ user.amountReceived | number:'1.0-0' }}
+            </span>
+          </div>
+
+          <ng-template #settledTpl>
+            <div class="settled-stack">
+              <span class="settledlbl">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                Settled up
+              </span>
+              <span *ngIf="user.amountPaid > 0" class="amount-badge paid-badge">
+                Paid ₹{{ user.amountPaid | number:'1.0-0' }}
+              </span>
+              <span *ngIf="user.amountReceived > 0" class="amount-badge received-badge">
+                Received ₹{{ user.amountReceived | number:'1.0-0' }}
+              </span>
+            </div>
+          </ng-template>
+
+          <ion-button *ngIf="user.netBalance < 0 && user.isSettleShow" size="small" class="btn-settle"
+            (click)="settle(user)">
+            Settle
+          </ion-button>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+<ng-template #cardSkeleton>
+  <div class="personal-row" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+    <ion-skeleton-text animated style="width:140px;height:24px;margin:0;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:80px;height:24px;margin:0;"></ion-skeleton-text>
+  </div>
+</ng-template>

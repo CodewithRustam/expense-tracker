@@ -1,0 +1,87 @@
+<div class="ledger-container">
+
+  <!-- LOADING SKELETONS -->
+  <ng-container *ngIf="isLoadingExpenses">
+    <div class="ledger-card">
+      <ion-item-sliding *ngFor="let i of [1,2,3,4]" class="ledger-slider">
+        <ion-item lines="none" class="ledger-glass-panel">
+          <div class="transaction-row">
+            <div class="row-left">
+              <ion-skeleton-text animated class="skeleton-icon"></ion-skeleton-text>
+              <div class="text-group">
+                <ion-skeleton-text animated class="skeleton-tx-title"></ion-skeleton-text>
+                <ion-skeleton-text animated class="skeleton-tx-meta"></ion-skeleton-text>
+              </div>
+            </div>
+            <div class="row-right">
+              <ion-skeleton-text animated class="skeleton-tx-amt"></ion-skeleton-text>
+            </div>
+          </div>
+        </ion-item>
+      </ion-item-sliding>
+    </div>
+  </ng-container>
+
+  <!-- ACTUAL TRANSACTION LIST -->
+  <ng-container *ngIf="!isLoadingExpenses && hasExpenses()">
+    <div class="ledger-card">
+      <ng-container *ngFor="let user of users">
+        <ng-container *ngIf="selectedUser === user.memberId">
+
+          <ng-container *ngFor="let group of groupedExpensesMap[user.memberId]">
+            <div class="ledger-group-date">{{ group.date }}</div>
+
+            <ion-item-sliding #slidingItem *ngFor="let exp of group.expenses" class="ledger-slider timeline-item">
+              <ion-item lines="none" class="ledger-glass-panel">
+                <div class="transaction-row">
+                  <div class="row-left">
+                    <div class="icon-wrapper">
+                      <i [class]="exp.iconName" [style.color]="getIconColor(exp.iconName)"></i>
+                    </div>
+                    <div class="text-group">
+                      <span class="tx-name">{{ exp.item }}</span>
+                      <div class="tx-meta-row">
+                        <span class="category-badge">{{ exp.category }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row-right">
+                    <div class="tx-amount" [class.pos]="exp.amount > 0">
+                      ₹{{ exp.amount | number:'1.0-0' }}
+                    </div>
+                  </div>
+                </div>
+              </ion-item>
+
+              <ion-item-options side="end">
+                <ion-item-option class="swipe-btn swipe-edit" *ngIf="exp.isEditShow" (click)="editExpense(exp)">
+                  <div class="swipe-content">
+                    <ion-icon name="create-outline"></ion-icon>
+                    <span>Edit</span>
+                  </div>
+                </ion-item-option>
+                <ion-item-option class="swipe-btn swipe-delete" color="danger" (click)="deleteExpense(exp, slidingItem)">
+                  <div class="swipe-content">
+                    <ion-icon name="trash-outline"></ion-icon>
+                    <span>Delete</span>
+                  </div>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ng-container>
+
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <!-- EMPTY STATE -->
+  <ng-container *ngIf="!isLoadingExpenses && !hasExpenses()">
+    <div class="empty-ledger">
+      <i class="fa-solid fa-ghost"></i>
+      <p>No transactions this month</p>
+    </div>
+  </ng-container>
+
+</div>

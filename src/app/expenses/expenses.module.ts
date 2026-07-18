@@ -8,6 +8,16 @@ import { ExpensesPageRoutingModule } from './expenses-routing.module';
 
 import { ExpensesPage } from './expenses.page';
 
+// Pipes
+import { InitialsPipe } from '../pipes/initials.pipe';
+import { FirstNamePipe } from '../pipes/first-name.pipe';
+
+// Sub-components
+import { ExpenseStatsComponent } from '../features/expense-dashboard/components/expense-stats/expense-stats.component';
+import { MemberListComponent } from '../features/expense-dashboard/components/member-list/member-list.component';
+import { PersonalCardComponent } from '../features/expense-dashboard/components/personal-card/personal-card.component';
+import { TransactionLedgerComponent } from '../features/expense-dashboard/components/transaction-ledger/transaction-ledger.component';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -15,7 +25,15 @@ import { ExpensesPage } from './expenses.page';
     IonicModule,
     ExpensesPageRoutingModule
   ],
-  declarations: [ExpensesPage],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA] // Add this line
+  declarations: [
+    ExpensesPage,
+    InitialsPipe,
+    FirstNamePipe,
+    ExpenseStatsComponent,
+    MemberListComponent,
+    PersonalCardComponent,
+    TransactionLedgerComponent
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ExpensesPageModule {}

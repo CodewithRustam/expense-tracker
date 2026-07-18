@@ -1,0 +1,25 @@
+<div class="hub-members">
+  <div class="member-track">
+    <ng-container *ngIf="!isLoading; else membersSkeleton">
+      <div class="member-chip" *ngFor="let u of users" (click)="selectUser(u.memberId)"
+        [class.active]="selectedUser === u.memberId"
+        [class.status-owe]="u.netBalance < 0 && u.badgeText !== 'Settled up'"
+        [class.status-get]="u.netBalance >= 0 && u.badgeText !== 'Settled up'"
+        [class.status-settled]="u.badgeText === 'Settled up'">
+        <div class="avatar-sq">{{ u.memberName | initials }}</div>
+        <span class="chip-name">{{ u.memberName | firstName }}</span>
+      </div>
+
+      <div class="member-chip add-chip" *ngIf="isNextMonthDisabled" (click)="addMember()" role="button" aria-label="Add member">
+        <div class="avatar-sq add-sq"><i class="fa-solid fa-plus"></i></div>
+        <span class="chip-name">Add</span>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<ng-template #membersSkeleton>
+  <div class="member-chip" *ngFor="let i of [1,2,3]">
+    <ion-skeleton-text animated class="skeleton-avatar" style="width: 40px; height: 40px; border-radius: 12px; margin: 0;"></ion-skeleton-text>
+  </div>
+</ng-template>

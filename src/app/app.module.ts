@@ -17,7 +17,15 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { AddMemberModalComponent } from './modals/add-member-modal/add-member-modal.component';
 
 @NgModule({
-  declarations: [AppComponent, AddExpenseModalComponent, CalendarPopoverComponent, EditExpenseModal, NotificationListModal, SettleExpenseModalComponent, AddMemberModalComponent],
+  declarations: [
+    AppComponent, 
+    AddExpenseModalComponent, 
+    CalendarPopoverComponent, 
+    EditExpenseModal, 
+    NotificationListModal, 
+    SettleExpenseModalComponent, 
+    AddMemberModalComponent
+  ],
   imports: [
     BrowserModule,
     IonicModule.forRoot(),
