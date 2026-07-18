@@ -59,9 +59,12 @@ export class NotificationService {
 
   getAll(): Observable<AppNotification[]> {
     return this.http
-      .get<AppNotification[]>(`${this.baseUrl}/get-notifications`)
+      .get<any>(`${this.baseUrl}/get-notifications`)
       .pipe(
-        tap(notifications => {
+        map(res => {
+          return Array.isArray(res) ? res : (res?.data || []);
+        }),
+        tap((notifications: AppNotification[]) => {
           const unread = notifications.filter(n => !n.isRead).length;
           this.setUnreadCount(unread);
         })

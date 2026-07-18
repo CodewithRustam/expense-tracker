@@ -31,7 +31,7 @@
       <!-- ACTIONS -->
       <button class="action-icon" (click)="openNotifications()" aria-label="Notifications">
         <ion-icon name="notifications-outline"></ion-icon>
-        <span class="notification-badge" *ngIf="!isLoading && unreadCount > 0">{{ unreadCount }}</span>
+        <span class="notification-badge" *ngIf="!isLoading && unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
       </button>
 
     </div>

@@ -1,25 +1,39 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title class="modal-title">Notifications</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="close()" class="close-btn" color="tertiary">
-        <ion-icon name="close-circle"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+<ion-header class="ion-no-border premium-modal-header">
+  <ion-toolbar class="glass-toolbar">
+    <div class="custom-header-layout">
+      <h1 class="modal-title">Notifications</h1>
+      
+      <div class="header-actions">
+        <button *ngIf="notifications.length > 0 && hasUnread" 
+                (click)="markAllAsRead()" 
+                class="premium-pill-btn">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+          <span>Mark Read</span>
+        </button>
+        <button (click)="close()" class="premium-close-btn" aria-label="Close">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div class="main-container">
 
-    <!-- Loading -->
+    <!-- Loading Skeleton -->
     <div class="list-wrapper" *ngIf="loading">
-      <ion-skeleton-text animated style="width: 100%; height: 100px; border-radius: 18px; margin-bottom: 10px;"
-        *ngFor="let i of [1,2,3]">
-      </ion-skeleton-text>
+      <div class="skeleton-card" *ngFor="let i of [1,2,3]">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-text-group">
+          <ion-skeleton-text animated style="width: 50%; height: 16px; border-radius: 4px; margin-bottom: 8px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 90%; height: 12px; border-radius: 4px; margin-bottom: 12px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 30%; height: 10px; border-radius: 4px;"></ion-skeleton-text>
+        </div>
+      </div>
     </div>
 
-    <!-- List -->
+    <!-- List Content -->
     <ng-container *ngIf="!loading">
       <div class="list-wrapper" *ngIf="notifications.length > 0; else emptyView">
 
@@ -29,24 +43,36 @@
 
             <ion-item class="notification-item" [class.unread]="!n.isRead" [class.collapsing]="n.collapsing">
 
-              <div class="notification-card-inner" [style.background]="n.swipeColor || null">
+              <div class="notification-card-inner">
+                <!-- Glowing unread line -->
+                <div *ngIf="!n.isRead" class="unread-glow-line"></div>
 
-                <div class="notif-header">
-                  <h2>{{ n.title }}</h2>
-                  <div *ngIf="!n.isRead" class="unread-dot"></div>
-                </div>
+                <div class="notif-card-layout">
+                  <!-- Circular Icon Badge -->
+                  <div class="notif-icon-circle" [ngClass]="getCategoryClass(n.title + ' ' + n.body)">
+                    <ion-icon [name]="getCategoryIcon(n.title + ' ' + n.body)"></ion-icon>
+                  </div>
 
-                <p class="notif-body">
-                  {{ cleanBody(n.body) }}
-                </p>
+                  <!-- Text Context -->
+                  <div class="notif-details">
+                    <div class="notif-header">
+                      <h2>{{ n.title }}</h2>
+                      <div *ngIf="!n.isRead" class="unread-dot-glow"></div>
+                    </div>
 
-                <div class="notif-footer">
-                  <span class="category-tag">
-                    {{ n.type || 'Expense' }}
-                  </span>
-                  <span class="time-stamp">
-                    {{ formatTimestamp(n.sentAt) }}
-                  </span>
+                    <p class="notif-body">
+                      {{ cleanBody(n.body) }}
+                    </p>
+
+                    <div class="notif-footer">
+                      <span class="category-tag" [ngClass]="getCategoryClass(n.title + ' ' + n.body)">
+                        {{ n.type || (getCategoryClass(n.title + ' ' + n.body) === 'settle-tag' ? 'Settlement' : 'Expense') }}
+                      </span>
+                      <span class="time-stamp">
+                        {{ formatTimestamp(n.receivedAt || n.sentAt) }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
               </div>
@@ -54,29 +80,38 @@
             </ion-item>
 
             <ion-item-options side="end">
-              <ion-item-option expandable>
+              <ion-item-option class="swipe-btn swipe-delete" color="danger" (click)="onSwipeDelete(n, slidingItem)">
+                <div class="swipe-content">
+                  <ion-icon name="trash-outline"></ion-icon>
+                  <span>Delete</span>
+                </div>
               </ion-item-option>
             </ion-item-options>
 
           </ion-item-sliding>
-
-
         </ion-list>
 
+        <!-- Premium Footer Action -->
         <div class="clear-all-row">
-          <ion-button fill="clear" color="tertiary" (click)="clearAll()" [disabled]="isClearing">
-            Clear all
+          <ion-button fill="solid" class="premium-clear-btn" (click)="clearAll()" [disabled]="isClearing">
+            <ion-icon name="trash-bin-outline" slot="start"></ion-icon>
+            Clear All Notifications
           </ion-button>
         </div>
 
       </div>
     </ng-container>
 
-    <!-- Empty -->
+    <!-- Premium Empty State -->
     <ng-template #emptyView>
-      <div class="empty-state">
-        <ion-icon name="notifications-off-outline"></ion-icon>
-        <p>No new notifications</p>
+      <div class="empty-state-wrapper">
+        <div class="empty-icon-glow">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <div class="glow-ring-1"></div>
+          <div class="glow-ring-2"></div>
+        </div>
+        <h3>All caught up!</h3>
+        <p>You have no new notifications at the moment. We'll let you know when something updates.</p>
       </div>
     </ng-template>
 

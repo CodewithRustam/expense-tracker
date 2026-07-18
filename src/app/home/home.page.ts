@@ -91,12 +91,11 @@ export class HomePage implements OnInit, OnDestroy {
       this.loadGroups(true);
       this.loadNotifications(true);
     });
-
-    // 3. Initial Load
-    this.loadGroups();
-    this.loadNotifications();
   }
   ionViewWillEnter() {
+    // Refresh notifications for unread count
+    this.loadNotifications();
+
     // This runs every time the view becomes active (including tab switches)
     if (this.groups.length === 0) {
       // first time / real data load needed
@@ -262,7 +261,21 @@ export class HomePage implements OnInit, OnDestroy {
         },
         fontFamily: "'Poppins', sans-serif"
       },
-      dataLabels: { enabled: false },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => {
+          return '₹' + val.toLocaleString('en-IN');
+        },
+        offsetY: -10,
+        style: {
+          fontSize: '10px',
+          fontWeight: '600',
+          colors: ['#a5b4fc']
+        },
+        background: {
+          enabled: false
+        }
+      },
       legend: { show: false },
       stroke: {
         curve: 'smooth',
@@ -313,7 +326,7 @@ export class HomePage implements OnInit, OnDestroy {
         padding: { left: 4, right: 8, top: 0, bottom: 0 }
       },
       tooltip: {
-        theme: 'light',
+        theme: 'dark',
         x: { show: true },
         y: { formatter: (val: number) => `₹${val.toLocaleString('en-IN')}` }
       }
