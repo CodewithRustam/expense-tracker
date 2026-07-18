@@ -15,7 +15,7 @@ import { SettlementDetail } from '../models/Settlement/SettlementDetail';
   providedIn: 'root'
 })
 export class ExpenseService {
-  private apiUrl = '';//'https://financetracker.runasp.net/api/Expenses';
+  private apiUrl = 'https://financetracker.runasp.net/api/Expenses';
 
   // ✅ Single Global Refresh Stream
   private refreshSubject = new Subject<void>();
