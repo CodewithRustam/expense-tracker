@@ -1,30 +1,42 @@
+@use 'src/theme/shared' as shared;
+
 :host {
-  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4338ca;
+  --surface: #ffffff;
+  --surface-sunken: #f5f5fb;
+  --border-hairline: rgba(20, 20, 43, 0.07);
+  --ink-1: #15152a;
+  --ink-2: #5c5c74;
+  --ink-3: #9797ab;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  font-family: 'Poppins', -apple-system, sans-serif;
+
+  @media (prefers-color-scheme: dark) {
+    --accent: #818cf8;
+    --accent-soft: rgba(129, 140, 248, 0.16);
+    --accent-strong: #a5b4fc;
+    --surface: #1c1c26;
+    --surface-sunken: #111116;
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --ink-1: #f2f2f7;
+    --ink-2: #a6a6bd;
+    --ink-3: #6f6f85;
+  }
 }
 
+/* ===== PAGE SHELL ===== */
 .register-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--ion-background-color, #f4f6fb);
+  background: var(--surface-sunken);
   text-align: center;
-  height: 100vh;
-  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-}
-
-img {
-  max-width: 20%;
-  border-radius: 18px;
-}
-
-.checkbox-item {
-  --background: transparent;
-  margin-bottom: 12px;
-}
-
-.checkbox-item ion-label {
-  font-size: 0.9rem;
-  color: #555;
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+  box-sizing: border-box;
 }
 
 .auth-container {
@@ -32,114 +44,85 @@ img {
   max-width: 400px;
 }
 
+/* ===== BRANDING ===== */
 .logo-section {
   margin-bottom: 20px;
   margin-top: 4rem;
 }
 
+.logo-section img {
+  max-width: 22%;
+  border-radius: 18px;
+}
+
 .logo-icon {
   font-size: 72px;
-  color: var(--ion-color-tertiary);
+  color: var(--accent);
 }
 
 .welcome-text {
   margin: 8px 0 4px;
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink-1);
 }
 
 .sub-text {
-  color: #777;
-  font-size: 0.9rem;
+  color: var(--ink-3);
+  font-size: 0.88rem;
 }
-:host {
-  --member-tab-border: #d0d0ef;
-}
-@media (prefers-color-scheme: dark) {
-  :host {
-    --member-tab-border: #343c51;
-  }
-}
+
+/* ===== CARD ===== */
 ion-card.auth-card {
-  border: 1px solid  var(--member-tab-border);
-  border-radius: 15px;
-  padding: 10px;
+  @include shared.unified-card;
+  padding: 16px;
   margin: 20px;
 }
 
+/* ===== INPUTS ===== */
 .input-item {
-  --background: #f0f2f8;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  position: relative;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-
-  // ✨ BOOTSTRAP GLOW EFFECT
-  &:focus-within {
-    border-color: #4e54c8;
-    box-shadow:
-      0 0 0 3px rgba(78, 84, 200, 0.1),
-      0 0 0 6px rgba(78, 84, 200, 0.05);
-    transform: translateY(-1px);
-  }
+  @include shared.auth-input-item-base;
 }
 
 .input-item ion-icon {
-  color: var(--ion-color-tertiary);
-  font-size: 20px;
   margin-right: 14px;
 }
 
+/* ===== CHECKBOX ===== */
+.checkbox-item {
+  --background: transparent;
+  margin-bottom: 12px;
+
+  ion-label {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+}
+
+/* ===== REGISTER BUTTON ===== */
 .register-btn {
-  --background: linear-gradient(135deg, #4e54c8, #8f94fb);
-  border-radius: 12px;
-  font-weight: 600;
-  --border-radius: 10px;
+  @include shared.primary-action-button;
   height: 46px;
   --padding-start: 1.5rem;
   --padding-end: 1.5rem;
   font-size: 1rem;
 }
 
+/* ===== MESSAGES ===== */
 .error-message {
-  color: #dc3545;
-  font-size: 0.85rem;
+  color: var(--debit, #dc2626);
+  font-size: 0.84rem;
   margin: 8px 0;
 }
 
 .login-link {
   margin-top: 16px;
   font-size: 0.85rem;
-  color: #666;
-}
+  color: var(--ink-2);
 
-.login-link a {
-  color: var(--ion-color-tertiary);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .input-item {
-    --background: #222;
-
-    &:focus-within {
-      border-color: #8f94fb;
-      box-shadow:
-        0 0 0 3px rgba(143, 148, 251, 0.2),
-        0 0 0 6px rgba(143, 148, 251, 0.1);
-    }
-  }
-
-  .sub-text,
-  .login-link {
-    color: #aaa;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  ion-card.auth-card {
-    box-shadow: 0 3px 8px #d7d8da;
+  a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
   }
 }

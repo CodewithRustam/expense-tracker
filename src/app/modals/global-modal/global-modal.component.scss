@@ -1,144 +1,95 @@
-/* ================= VARIABLES ================= */
+@use 'src/theme/shared' as shared;
+
 :host {
-  --glass-border-light: rgba(0, 0, 0, 0.1);
-  --glass-border-dark: rgba(255, 255, 255, 0.08);
-  --glass-surface-light: rgba(0, 0, 0, 0.03);
-  --glass-surface-dark: rgba(255, 255, 255, 0.03);
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4338ca;
+  --surface: #ffffff;
+  --surface-sunken: #f5f5fb;
+  --border-hairline: rgba(20, 20, 43, 0.07);
+  --ink-1: #15152a;
+  --ink-2: #5c5c74;
+  --ink-3: #9797ab;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  font-family: 'Poppins', -apple-system, sans-serif;
 
-  --primary-glow: #59113a;
-  --secondary-glow: #6366f1;
-  --success-neon: #4ade80;
-  --danger-neon: #f43f5e;
-
-  font-family: var(--ion-font-family, 'Poppins', 'Helvetica', 'Arial', sans-serif);
-}
-
-/* Theme-aware glass effects */
-:host {
-  --glass-border: var(--glass-border-dark);
-  --glass-surface: var(--glass-surface-dark);
-}
-
-@media (prefers-color-scheme: light) {
-  :host {
-    --glass-border: var(--glass-border-light);
-    --glass-surface: var(--glass-surface-light);
+  @media (prefers-color-scheme: dark) {
+    --accent: #818cf8;
+    --accent-soft: rgba(129, 140, 248, 0.16);
+    --accent-strong: #a5b4fc;
+    --surface: #1c1c26;
+    --surface-sunken: #111116;
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --ink-1: #f2f2f7;
+    --ink-2: #a6a6bd;
+    --ink-3: #6f6f85;
   }
 }
 
-/* ================= GLASS MODAL CARD ================= */
+/* ===== MODAL CARD ===== */
 .modal-glass-card {
+  @include shared.unified-card;
   position: relative;
   width: 100%;
   max-width: 350px;
-  padding: 32px 24px;
+  padding: 28px 22px;
   text-align: center;
-  border-radius: 28px;
-  font-family: var(--ion-font-family);
-
-  /* Glass background */
-  background: var(--ion-background-color);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-
-  @media (prefers-color-scheme: dark) {
-    background: rgba(20, 20, 30, 0.85);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  }
-
-  /* Top shine effect */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  }
-
-  /* Ambient glow behind modal */
-  &::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: -1;
-  }
+  border-radius: 22px;
 }
 
-/* ================= ICON ================= */
+/* ===== ICON ===== */
 .modal-icon {
   font-size: 3rem;
-  margin-bottom: 16px;
-  color: var(--ion-text-color-step-600, var(--ion-color-medium));
+  margin-bottom: 14px;
+  color: var(--ink-2);
 }
 
-@media (prefers-color-scheme: dark) {
-  .modal-icon {
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.2));
-  }
-}
-
-/* ================= MESSAGE ================= */
+/* ===== MESSAGE ===== */
 .modal-message {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--ion-text-color);
+  color: var(--ink-1);
   line-height: 1.5;
-  margin: 0 0 24px;
-  letter-spacing: 0.3px;
+  margin: 0 0 22px;
+  letter-spacing: 0.2px;
 }
 
-/* ================= BUTTONS ================= */
+/* ===== BUTTONS ===== */
 .modal-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Base button */
-button {
+.modal-buttons button {
   border: none;
-  padding: 12px;
-  border-radius: 16px;
-  font-size: 0.95rem;
+  padding: 13px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
   width: 100%;
+  font-family: inherit;
+
+  &:active {
+    transform: scale(0.96);
+  }
 }
 
-/* Cancel - glassy ghost */
 .btn-cancel {
-  background: var(--glass-surface);
-  color: var(--ion-text-color-step-600, var(--ion-color-medium));
-  border: 1px solid var(--glass-border);
-
-  &:active {
-    transform: scale(0.98);
-  }
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  border: 1px solid var(--border-hairline) !important;
 }
 
-/* Confirm - neon gradient */
 .btn-confirm {
-  background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
-  color: white;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px var(--accent-soft);
 
   &:active {
-    transform: scale(0.98);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+    box-shadow: none;
   }
 }

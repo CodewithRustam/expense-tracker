@@ -1,3 +1,32 @@
+@use 'src/theme/shared' as shared;
+
+:host {
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4338ca;
+  --surface: #ffffff;
+  --surface-sunken: #f5f5fb;
+  --border-hairline: rgba(20, 20, 43, 0.07);
+  --ink-1: #15152a;
+  --ink-2: #5c5c74;
+  --ink-3: #9797ab;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  font-family: 'Poppins', -apple-system, sans-serif;
+
+  @media (prefers-color-scheme: dark) {
+    --accent: #818cf8;
+    --accent-soft: rgba(129, 140, 248, 0.16);
+    --accent-strong: #a5b4fc;
+    --surface: #1c1c26;
+    --surface-sunken: #111116;
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --ink-1: #f2f2f7;
+    --ink-2: #a6a6bd;
+    --ink-3: #6f6f85;
+  }
+}
+
 ion-header {
   box-shadow: none !important;
   border-bottom: none !important;
@@ -5,28 +34,26 @@ ion-header {
 
 ion-toolbar {
   --min-height: 56px;
-  --padding-top: 0px;
-  --padding-bottom: 0px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: var(--surface-sunken);
+  --border-width: 0;
 }
 
 ion-header.ion-no-border::after {
   display: none !important;
 }
 
-
 ion-content {
-  --background: var(--ion-item-background);
+  --background: var(--surface-sunken);
 }
 
-
-/* --- 2. FORM CARD --- */
+/* ===== FORM CARD ===== */
 .form-card {
-  background: var(--ion-item-background);
-  margin: 4px 20px 0 20px;
-  border-radius: 20px;
-  padding: 8px 20px;
-  border: 1px solid var(--ion-color-step-100);
-  box-shadow: 0 4px 20px rgb(122 112 112 / 6%);
+  @include shared.unified-card;
+  margin: 8px 16px 0;
+  border-radius: 18px;
+  padding: 8px 16px;
 }
 
 .input-row {
@@ -39,29 +66,28 @@ ion-content {
   }
 
   .icon-square {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
-    font-size: 1.2rem;
+    margin-right: 14px;
+    font-size: 1.15rem;
 
-    /* Tints */
     &.primary-tint {
-      background: rgba(var(--ion-color-primary-rgb), 0.12);
-      color: var(--ion-color-primary);
+      background: rgba(79, 70, 229, 0.12);
+      color: var(--accent);
     }
 
     &.success-tint {
-      background: rgba(var(--ion-color-success-rgb), 0.12);
-      color: var(--ion-color-success);
+      background: rgba(22, 163, 74, 0.12);
+      color: #16a34a;
     }
 
     &.warning-tint {
-      background: rgba(var(--ion-color-warning-rgb), 0.12);
-      color: var(--ion-color-warning);
+      background: rgba(217, 119, 6, 0.12);
+      color: #d97706;
     }
 
     .currency-symbol {
@@ -75,23 +101,23 @@ ion-content {
     flex-direction: column;
 
     ion-label {
-      font-size: 0.75rem;
-      color: var(--ion-color-medium);
+      font-size: 0.72rem;
+      color: var(--ink-3);
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     ion-input,
     .date-display {
-      font-size: 1.05rem;
+      font-size: 1.04rem;
       font-weight: 500;
-      color: var(--ion-text-color);
+      color: var(--ink-1);
       --padding-start: 0;
       --padding-top: 0;
       --padding-bottom: 0;
       --background: transparent;
-      --placeholder-color: var(--ion-color-medium);
-      --placeholder-opacity: 0.5;
+      --placeholder-color: var(--ink-3);
+      --placeholder-opacity: 0.6;
     }
 
     .amount-input {
@@ -103,11 +129,11 @@ ion-content {
 
 .divider {
   height: 1px;
-  background: var(--ion-color-step-100);
-  margin-left: 58px;
+  background: var(--border-hairline);
+  margin-left: 54px;
 }
 
-/* --- 3. MODAL & DATETIME --- */
+/* ===== DATETIME MODAL ===== */
 ion-modal.auto-height {
   --height: auto;
   align-items: flex-end;
@@ -115,8 +141,8 @@ ion-modal.auto-height {
 }
 
 .datetime-wrapper {
-  background: var(--ion-item-background);
-  padding: 24px 16px 40px 16px;
+  background: var(--surface);
+  padding: 24px 16px 40px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -125,32 +151,19 @@ ion-modal.auto-height {
 ion-datetime {
   max-width: 100%;
   background: transparent;
-  color: var(--ion-text-color);
+  color: var(--ink-1);
   margin: 0 auto;
   --show-buttons: none;
 }
 
-/* --- 4. FOOTER & GRADIENT BUTTON --- */
+/* ===== FOOTER BUTTON ===== */
 .footer-pad {
-  padding: 20px;
-  // background: var(--ion-background-color);
+  padding: 16px 20px 20px;
 }
 
 .main-btn {
-  /* Indigo-Purple Gradient */
-  --background: linear-gradient(147deg, #6366f1 0%, #240e54 100%);
-  --color: #ffffff;
-  --border-radius: 18px;
-  height: 56px;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  --box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
-  transition: transform 0.2s ease;
-
-  &:active {
-    transform: scale(0.98);
-    --box-shadow: 0 5px 15px -3px rgba(99, 102, 241, 0.5);
-  }
+  @include shared.primary-action-button;
+  height: 52px;
+  font-size: 1.02rem;
+  margin: 0;
 }

@@ -1,0 +1,221 @@
+/* ================= Shared Theme Partial ================= */
+/* Contains common definitions to clean up duplicated page/component CSS/SCSS */
+
+/* 1. Design Tokens and Theme Variables */
+/* Originally from expenses.page.scss, history.page.scss, charts.page.scss, tabs.page.scss */
+@mixin design-tokens {
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4338ca;
+
+  --credit: #16a34a;
+  --credit-soft: rgba(22, 163, 74, 0.12);
+  --debit: #dc2626;
+  --debit-soft: rgba(220, 38, 38, 0.12);
+
+  --surface: #ffffff;
+  --surface-sunken: #f6f6fb;
+  --surface-raised: #ffffff;
+  --border-hairline: rgba(20, 20, 43, 0.08);
+  --border-hairline-strong: rgba(20, 20, 43, 0.14);
+
+  --ink-1: #17172b;
+  --ink-2: #5c5c74;
+  --ink-3: #9797ab;
+
+  --max-width: 520px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-variant-numeric: tabular-nums;
+
+  @media (prefers-color-scheme: dark) {
+    --accent: #818cf8;
+    --accent-soft: rgba(129, 140, 248, 0.16);
+    --accent-strong: #a5b4fc;
+
+    --credit: #4ade80;
+    --credit-soft: rgba(74, 222, 128, 0.14);
+    --debit: #f87171;
+    --debit-soft: rgba(248, 113, 113, 0.14);
+
+    --surface: #1c1c26;
+    --surface-sunken: #131318;
+    --surface-raised: #23232f;
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --border-hairline-strong: rgba(255, 255, 255, 0.14);
+
+    --ink-1: #f2f2f7;
+    --ink-2: #a6a6bd;
+    --ink-3: #6f6f85;
+  }
+}
+
+/* 2. Common Layout Focus & Animations */
+/* Focus-visible style used in main pages */
+@mixin focus-visible-styles {
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* Base override for ion-content and ion-toolbar */
+@mixin content-toolbar-overrides {
+  ion-content {
+    --background: var(--surface-sunken);
+  }
+
+  ion-toolbar {
+    --background: var(--surface-sunken);
+    --border-width: 0;
+  }
+}
+
+/* 3. Input Element Layout & Styling (Auth Forms) */
+/* Originally from login, registration, forgot-password, reset-password page SCSS */
+@mixin auth-input-item-base {
+  --background: var(--surface-sunken);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+
+  ion-icon {
+    color: var(--accent);
+    font-size: 20px;
+  }
+
+  &.ion-focused {
+    --background: var(--surface);
+    border: 2px solid var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  &:focus-within {
+    --background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+@mixin auth-input-item-dark-base {
+  --background: var(--surface-sunken);
+}
+
+/* 4. Status Bar Header Spacer */
+/* Set to occupy Safe Area Inset Space on Mobile device */
+@mixin status-header-style {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--accent);
+  z-index: 1;
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--surface-sunken);
+  }
+}
+
+/* 5. Row Entrance Stagger Animation */
+/* Used on list items inside expenses, history, and charts lists */
+@mixin stagger-entrance($class-name, $count: 20, $delay: 0.03s) {
+  @for $i from 1 through $count {
+    #{$class-name}:nth-child(#{$i}) {
+      animation-delay: #{$i * $delay}s;
+    }
+  }
+}
+
+/* Row-in animation declaration */
+@mixin row-in-keyframes {
+  @keyframes rowIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* 6. Empty States Containers */
+/* Used for empty history lists, charts, and notification lists */
+@mixin empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@mixin empty-state-circle($size: 56px, $font-size: 1.4rem) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size;
+  color: var(--ink-3);
+}
+
+/* 7. Skeleton Text Base Overrides */
+@mixin skeleton-base-rules {
+  ion-skeleton-text {
+    --background: var(--border-hairline);
+    --background-animated: var(--border-hairline-strong);
+    margin: 4px 0;
+    border-radius: 6px;
+  }
+}
+
+/* 8. Unified Card Layout */
+/* Matches the standard surfaces on Home/History */
+@mixin unified-card {
+  background: var(--surface);
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 1px 2px rgba(20, 20, 43, .04), 0 8px 24px rgba(20, 20, 43, .06);
+  border-radius: var(--radius-md, 14px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 9. Core Action Buttons (Primary / Secondary) */
+/* Matches home/history button styles */
+@mixin primary-action-button {
+  --background: var(--accent) !important;
+  --background-hover: var(--accent-strong) !important;
+  --color: #ffffff !important;
+  --border-radius: var(--radius-sm, 12px) !important;
+  font-weight: 600;
+  --box-shadow: none !important;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@mixin secondary-action-button {
+  --background: var(--surface-sunken) !important;
+  --background-hover: var(--border-hairline) !important;
+  --color: var(--ink-2) !important;
+  --border-radius: var(--radius-sm, 12px) !important;
+  font-weight: 600;
+  --box-shadow: none !important;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:active {
+    transform: scale(0.96);
+  }
+}

@@ -1,70 +1,12 @@
+@use 'src/theme/shared' as shared;
+
 /* ================= DESIGN TOKENS ================= */
 :host {
-  --accent: #4f46e5;
-  --accent-soft: rgba(79, 70, 229, 0.12);
-  --accent-strong: #4338ca;
-
-  --credit: #16a34a;
-  --credit-soft: rgba(22, 163, 74, 0.12);
-  --debit: #dc2626;
-  --debit-soft: rgba(220, 38, 38, 0.12);
-
-  --surface: #ffffff;
-  --surface-sunken: #f6f6fb;
-  --surface-raised: #ffffff;
-  --border-hairline: rgba(20, 20, 43, 0.08);
-  --border-hairline-strong: rgba(20, 20, 43, 0.14);
-
-  --ink-1: #17172b;
-  --ink-2: #5c5c74;
-  --ink-3: #9797ab;
-
-  --max-width: 520px;
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-
-  font-family: 'Poppins', -apple-system, sans-serif;
-  font-variant-numeric: tabular-nums;
+  @include shared.design-tokens;
 }
 
-*:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host {
-    --accent: #818cf8;
-    --accent-soft: rgba(129, 140, 248, 0.16);
-    --accent-strong: #a5b4fc;
-
-    --credit: #4ade80;
-    --credit-soft: rgba(74, 222, 128, 0.14);
-    --debit: #f87171;
-    --debit-soft: rgba(248, 113, 113, 0.14);
-
-    --surface: #1c1c26;
-    --surface-sunken: #131318;
-    --surface-raised: #23232f;
-    --border-hairline: rgba(255, 255, 255, 0.08);
-    --border-hairline-strong: rgba(255, 255, 255, 0.14);
-
-    --ink-1: #f2f2f7;
-    --ink-2: #a6a6bd;
-    --ink-3: #6f6f85;
-  }
-}
-
-ion-content {
-  --background: var(--surface-sunken);
-}
-
-ion-toolbar {
-  --background: var(--surface-sunken);
-  --border-width: 0;
-}
+@include shared.focus-visible-styles;
+@include shared.content-toolbar-overrides;
 
 /* ================= SHELL ================= */
 .expense-desktop-shell {
@@ -520,23 +462,9 @@ ion-toolbar {
   animation: rowIn 0.35s ease backwards;
 }
 
-@for $i from 1 through 20 {
-  .timeline-item:nth-child(#{$i}) {
-    animation-delay: #{$i * 0.03}s;
-  }
-}
+@include shared.stagger-entrance('.timeline-item', 20);
 
-@keyframes rowIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+@include shared.row-in-keyframes;
 
 .ledger-slider .ledger-glass-panel:active {
   background: var(--border-hairline) !important;
@@ -669,21 +597,12 @@ ion-toolbar {
 
 /* ================= EMPTY STATE ================= */
 .empty-ledger {
-  text-align: center;
+  @include shared.empty-state-container;
   padding: 56px 20px;
   color: var(--ink-3);
 
   i {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--surface-sunken);
-    font-size: 1.4rem;
-    margin-bottom: 14px;
-    color: var(--ink-3);
+    @include shared.empty-state-circle;
   }
 
   p {
@@ -693,13 +612,7 @@ ion-toolbar {
   }
 }
 
-/* ================= SKELETONS ================= */
-ion-skeleton-text {
-  --background: var(--border-hairline);
-  --background-animated: var(--border-hairline-strong);
-  margin: 4px 0;
-  border-radius: 6px;
-}
+@include shared.skeleton-base-rules;
 
 .room-name-skeleton {
   width: 150px;

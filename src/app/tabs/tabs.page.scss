@@ -1,28 +1,8 @@
+@use 'src/theme/shared' as shared;
+
 /* ================= DESIGN TOKENS (shared across app) ================= */
 :host {
-  --accent: #4f46e5;
-  --accent-soft: rgba(79, 70, 229, 0.12);
-
-  --surface: #ffffff;
-  --border-hairline: rgba(20, 20, 43, 0.08);
-
-  --ink-2: #5c5c74;
-  --ink-3: #9797ab;
-
-  font-family: 'Poppins', -apple-system, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host {
-    --accent: #818cf8;
-    --accent-soft: rgba(129, 140, 248, 0.16);
-
-    --surface: #1c1c26;
-    --border-hairline: rgba(255, 255, 255, 0.08);
-
-    --ink-2: #a6a6bd;
-    --ink-3: #6f6f85;
-  }
+  @include shared.design-tokens;
 }
 
 /* ================= TAB BAR ================= */
