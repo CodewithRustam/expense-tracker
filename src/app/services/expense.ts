@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, throwError } from 'rxjs';
-import { AuthService } from './auth-service';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Group } from '../models/group.model';
 import { AddExpenseResponse } from '../models/Expense/AddExpenseResponse';
@@ -23,8 +22,7 @@ export class ExpenseService {
   refresh$ = this.refreshSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
-    private authService: AuthService
+    private http: HttpClient // AuthService is removed since the Interceptor handles tokens
   ) { }
 
   // =====================================
@@ -50,15 +48,13 @@ export class ExpenseService {
 
   getExpenseMonths(): Observable<{ success: boolean; message: string; data: string[] }> {
     return this.http.get<{ success: boolean; message: string; data: string[] }>(
-      `${this.apiUrl}/get-userexpesne-months`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/get-userexpesne-months`
     );
   }
 
   getGroups(): Observable<{ success: boolean; data?: Group[] }> {
     return this.http.get<{ success: boolean; data?: Group[] }>(
-      `${this.apiUrl}/groups`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/groups`
     );
   }
 
@@ -66,14 +62,13 @@ export class ExpenseService {
     let url = `${this.apiUrl}/get-room-expenses?roomId=${roomId}`;
     if (month) url += `&month=${month}`;
 
-    return this.http.get<ExpenseResponse>(url, this.authService.getAuthHeaders());
+    return this.http.get<ExpenseResponse>(url);
   }
 
   addExpense(expense: ApiExpense): Observable<AddExpenseResponse> {
     return this.http.post<AddExpenseResponse>(
       `${this.apiUrl}/add-expense`,
-      expense,
-      this.authService.getAuthHeaders()
+      expense
     ).pipe(
       tap(() => this.triggerRefresh()),
       catchError(this.handleError('Network error. Please try again.'))
@@ -83,8 +78,7 @@ export class ExpenseService {
   updateExpense(expense: ApiExpense): Observable<AddExpenseResponse> {
     return this.http.post<AddExpenseResponse>(
       `${this.apiUrl}/update-expense`,
-      expense,
-      this.authService.getAuthHeaders()
+      expense
     ).pipe(
       tap(() => this.triggerRefresh()),
       catchError(this.handleError('Failed to update expense.'))
@@ -93,8 +87,7 @@ export class ExpenseService {
 
   deleteExpense(id: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/delete-expense/${id}`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/delete-expense/${id}`
     ).pipe(
       tap(() => this.triggerRefresh()),
       catchError(this.handleError('Failed to delete expense.'))
@@ -103,8 +96,7 @@ export class ExpenseService {
 
   getUserExpenses(month: string): Observable<{ userExpenseResponse: UserExpenseResponse[] }> {
     return this.http.get<ExpenseResponse>(
-      `${this.apiUrl}/get-user-expenses?month=${month}`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/get-user-expenses?month=${month}`
     ).pipe(
       map(response => ({
         userExpenseResponse: response.data as UserExpenseResponse[]
@@ -114,8 +106,7 @@ export class ExpenseService {
 
   getMonthlyExpensesTrend(roomId: number, month: string): Observable<MonthlyExpensesTrendResponse> {
     return this.http.get<{ data: MonthlyExpensesTrendResponse }>(
-      `${this.apiUrl}/trend-expenses?roomId=${roomId}&month=${month}`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/trend-expenses?roomId=${roomId}&month=${month}`
     ).pipe(
       map(response => response.data)
     );
@@ -125,7 +116,7 @@ export class ExpenseService {
     let url = `${this.apiUrl}/get-settlement-details?roomId=${roomId}&memberId=${memberId}`;
     if (month) url += `&month=${month}`;
 
-    return this.http.get<any>(url, this.authService.getAuthHeaders());
+    return this.http.get<any>(url);
   }
 
   settleBalance(selectedMember: SettlementDetail, roomId: number, payerName: string, monthLabel: string): Observable<any> {
@@ -140,8 +131,7 @@ export class ExpenseService {
 
     return this.http.post<any>(
       `${this.apiUrl}/expenses-settle`,
-      payload,
-      this.authService.getAuthHeaders()
+      payload
     ).pipe(
       tap(() => this.triggerRefresh()),
       catchError(this.handleError('Settlement failed.'))
@@ -150,8 +140,7 @@ export class ExpenseService {
 
   getRoomTrend(roomId: number): Observable<any> {
     return this.http.get<any>(
-      `${this.apiUrl}/trend-home-expenses?roomId=${roomId}`,
-      this.authService.getAuthHeaders()
+      `${this.apiUrl}/trend-home-expenses?roomId=${roomId}`
     );
   }
 }

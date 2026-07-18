@@ -45,7 +45,6 @@ export class GroupService {
   // ================================
 
   getGroups(): Observable<any> {
-    // Hits: GET /api/rooms/get-rooms
     return this.http.get<any>(`${this.baseUrl}/get-rooms`);
   }
 

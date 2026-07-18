@@ -136,14 +136,4 @@ export class AuthService {
     localStorage.removeItem('rememberedUser');
     this.navCtrl.navigateRoot('/login');
   }
-
-  // Get auth headers
-  getAuthHeaders(): { headers: HttpHeaders } {
-    const token = this.getToken();
-    return {
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      })
-    };
-  }
 }
