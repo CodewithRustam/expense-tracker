@@ -74,7 +74,7 @@
                 <span class="chip-name">{{ u.memberName.split(' ')[0] }}</span>
               </div>
 
-              <div class="member-chip add-chip" (click)="openAddMemberModal()" role="button" aria-label="Add member">
+              <div class="member-chip add-chip" *ngIf="isNextMonthDisabled" (click)="openAddMemberModal()" role="button" aria-label="Add member">
                 <div class="avatar-sq add-sq"><i class="fa-solid fa-plus"></i></div>
                 <span class="chip-name">Add</span>
               </div>

@@ -2674,18 +2674,18 @@ ion-tab-button.tab-selected .tab-icon {
 }
 
 .form-card {
-  background: var(--ion-item-background, var(--surface));
-  margin: 10px 20px 0px 20px;
-  border-radius: 20px;
-  padding: 0 20px;
-  border: 1px solid rgba(154, 136, 136, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  background: var(--surface);
+  margin: 0 16px;
+  border-radius: var(--radius-lg);
+  padding: 0 16px;
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
 }
 
 .input-row {
   display: flex;
   align-items: center;
-  padding: 16px 0;
+  padding: 14px 20px;
 }
 
 .input-row.clickable:active {
@@ -2756,7 +2756,7 @@ ion-tab-button.tab-selected .tab-icon {
 .divider {
   height: 1px;
   background: var(--border-hairline);
-  margin-left: 58px;
+  margin: 0 20px;
 }
 
 .datetime-wrapper {
@@ -2776,7 +2776,8 @@ ion-datetime {
 }
 
 .footer-pad {
-  padding: 0 20px;
+  padding: 0 16px;
+  margin-top: 20px;
 }
 
 .main-btn {
@@ -2805,64 +2806,65 @@ ion-datetime {
   animation: fadeIn 0.25s ease-in-out;
 }
 
-/* Modals - Add Member */
-.add-member-content {
+/* Modals - Shared Sheet Layout */
+.add-member-content,
+.add-expense-content,
+.edit-expense-content {
   --background: var(--surface-sunken);
 }
 
-.modal-wrapper {
-  padding: 28px 20px calc(env(safe-area-inset-bottom) + 32px) 20px;
-  width: 100%;
-  box-sizing: border-box;
+.modal-sheet-content {
+  padding: 16px 0 calc(env(safe-area-inset-bottom) + 32px);
 }
 
-.modal-handle {
-  width: 40px;
-  height: 5px;
-  border-radius: 4px;
-  background: var(--border-hairline);
-  margin: 0 auto 24px auto;
-}
-
-.modal-header {
-  position: relative;
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.modal-header h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  color: var(--ink-1);
-}
-
-.modal-header p {
+.modal-sheet-subtitle {
   font-size: 0.84rem;
   color: var(--ink-3);
-  margin: 0;
-  line-height: 1.4;
+  text-align: center;
+  margin: 0 20px 18px;
+  line-height: 1.5;
 }
 
-.modal-header .btn-close {
-  position: absolute;
-  top: -10px;
-  right: -16px;
-  margin: 0;
+.sheet-section-label {
+  padding: 20px 20px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.close-btn {
+  --color: var(--ink-2);
   --border-radius: 50%;
   --padding-start: 8px;
   --padding-end: 8px;
+  font-size: 1.4rem;
 }
 
-.modal-header .btn-close ion-icon {
-  font-size: 24px;
-  color: var(--ink-3);
-  transition: color 0.2s ease;
-}
-
-.modal-header .btn-close:active ion-icon {
+.native-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
   color: var(--ink-1);
+  font-size: 1.0rem;
+  font-weight: 500;
+  font-family: inherit;
+  width: 100%;
+  padding: 0;
 }
+
+.native-input::placeholder {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.input-body.has-error ion-label {
+  color: #dc2626 !important;
+}
+
+
 
 .input-group {
   display: flex;

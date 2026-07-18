@@ -1,101 +1,93 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>New Expense</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" color="medium">
-        <ion-icon name="close-circle" slot="icon-only" size="large"></ion-icon>
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="form-card">
+<ion-content class="add-expense-content">
+  <div class="modal-sheet-content">
+    <!-- FIELDS -->
 
-    <div class="input-row">
-      <div class="icon-square primary-tint">
-        <ion-icon name="bag-handle"></ion-icon>
-      </div>
-      <div class="input-body">
-        <ion-label>Item Name</ion-label>
-        <ion-input [ngModel]="newExpense.item" (ionInput)="onItemInput($event)" inputmode="text"
-          autocapitalize="sentences" enterkeyhint="next" placeholder="e.g. Groceries">
-        </ion-input>
-
-        <div class="error-text" *ngIf="itemError">
-          {{ itemError }}
+      <div class="input-row">
+        <div class="icon-square primary-tint">
+          <ion-icon name="bag-handle"></ion-icon>
+        </div>
+        <div class="input-body">
+          <ion-label>Item Name</ion-label>
+          <ion-input [ngModel]="newExpense.item" (ionInput)="onItemInput($event)" inputmode="text"
+            autocapitalize="sentences" enterkeyhint="next" placeholder="e.g. Groceries">
+          </ion-input>
+          <div class="error-text" *ngIf="itemError">{{ itemError }}</div>
         </div>
       </div>
-    </div>
 
-    <div class="divider"></div>
+      <div class="divider"></div>
 
-    <div class="input-row">
-      <div class="icon-square success-tint">
-        <span class="currency-symbol">₹</span>
-      </div>
-      <div class="input-body">
-        <ion-label>Amount</ion-label>
-        <ion-input #amountInput type="text" inputmode="numeric" [ngModel]="newExpense.amount"
-          (ionInput)="onAmountInput($event)" (ionBlur)="onAmountBlur()" placeholder="0">
-        </ion-input>
-
-        <div class="error-text" *ngIf="amountError">
-          {{ amountError }}
+      <div class="input-row">
+        <div class="icon-square success-tint">
+          <span class="currency-symbol">₹</span>
+        </div>
+        <div class="input-body">
+          <ion-label>Amount</ion-label>
+          <ion-input #amountInput type="text" inputmode="numeric" [ngModel]="newExpense.amount"
+            (ionInput)="onAmountInput($event)" (ionBlur)="onAmountBlur()" placeholder="0">
+          </ion-input>
+          <div class="error-text" *ngIf="amountError">{{ amountError }}</div>
         </div>
       </div>
-    </div>
 
-    <div class="divider"></div>
+      <div class="divider"></div>
 
-    <div class="input-row clickable" (click)="showDatePicker = true">
-      <div class="icon-square warning-tint">
-        <ion-icon name="calendar"></ion-icon>
+      <div class="input-row clickable" (click)="showDatePicker = true">
+        <div class="icon-square warning-tint">
+          <ion-icon name="calendar"></ion-icon>
+        </div>
+        <div class="input-body">
+          <ion-label>Date</ion-label>
+          <div class="date-display">{{ formatDate(newExpense.date) }}</div>
+        </div>
+        <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
       </div>
-      <div class="input-body">
-        <ion-label>Date</ion-label>
-        <div class="date-display">{{ formatDate(newExpense.date) }}</div>
-      </div>
-      <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
-    </div>
 
-  </div>
-  <div class="room-container-inline">
-    <div class="section-label">Assign Room</div>
+    <!-- ASSIGN GROUP SECTION -->
+    <div class="sheet-section-label">Assign Group</div>
 
-    <div class="room-inline-scroll">
-      <div class="room-inline-track">
-
-        <div *ngFor="let g of filteredGroups" class="room-chip" [class.active]="newExpense.roomId === g.roomId"
-          (click)="newExpense.roomId = g.roomId">
-          <div class="chip-avatar">
-            {{ g.name.substring(0,1) }}
+    <div class="room-container-inline">
+      <div class="room-inline-scroll">
+        <div class="room-inline-track">
+          <div *ngFor="let g of filteredGroups" class="room-chip" [class.active]="newExpense.roomId === g.roomId"
+            (click)="newExpense.roomId = g.roomId">
+            <div class="chip-avatar">{{ g.name.substring(0,1) }}</div>
+            <span class="chip-name">{{ g.name }}</span>
+            <div class="active-indicator"></div>
           </div>
-
-          <span class="chip-name">
-            {{ g.name }}
-          </span>
-
-          <div class="active-indicator"></div>
         </div>
-
       </div>
     </div>
-  </div>
-  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
-    [breakpoints]="[0, 0.42]">
-    <ng-template>
-      <div class="datetime-wrapper">
-        <ion-datetime [(ngModel)]="newExpense.date" presentation="date" [max]="today" size="cover"
-          (ionChange)="confirmDate()">
-        </ion-datetime>
-      </div>
-    </ng-template>
-  </ion-modal>
 
-  <div class="footer-pad">
-    <ion-button expand="block" class="main-btn" [disabled]="!isFormValid || isSubmitting" (click)="addExpense()">
-      Add Expense
-    </ion-button>
+    <!-- DATE PICKER MODAL -->
+    <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
+      [breakpoints]="[0, 0.42]">
+      <ng-template>
+        <div class="datetime-wrapper">
+          <ion-datetime [(ngModel)]="newExpense.date" presentation="date" [max]="today" size="cover"
+            (ionChange)="confirmDate()">
+          </ion-datetime>
+        </div>
+      </ng-template>
+    </ion-modal>
+
+    <!-- SUBMIT BUTTON -->
+    <div class="footer-pad">
+      <ion-button expand="block" class="main-btn" [disabled]="!isFormValid || isSubmitting" (click)="addExpense()">
+        Add Expense
+      </ion-button>
+    </div>
+
   </div>
 </ion-content>

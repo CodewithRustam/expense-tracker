@@ -1,81 +1,86 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Edit Expense</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" color="medium">
-        <ion-icon name="close-circle" slot="icon-only" size="large"></ion-icon>
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="form-card">
-    <div class="input-row">
-      <div class="icon-square primary-tint">
-        <ion-icon name="home"></ion-icon>
+<ion-content class="edit-expense-content">
+  <div class="modal-sheet-content">
+    <!-- FIELDS -->
+
+      <div class="input-row">
+        <div class="icon-square primary-tint">
+          <ion-icon name="home"></ion-icon>
+        </div>
+        <div class="input-body">
+          <ion-label>Group</ion-label>
+          <ion-input [value]="roomName" readonly></ion-input>
+        </div>
       </div>
-      <div class="input-body">
-        <ion-label>Room Name</ion-label>
-        <ion-input [value]="roomName" readonly></ion-input>
+
+      <div class="divider"></div>
+
+      <div class="input-row">
+        <div class="icon-square primary-tint">
+          <ion-icon name="bag-handle"></ion-icon>
+        </div>
+        <div class="input-body">
+          <ion-label>Item Name</ion-label>
+          <ion-input [(ngModel)]="expense.item" placeholder="What did you buy?" (ionInput)="onInputChange()">
+          </ion-input>
+        </div>
       </div>
+
+      <div class="divider"></div>
+
+      <div class="input-row">
+        <div class="icon-square success-tint">
+          <span class="currency-symbol">₹</span>
+        </div>
+        <div class="input-body">
+          <ion-label>Amount</ion-label>
+          <ion-input type="number" [(ngModel)]="expense.amount" placeholder="0.00" class="amount-input"
+            (ionInput)="onInputChange()">
+          </ion-input>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="input-row clickable" (click)="showDatePicker = true">
+        <div class="icon-square warning-tint">
+          <ion-icon name="calendar"></ion-icon>
+        </div>
+        <div class="input-body">
+          <ion-label>Date</ion-label>
+          <div class="date-display">{{ formatDate(expense.originalDate) }}</div>
+        </div>
+        <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
+      </div>
+
+    <!-- DATE PICKER MODAL -->
+    <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
+      [breakpoints]="[0, 0.42]">
+      <ng-template>
+        <div class="datetime-wrapper">
+          <ion-datetime [(ngModel)]="expense.originalDate" presentation="date" [max]="today" [min]="'2000-01-01'"
+            size="cover" (ionChange)="showDatePicker = false; onInputChange()">
+          </ion-datetime>
+        </div>
+      </ng-template>
+    </ion-modal>
+
+    <!-- SUBMIT BUTTON -->
+    <div class="footer-pad">
+      <ion-button expand="block" class="main-btn" (click)="saveExpense()" [disabled]="!hasChanges">
+        Update Expense
+      </ion-button>
     </div>
-    <div class="divider"></div>
 
-    <div class="input-row">
-      <div class="icon-square primary-tint">
-        <ion-icon name="bag-handle"></ion-icon>
-      </div>
-      <div class="input-body">
-        <ion-label>Item Name</ion-label>
-        <ion-input [(ngModel)]="expense.item" placeholder="What did you buy?" (ionInput)="onInputChange()">
-        </ion-input>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="input-row">
-      <div class="icon-square success-tint">
-        <span class="currency-symbol">₹</span>
-      </div>
-      <div class="input-body">
-        <ion-label>Amount</ion-label>
-        <ion-input type="number" [(ngModel)]="expense.amount" placeholder="0.00" class="amount-input"
-          (ionInput)="onInputChange()">
-        </ion-input>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="input-row clickable" (click)="showDatePicker = true">
-      <div class="icon-square warning-tint">
-        <ion-icon name="calendar"></ion-icon>
-      </div>
-      <div class="input-body">
-        <ion-label>Date</ion-label>
-        <div class="date-display">{{ formatDate(expense.originalDate) }}</div>
-      </div>
-      <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
-    </div>
-
-  </div>
-
-  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
-    [breakpoints]="[0, 0.42]">
-    <ng-template>
-      <div class="datetime-wrapper">
-        <ion-datetime [(ngModel)]="expense.originalDate" presentation="date" [max]="today" [min]="'2000-01-01'"
-          size="cover" (ionChange)="showDatePicker = false; onInputChange()">
-        </ion-datetime>
-      </div>
-    </ng-template>
-  </ion-modal>
-
-  <div class="footer-pad">
-    <ion-button expand="block" class="main-btn" (click)="saveExpense()" [disabled]="!hasChanges">
-      Update Expense
-    </ion-button>
   </div>
 </ion-content>
