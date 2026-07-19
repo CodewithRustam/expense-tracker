@@ -4032,3 +4032,12 @@ ion-item-options {
 .fade-in {
   animation: fadeIn 0.4s ease;
 }
+
+/* --- Header Entrance Animation --- */
+.animate-header {
+  animation: headerFadeIn 0.35s ease-out forwards !important;
+}
+@keyframes headerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

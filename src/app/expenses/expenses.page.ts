@@ -89,7 +89,14 @@ export class ExpensesPage implements OnInit, OnDestroy {
   });
 
   isSticky = signal<boolean>(false);
+  public playHeaderAnim = signal<boolean>(false);
+  
   private refreshSub: Subscription | undefined;
+
+  ionViewWillEnter() {
+    this.playHeaderAnim.set(false);
+    setTimeout(() => this.playHeaderAnim.set(true), 10);
+  }
 
   ngOnInit() {
     const token = this.authService.getToken();

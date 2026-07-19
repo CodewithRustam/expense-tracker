@@ -1,5 +1,5 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar>
+  <ion-toolbar [class.animate-header]="playHeaderAnim()">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
     </ion-buttons>
@@ -80,13 +80,15 @@
           </div>
         </div>
 
-        @if (hasData() && showChart()) {
+        @if (hasData()) {
           <div class="chart-wrapper">
-            <apx-chart [series]="chartOptions().series" [chart]="chartOptions().chart" [labels]="chartOptions().labels"
-              [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
-              [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
-              [responsive]="chartOptions().responsive">
-            </apx-chart>
+            @if (renderChart()) {
+              <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart" [labels]="chartOptions().labels"
+                [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
+                [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
+                [responsive]="chartOptions().responsive">
+              </apx-chart>
+            }
           </div>
         } @else if (!hasData()) {
           <div class="empty-chart-placeholder">

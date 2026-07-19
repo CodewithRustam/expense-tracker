@@ -70,6 +70,13 @@ export class HistoryPage implements OnInit, OnDestroy {
     }
   }
 
+  public playHeaderAnim = signal<boolean>(false);
+
+  ionViewWillEnter() {
+    this.playHeaderAnim.set(false);
+    setTimeout(() => this.playHeaderAnim.set(true), 10);
+  }
+
   loadExpenseMonths(isBackground = false) {
     if (!isBackground) this.isLoading.set(true);
 

@@ -17,6 +17,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   user: any = null;
   totalGroups: number = 0;
   totalSpent: number = 0;
+  playHeaderAnim: boolean = false;
 
   private refreshSub: Subscription | undefined;
 
@@ -39,7 +40,6 @@ export class ProfilePage implements OnInit, OnDestroy {
     this.loadUserProfile();
 
     // ✅ Reactive Stats Update
-    // If an expense is added/deleted or a group is created, update profile stats silently
     this.refreshSub = merge(
       this.groupService.refresh$,
       this.expenseService.refresh$
@@ -50,6 +50,8 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   // ionViewWillEnter is still good for ensuring data is fresh when navigating
   ionViewWillEnter() {
+    this.playHeaderAnim = false;
+    setTimeout(() => this.playHeaderAnim = true, 10);
     this.loadDashboardStats();
   }
 

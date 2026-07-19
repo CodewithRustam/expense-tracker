@@ -55,19 +55,24 @@ export class ChartsPage implements OnInit, OnDestroy {
     this.colorSchemeMedia.addEventListener('change', this.colorSchemeHandler);
     this.loadChartData();
   }
-  showChart = signal<boolean>(false);
+
+  public renderChart = signal<boolean>(false);
+  public playHeaderAnim = signal<boolean>(false);
+
+  ionViewWillEnter() {
+    this.playHeaderAnim.set(false);
+    setTimeout(() => this.playHeaderAnim.set(true), 10);
+  }
 
   ionViewDidEnter() {
-    setTimeout(() => {
-      if (this.hasData()) {
-        this.applyChartData();
-        this.showChart.set(true);
-      }
-    }, 10);
+    if (this.hasData()) {
+      // Delay slightly to ensure transition is fully done before drawing
+      setTimeout(() => this.renderChart.set(true), 50);
+    }
   }
 
   ionViewWillLeave() {
-    this.showChart.set(false);
+    this.renderChart.set(false);
   }
 
   applyChartData() {
@@ -78,6 +83,7 @@ export class ChartsPage implements OnInit, OnDestroy {
       series: data.members.map(member => member.monthlyExpenses[0] || 0),
       labels: data.members.map(member => member.name || 'Unknown')
     });
+    this.renderChart.set(true);
   }
   ngOnDestroy() {
     this.destroy$.next();
@@ -129,7 +135,6 @@ export class ChartsPage implements OnInit, OnDestroy {
         next: (data) => {
           this.trendData.set(data);
           this.applyChartData();
-          this.showChart.set(true);
           this.isLoading.set(false);
         },
         error: (err) => {

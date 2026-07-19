@@ -39,6 +39,21 @@ export class HomePage implements OnInit, OnDestroy {
   public totalBalance = computed(() => {
     return this.groupService.groups().reduce((sum, group) => sum + (group.totalAmount || 0), 0);
   });
+  public hasInitiallyLoaded = signal<boolean>(false);
+  public renderChart = signal<boolean>(false);
+  public playHeaderAnim = signal<boolean>(false);
+
+  public isPageLoaded = computed(() => {
+    if (this.hasInitiallyLoaded()) return true;
+
+    const groupsLoaded = !this.groupService.isLoading();
+    if (!groupsLoaded) return false;
+    
+    const hasGroups = this.groupService.groups().length > 0;
+    if (!hasGroups) return true;
+    
+    return this.chartOptions().series.length > 0;
+  });
 
   private refreshSubscription: Subscription | undefined;
 
@@ -91,29 +106,31 @@ export class HomePage implements OnInit, OnDestroy {
   private cachedCategories = signal<string[]>([]);
 
   ionViewWillEnter() {
+    this.playHeaderAnim.set(false);
+    setTimeout(() => this.playHeaderAnim.set(true), 10);
+
     this.notificationService.getAll().subscribe();
     if (this.groupService.groups().length === 0) {
       this.groupService.loadGroups();
     }
+    const current = this.selectedGroup();
   }
 
   ionViewDidEnter() {
     const current = this.selectedGroup();
     if (current) {
-      // Restore chart quickly from cache for instant animation
       if (this.cachedSeries().length > 0) {
-        setTimeout(() => {
-          this.applyChartData();
-        }, 10);
+        // Delay slightly to ensure transition is fully done before drawing
+        setTimeout(() => this.renderChart.set(true), 50);
       }
-      
       // Fetch fresh data in background
       this.fetchTrendData(current.roomId);
     }
   }
 
   ionViewWillLeave() {
-    this.chartOptions.update(opts => ({ ...opts, series: [] }));
+    // Destroy chart on leave to prepare for a fresh animation on next visit
+    this.renderChart.set(false);
   }
 
   ngOnDestroy() {
@@ -121,6 +138,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   applyChartData() {
+    this.hasInitiallyLoaded.set(true);
     const currentOptions = this.chartOptions();
     this.chartOptions.set({
       ...currentOptions,
@@ -130,6 +148,7 @@ export class HomePage implements OnInit, OnDestroy {
         categories: this.cachedCategories()
       }
     });
+    this.renderChart.set(true);
   }
 
   fetchTrendData(roomId: number) {
