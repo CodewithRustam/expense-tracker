@@ -3,26 +3,29 @@
     <div class="top-nav">
 
       <!-- USER INFO & ACTIONS -->
-      <app-user-header
-        *ngIf="!isLoading; else headerSkeleton"
-        [title]="userName"
-        [subtitle]="greetingText"
-        [unreadCount]="unreadCount"
-        [initials]="userName ? userName.charAt(0) : 'U'"
-        avatarUrl="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light"
-        (avatarClick)="goToProfile()"
-        (notificationClick)="openNotifications()">
-      </app-user-header>
-
-      <ng-template #headerSkeleton>
-        <div class="user-section" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px;">
-          <ion-skeleton-text animated style="width:48px;height:48px;border-radius:16px;"></ion-skeleton-text>
-          <div style="display: flex; flex-direction: column;">
-            <ion-skeleton-text animated style="width:70px;height:11px;margin-bottom:4px;"></ion-skeleton-text>
-            <ion-skeleton-text animated style="width:110px;height:18px;"></ion-skeleton-text>
+      @if (!groupService.isLoading()) {
+        <app-user-header
+          [title]="userName()"
+          [subtitle]="greetingText()"
+          [unreadCount]="notificationService.unreadCount()"
+          [initials]="userName() ? userName().charAt(0) : 'U'"
+          avatarUrl="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light"
+          (avatarClick)="goToProfile()"
+          (notificationClick)="openNotifications()">
+        </app-user-header>
+      } @else {
+        <!-- Skeleton matching app-user-header perfectly -->
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div class="user-section" style="display: flex; align-items: center; gap: 12px; cursor: default; padding: 0;">
+            <ion-skeleton-text animated style="width:46px; height:46px; border-radius:50%; margin: 0;"></ion-skeleton-text>
+            <div style="display: flex; flex-direction: column;">
+              <ion-skeleton-text animated style="width:90px; height:12px; margin-bottom:4px; border-radius:4px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width:130px; height:18px; border-radius:4px;"></ion-skeleton-text>
+            </div>
           </div>
+          <ion-skeleton-text animated style="width:42px; height:42px; border-radius:50%; margin: 0;"></ion-skeleton-text>
         </div>
-      </ng-template>
+      }
 
     </div>
   </ion-toolbar>
@@ -33,104 +36,131 @@
   <div class="page-container">
 
     <!-- ================= CHART / SPEND CARD ================= -->
-    <div class="chart-card" *ngIf="!isLoading; else balanceSkeleton">
-      <div class="chart-header">
-        <div class="header-info">
-          <span class="balance-label">Room spending</span>
-          <h1 class="chart-title">₹{{ selectedGroup?.totalAmount | number:'1.0-1' }}</h1>
-        </div>
+    @if (!groupService.isLoading()) {
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="header-info">
+            <span class="balance-label">Room spending</span>
+            <h1 class="chart-title">₹{{ selectedGroup()?.totalAmount | number:'1.0-1' }}</h1>
+          </div>
 
-        <div class="group-selector">
-          <ion-select interface="popover" [value]="selectedGroup" (ionChange)="onGroupChange($event)"
-            toggleIcon="chevron-down-outline" class="custom-select">
-            <ion-select-option *ngFor="let group of groups" [value]="group">
-              {{ group.name }}
-            </ion-select-option>
-          </ion-select>
-        </div>
-      </div>
-
-      <div class="chart-wrapper">
-        <apx-chart *ngIf="chartOptions?.series?.length" [series]="chartOptions.series" [chart]="chartOptions.chart"
-          [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis"
-          [dataLabels]="chartOptions.dataLabels" [colors]="chartOptions.colors" [grid]="chartOptions.grid"
-          [tooltip]="chartOptions.tooltip" [fill]="chartOptions.fill" [legend]="chartOptions.legend"
-          [stroke]="chartOptions.stroke" [markers]="chartOptions.markers">
-        </apx-chart>
-      </div>
-
-      <button class="analytics-link" (click)="openAnalytics()">
-        View full analytics
-        <ion-icon name="chevron-forward-outline"></ion-icon>
-      </button>
-    </div>
-
-    <ng-template #balanceSkeleton>
-      <div class="chart-card skeleton-chart">
-        <div class="skeleton-header">
-          <ion-skeleton-text animated style="width:90px;height:11px;margin-bottom:8px;"></ion-skeleton-text>
-          <ion-skeleton-text animated style="width:120px;height:28px;"></ion-skeleton-text>
-        </div>
-        <div class="skeleton-bars-container">
-          <div class="skeleton-bar" *ngFor="let i of [1,2,3,4,5,6]">
-            <ion-skeleton-text animated></ion-skeleton-text>
+          <div class="group-selector">
+            <ion-select interface="popover" [value]="selectedGroup()" (ionChange)="onGroupChange($event)"
+              toggleIcon="chevron-down-outline" class="custom-select">
+              @for (group of groupService.groups(); track group.roomId) {
+                <ion-select-option [value]="group">
+                  {{ group.name }}
+                </ion-select-option>
+              }
+            </ion-select>
           </div>
         </div>
+
+        <div class="chart-wrapper">
+          @if (chartOptions().series.length) {
+            <apx-chart 
+              [series]="chartOptions().series" 
+              [chart]="chartOptions().chart"
+              [xaxis]="chartOptions().xaxis" 
+              [yaxis]="chartOptions().yaxis"
+              [dataLabels]="chartOptions().dataLabels" 
+              [colors]="chartOptions().colors" 
+              [grid]="chartOptions().grid"
+              [tooltip]="chartOptions().tooltip" 
+              [fill]="chartOptions().fill" 
+              [legend]="chartOptions().legend"
+              [stroke]="chartOptions().stroke" 
+              [markers]="chartOptions().markers">
+            </apx-chart>
+          }
+        </div>
+
+        <button class="analytics-link" (click)="openAnalytics()">
+          View full analytics
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
       </div>
-    </ng-template>
+    } @else {
+      <div class="chart-card skeleton-chart" style="display: block; height: auto; padding: 22px 14px;">
+        <div class="chart-header">
+          <div class="header-info">
+            <ion-skeleton-text animated style="width:90px;height:11px;margin-bottom:6px;border-radius:4px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width:140px;height:33px;border-radius:6px;"></ion-skeleton-text>
+          </div>
+          <div class="group-selector" style="border:none; background:transparent; padding:0; min-height:auto;">
+            <ion-skeleton-text animated style="width:110px;height:34px;border-radius:999px;margin:0;"></ion-skeleton-text>
+          </div>
+        </div>
+        
+        <div class="skeleton-chart-area" style="height: 210px; margin: 14px -10px -6px -8px; padding: 0 24px;">
+          <ion-skeleton-text animated style="width: 100%; height: 100%; border-radius: 8px; margin: 0;"></ion-skeleton-text>
+        </div>
+        
+        <div style="display:flex; justify-content:center; align-items:center; height: 26px; margin-top: 14px; padding: 10px 0 0;">
+          <ion-skeleton-text animated style="width: 140px; height:14px; border-radius:4px; margin:0;"></ion-skeleton-text>
+        </div>
+      </div>
+    }
 
     <!-- ================= MAIN CONTENT ================= -->
     <div class="main-content">
 
-      <div class="total-summary-row" *ngIf="!isLoading">
-        <span class="summary-label">Total portfolio</span>
-        <span class="summary-value">₹{{ getTotalBalance() | number:'1.0-0' }}</span>
-      </div>
+      @if (!groupService.isLoading()) {
+        <div class="total-summary-row">
+          <span class="summary-label">Total portfolio</span>
+          <span class="summary-value">₹{{ totalBalance() | number:'1.0-0' }}</span>
+        </div>
+      } @else {
+        <div class="total-summary-row" style="align-items: center;">
+          <ion-skeleton-text animated style="width:110px; height:12px; border-radius:4px; margin:0;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:60px; height:20px; border-radius:4px; margin:0;"></ion-skeleton-text>
+        </div>
+      }
 
       <div class="section-header">
         <span class="section-title">Your groups</span>
-        <span class="section-count" *ngIf="!isLoading">{{ groups.length }}</span>
+        @if (!groupService.isLoading()) {
+          <span class="section-count">{{ groupService.groups().length }}</span>
+        }
         <div class="h-line"></div>
       </div>
 
-      <ng-container *ngIf="isLoading; else groupContent">
+      @if (groupService.isLoading()) {
         <app-skeleton-list [count]="4"></app-skeleton-list>
-      </ng-container>
+      } @else {
+        @if (groupService.groups().length > 0) {
+          <div class="group-list">
+            @for (group of groupService.groups(); track group.roomId) {
+              <div class="group-row" (click)="goToDetails(group)">
+                <div class="card-icon-wrapper" [ngClass]="getGroupColorClass(group.type)">
+                  <ion-icon [name]="group.iconName || 'people-outline'"></ion-icon>
+                </div>
 
-      <ng-template #groupContent>
+                <div class="text-group">
+                  <span class="group-name">{{ group.name }}</span>
+                  <div class="group-meta">
+                    <span>{{ group.type }}</span>
+                    <span class="dot">&middot;</span>
+                    <span>{{ group.month }}</span>
+                  </div>
+                </div>
 
-        <div class="group-list" *ngIf="groups.length > 0; else emptyState">
-          <div class="group-row" *ngFor="let group of groups" (click)="goToDetails(group)">
-            <div class="card-icon-wrapper" [ngClass]="getGroupColorClass(group.type)">
-              <ion-icon [name]="group.iconName || 'people-outline'"></ion-icon>
-            </div>
+                <div class="card-amount">
+                  <span class="amount-value">₹{{ group.totalAmount | number:'1.0-0' }}</span>
+                </div>
 
-            <div class="text-group">
-              <span class="group-name">{{ group.name }}</span>
-              <div class="group-meta">
-                <span>{{ group.type }}</span>
-                <span class="dot">&middot;</span>
-                <span>{{ group.month }}</span>
+                <ion-icon name="chevron-forward-outline" class="row-chevron"></ion-icon>
               </div>
-            </div>
-
-            <div class="card-amount">
-              <span class="amount-value">₹{{ group.totalAmount | number:'1.0-0' }}</span>
-            </div>
-
-            <ion-icon name="chevron-forward-outline" class="row-chevron"></ion-icon>
+            }
           </div>
-        </div>
-
-        <ng-template #emptyState>
+        } @else {
           <app-empty-state 
             iconName="wallet-outline" 
             title="No groups yet" 
             message="Create your first group to start tracking expenses">
           </app-empty-state>
-        </ng-template>
-
-      </ng-template>
+        }
+      }
 
     </div>
 

@@ -22,46 +22,51 @@
 
         <!-- HEADER -->
         <div class="hub-header-row">
-          <ng-container *ngIf="!isLoading; else headerSkeleton">
+          @if (!isLoading()) {
             <div class="room-title-group">
-              <h1 class="room-name" title="{{ roomName }}">{{ roomName }}</h1>
+              <h1 class="room-name" title="{{ roomName() }}">{{ roomName() }}</h1>
             </div>
 
             <div class="month-capsule">
-              <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled"
+              <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled()"
                 aria-label="Previous month">
                 <i class="fa-solid fa-chevron-left"></i>
               </ion-button>
-              <span class="selected-month">{{ selectedMonth }}</span>
-              <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled" aria-label="Next month">
+              <span class="selected-month">{{ selectedMonth() }}</span>
+              <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled()" aria-label="Next month">
                 <i class="fa-solid fa-chevron-right"></i>
               </ion-button>
             </div>
-          </ng-container>
+          } @else {
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+              <ion-skeleton-text animated class="room-name-skeleton" style="width:140px;height:24px;margin:0;"></ion-skeleton-text>
+              <ion-skeleton-text animated class="month-skel" style="width:100px;height:24px;margin:0;"></ion-skeleton-text>
+            </div>
+          }
         </div>
 
         <!-- STATS SUB-COMPONENT -->
         <app-expense-stats
-          [isLoadingExpenses]="isLoadingExpenses"
-          [totalAllTime]="totalAllTime"
-          [averageAmount]="averageAmount">
+          [isLoadingExpenses]="isLoadingExpenses()"
+          [totalAllTime]="totalAllTime()"
+          [averageAmount]="averageAmount()">
         </app-expense-stats>
 
         <!-- MEMBERS SUB-COMPONENT -->
         <app-member-list
-          [isLoading]="isLoading"
-          [users]="users"
-          [selectedUser]="selectedUser"
-          [isNextMonthDisabled]="isNextMonthDisabled"
+          [isLoading]="isLoading()"
+          [users]="users()"
+          [selectedUser]="selectedUser()"
+          [isNextMonthDisabled]="isNextMonthDisabled()"
           (onSelectUser)="selectUser($event)"
           (onAddMember)="openAddMemberModal()">
         </app-member-list>
 
         <!-- PERSONAL CARD SUB-COMPONENT -->
         <app-personal-card
-          [isLoadingExpenses]="isLoadingExpenses"
-          [users]="users"
-          [selectedUser]="selectedUser"
+          [isLoadingExpenses]="isLoadingExpenses()"
+          [users]="users()"
+          [selectedUser]="selectedUser()"
           (onSettle)="openSettleModal($event)">
         </app-personal-card>
 
@@ -69,7 +74,7 @@
     </div>
 
     <!-- ============== TRANSACTION HISTORY ================= -->
-    <div class="sticky-history-bar">
+    <div class="sticky-history-bar" [class.is-sticky]="isSticky()">
       <div class="history-content">
         <span>Transactions</span>
         <div class="h-line"></div>
@@ -77,22 +82,14 @@
     </div>
 
     <app-transaction-ledger
-      [isLoadingExpenses]="isLoadingExpenses"
-      [users]="users"
-      [selectedUser]="selectedUser"
-      [currentUserId]="currentUserId"
-      [groupedExpensesMap]="groupedExpensesMap"
+      [isLoadingExpenses]="isLoadingExpenses()"
+      [users]="users()"
+      [selectedUser]="selectedUser()"
+      [currentUserId]="currentUserId()"
+      [groupedExpensesMap]="groupedExpensesMap()"
       (onEditExpense)="openEditExpenseModal($event)"
       (onDeleteExpense)="deleteExpense($event.expense, $event.slidingItem)">
     </app-transaction-ledger>
 
   </div>
 </ion-content>
-
-<!-- ================= SKELETONS ================= -->
-<ng-template #headerSkeleton>
-  <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-    <ion-skeleton-text animated class="room-name-skeleton" style="width:140px;height:24px;margin:0;"></ion-skeleton-text>
-    <ion-skeleton-text animated class="month-skel" style="width:100px;height:24px;margin:0;"></ion-skeleton-text>
-  </div>
-</ng-template>

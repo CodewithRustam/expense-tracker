@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuthService } from './auth-service';
-import { Group } from '../models/group.model'; // You might need to update this model to match RoomResponse
+import { Group } from '../models/group.model'; 
 
-// 1. Interfaces matching your C# RoomViewModel & InviteMemberViewModel
 export interface InviteMemberPayload {
   name: string;
   email: string;
@@ -16,15 +15,28 @@ export interface CreateRoomPayload {
   members: InviteMemberPayload[];
 }
 
+interface GroupState {
+  groups: Group[];
+  isLoading: boolean;
+  error: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GroupService {
 
+  // ✅ Modern Signal State
+  private state = signal<GroupState>({
+    groups: [],
+    isLoading: false,
+    error: null
+  });
 
-  // 🔥 Global Refresh Stream
-  private refreshSubject = new Subject<void>();
-  refresh$ = this.refreshSubject.asObservable();
+  // ✅ Public computed signals for components to consume
+  public groups = computed(() => this.state().groups);
+  public isLoading = computed(() => this.state().isLoading);
+  public error = computed(() => this.state().error);
 
   constructor(
     private apiService: ApiService,
@@ -32,11 +44,36 @@ export class GroupService {
   ) { }
 
   // ================================
-  // REFRESH TRIGGER
+  // STATE MANAGEMENT
   // ================================
 
-  triggerRefresh(): void {
+  // Global Refresh Stream (Backward Compatibility during migration)
+  private refreshSubject = new Subject<void>();
+  public refresh$ = this.refreshSubject.asObservable();
+
+  public loadGroups(): void {
+    this.state.update(s => ({ ...s, isLoading: true, error: null }));
+    
+    this.apiService.get<any>(`rooms/get-rooms`).subscribe({
+      next: (res: any) => {
+        const data = Array.isArray(res) ? res : res.data;
+        const success = Array.isArray(res) ? true : res.success;
+        if (success) {
+          this.state.update(s => ({ ...s, groups: data || [], isLoading: false }));
+        } else {
+          this.state.update(s => ({ ...s, isLoading: false, error: 'Failed to load groups' }));
+        }
+      },
+      error: (err) => {
+        this.state.update(s => ({ ...s, isLoading: false, error: err.message || 'Error loading groups' }));
+      }
+    });
+  }
+
+  // ✅ Trigger a reload of state and notify listeners
+  public triggerRefresh(): void {
     this.refreshSubject.next();
+    this.loadGroups();
   }
 
   // ================================
@@ -48,16 +85,11 @@ export class GroupService {
   }
 
   getGroupById(id: number, month?: string): Observable<any> {
-    const endpoint = month
-      ? `rooms/details/${id}?month=${month}`
-      : `rooms/details/${id}`;
-
+    const endpoint = month ? `rooms/details/${id}?month=${month}` : `rooms/details/${id}`;
     return this.apiService.get<any>(endpoint);
   }
 
-  // 🔥 UPDATED CREATE ENDPOINT 🔥
   createGroup(payload: CreateRoomPayload): Observable<any> {
-    // Hits: POST /api/rooms/create
     return this.apiService.post<any>(`rooms/create`, payload).pipe(
       tap(() => this.triggerRefresh())
     );

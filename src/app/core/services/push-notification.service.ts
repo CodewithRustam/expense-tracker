@@ -4,6 +4,7 @@ import { Preferences } from '@capacitor/preferences';
 import { AuthService } from './auth-service';
 import { NotificationService } from './notification-service';
 import { Toastservice } from './toastservice';
+import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,11 @@ export class PushNotificationService {
   ) {}
 
   public async initPush() {
+    if (!Capacitor.isNativePlatform()) {
+      console.log('Push notifications bypassed: not implemented on web platform');
+      return;
+    }
+
     const currentUserId = this.authService.getUserId();
     if (!currentUserId) return;
 

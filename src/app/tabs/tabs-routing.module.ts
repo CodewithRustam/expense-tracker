@@ -32,7 +32,6 @@ const routes: Routes = [
         loadChildren: () =>
           import('../charts/charts.module').then(m => m.ChartsPageModule)
       },
-      //✅ Add this default child route
       {
         path: '',
         redirectTo: 'home',
@@ -47,4 +46,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class TabsPageRoutingModule {}
+export class TabsPageRoutingModule { }

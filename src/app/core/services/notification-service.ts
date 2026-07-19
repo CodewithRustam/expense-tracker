@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, BehaviorSubject, Subject } from 'rxjs'; // Added Subject
+import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { AppNotification } from '../models/app-notification';
 import { AuthService } from './auth-service';
@@ -10,14 +10,12 @@ import { AuthService } from './auth-service';
 })
 export class NotificationService {
 
-
-  // ✅ Global Refresh Stream (The missing part)
+  // Global Refresh Stream
   private refreshSubject = new Subject<void>();
   public refresh$ = this.refreshSubject.asObservable();
 
-  // ✅ Global unread count state
-  private unreadCountSubject = new BehaviorSubject<number>(0);
-  public unreadCount$ = this.unreadCountSubject.asObservable();
+  // ✅ Global unread count state using Signal
+  public unreadCount: WritableSignal<number> = signal(0);
 
   constructor(
     private apiService: ApiService,
@@ -32,20 +30,17 @@ export class NotificationService {
     return this.authService.getUserId()!;
   }
 
-  // ✅ Trigger a refresh across the app
+  // Trigger a refresh across the app
   public triggerRefresh(): void {
     this.refreshSubject.next();
   }
 
   private setUnreadCount(count: number): void {
-    this.unreadCountSubject.next(count);
+    this.unreadCount.set(count);
   }
 
   private decreaseUnreadCount(): void {
-    const current = this.unreadCountSubject.value;
-    if (current > 0) {
-      this.unreadCountSubject.next(current - 1);
-    }
+    this.unreadCount.update(count => count > 0 ? count - 1 : 0);
   }
 
   // ================================

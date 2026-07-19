@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ExpenseService } from '../core/services/expense';
 import { IonItemSliding, ModalController } from '@ionic/angular';
@@ -36,45 +36,67 @@ interface ExpenseDateGroup {
   selector: 'app-expenses',
   templateUrl: './expenses.page.html',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExpensesPage implements OnInit, OnDestroy {
-  months: string[] = [];
-  users: any[] = [];
-  selectedMonth: string = '';
-  selectedUser: number | undefined;
-  roomId: number | undefined;
-  roomName: string = '';
-  isLoading: boolean = true;
-  isLoadingExpenses: boolean = false;
-  groups: { roomId: number | undefined; name: string }[] = [];
-  expenses: Expense[] = [];
-  skeletonMemberCount: number[] = Array(4).fill(0).map((_, i) => i + 1);
+  // Services
+  private expenseService = inject(ExpenseService);
+  private route = inject(ActivatedRoute);
+  private toast = inject(Toastservice);
+  private authService = inject(AuthService);
+  private modalCtrl = inject(ModalController);
+  private groupService = inject(GroupService);
 
-  isNextMonthDisabled = false;
-  isPrevMonthDisabled = false;
-  isSticky: boolean = false;
-  currentUserId: number | undefined;
-  groupedExpensesMap: { [userId: number]: ExpenseDateGroup[] } = {};
+  // Signal State
+  months = signal<string[]>([]);
+  users = signal<any[]>([]);
+  selectedMonth = signal<string>('');
+  selectedUser = signal<number | undefined>(undefined);
+  roomId = signal<number | undefined>(undefined);
+  roomName = signal<string>('');
+  isLoading = signal<boolean>(true);
+  isLoadingExpenses = signal<boolean>(false);
+  groups = signal<{ roomId: number | undefined; name: string }[]>([]);
+  expenses = signal<Expense[]>([]);
+  currentUserId = signal<number | undefined>(undefined);
+  groupedExpensesMap = signal<{ [userId: number]: ExpenseDateGroup[] }>({});
 
-  settlementDataByUser: { [memberId: number]: SettlementDetail[] } = {};
-  settlementLoadingByUser: { [memberId: number]: boolean } = {};
+  settlementDataByUser = signal<{ [memberId: number]: SettlementDetail[] }>({});
+  settlementLoadingByUser = signal<{ [memberId: number]: boolean }>({});
+
+  // Computed Values
+  isNextMonthDisabled = computed(() => {
+    const currentIndex = this.months().indexOf(this.selectedMonth());
+    return currentIndex === 0 || this.months().length === 0;
+  });
+
+  isPrevMonthDisabled = computed(() => {
+    const currentIndex = this.months().indexOf(this.selectedMonth());
+    return currentIndex === this.months().length - 1 || this.months().length === 0;
+  });
+
+  totalAllTime = computed(() => {
+    return this.users().reduce((sum, user) => sum + (user.totalMemberExpense || 0), 0);
+  });
+
+  averageAmount = computed(() => {
+    const usersList = this.users();
+    return usersList.length ? this.totalAllTime() / usersList.length : 0;
+  });
+
+  hasExpensesInSelectedMonth = computed(() => {
+    return this.users().some(user => user.expenses?.length);
+  });
+
+  isSticky = signal<boolean>(false);
   private refreshSub: Subscription | undefined;
-
-  constructor(
-    private expenseService: ExpenseService,
-    private route: ActivatedRoute,
-    private toast: Toastservice,
-    private authService: AuthService,
-    private modalCtrl: ModalController,
-    private groupService: GroupService
-  ) { }
 
   ngOnInit() {
     const token = this.authService.getToken();
     if (token) {
       const decoded = this.authService.decodeToken(token);
       let uid = decoded?.nameid || decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || decoded?.id || decoded?.userId || decoded?.sub;
-      this.currentUserId = uid ? +uid : undefined;
+      this.currentUserId.set(uid ? +uid : undefined);
     }
 
     this.route.queryParamMap
@@ -83,8 +105,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
         map(id => id ? +id : undefined),
         distinctUntilChanged()
       )
-      .subscribe(roomId => {
-        if (!roomId) {
+      .subscribe(id => {
+        if (!id) {
           this.toast.error('No room selected');
           return;
         }
@@ -93,13 +115,12 @@ export class ExpensesPage implements OnInit, OnDestroy {
           return;
         }
 
-        this.roomId = roomId;
+        this.roomId.set(id);
         this.loadInitialData();
       });
 
     this.refreshSub = this.expenseService.refresh$.subscribe(() => {
       this.loadMonthlyExpenses();
-      this.prepareGroupedExpenses();
     });
   }
 
@@ -108,100 +129,99 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   loadInitialData() {
-    if (!this.roomId) return;
+    const currentRoomId = this.roomId();
+    if (!currentRoomId) return;
 
-    this.selectedUser = undefined;
+    this.selectedUser.set(undefined);
+    this.isLoadingExpenses.set(true);
+    this.isLoading.set(true);
 
-    this.isLoadingExpenses = true;
-    this.isLoading = true;
-
-    this.expenseService.getExpenses(this.roomId).subscribe({
+    this.expenseService.getExpenses(currentRoomId).subscribe({
       next: (response: any) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         if (response.success && response.data) {
           this.populateExpenses(response.data);
         } else {
           this.toast.error(response.message || 'Failed to load expenses');
         }
-        this.isLoadingExpenses = false;
+        this.isLoadingExpenses.set(false);
       },
       error: () => {
-        this.isLoading = false;
-        this.isLoadingExpenses = false;
+        this.isLoading.set(false);
+        this.isLoadingExpenses.set(false);
         this.toast.error('Failed to load expenses');
       }
     });
   }
 
   populateExpenses(data: any) {
-    if (data.roomName) this.roomName = data.roomName;
+    if (data.roomName) this.roomName.set(data.roomName);
 
     if (data.availableMonths?.length) {
-      this.months = data.availableMonths.map((month: string) => {
+      this.months.set(data.availableMonths.map((month: string) => {
         const [year, monthNum] = month.split('-');
         return new Date(Number(year), Number(monthNum) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-      });
+      }));
     }
 
-    this.groups = [{ roomId: this.roomId, name: this.roomName || 'Unnamed Room' }];
+    this.groups.set([{ roomId: this.roomId(), name: this.roomName() || 'Unnamed Room' }]);
 
-    this.users = data.membersSummary.map((member: any) => ({
+    const newUsers = data.membersSummary.map((member: any) => ({
       ...member,
       expenses: []
     }));
+    this.users.set(newUsers);
 
-    this.selectedMonth = data.selectedMonth
+    this.selectedMonth.set(data.selectedMonth
       ? new Date(data.selectedMonth).toLocaleString('default', { month: 'long', year: 'numeric' })
-      : this.months[this.months.length - 1] || '';
+      : this.months()[this.months().length - 1] || '');
 
-    const currentIndex = this.months.indexOf(this.selectedMonth);
-    this.isNextMonthDisabled = (currentIndex === 0);
-    this.isPrevMonthDisabled = (currentIndex === this.months.length - 1);
-
-    if (!this.selectedUser) {
-      const currentUserInRoom = this.users.find(u => u.memberId === this.currentUserId);
-      this.selectedUser = currentUserInRoom ? currentUserInRoom.memberId : this.users[0]?.memberId;
+    if (!this.selectedUser()) {
+      const currentUserInRoom = newUsers.find((u: any) => u.memberId === this.currentUserId());
+      this.selectedUser.set(currentUserInRoom ? currentUserInRoom.memberId : newUsers[0]?.memberId);
     }
 
-    this.expenses = data.expenses;
+    this.expenses.set(data.expenses);
     this.assignExpensesToUsers(data.expenses);
     this.prepareGroupedExpenses();
 
-    // Only preload settlements for the currently selected user; other users'
-    // settlement data loads lazily when selected (see selectUser()). Previously
-    // this looped over every user AND loaded the selected user again, firing
-    // duplicate network requests on every page load.
-    if (this.selectedUser) {
-      this.loadSettlementsForUser(this.selectedUser);
+    const currentUser = this.selectedUser();
+    if (currentUser) {
+      this.loadSettlementsForUser(currentUser);
     }
   }
 
   loadMonthlyExpenses() {
-    if (!this.roomId || !this.selectedMonth) return;
-    this.isLoadingExpenses = true;
+    const currentRoomId = this.roomId();
+    const currentSelectedMonth = this.selectedMonth();
+    if (!currentRoomId || !currentSelectedMonth) return;
+    
+    this.isLoadingExpenses.set(true);
 
-    const [monthName, year] = this.selectedMonth.split(' ');
+    const [monthName, year] = currentSelectedMonth.split(' ');
     const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
     const formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
 
-    this.expenseService.getExpenses(this.roomId, formattedMonth).subscribe({
+    this.expenseService.getExpenses(currentRoomId, formattedMonth).subscribe({
       next: (response: any) => {
-        this.isLoadingExpenses = false;
+        this.isLoadingExpenses.set(false);
         if (response.success && response.data) {
           this.populateExpenses(response.data);
         }
       },
       error: () => {
-        this.isLoadingExpenses = false;
+        this.isLoadingExpenses.set(false);
         this.toast.error(`Error fetching monthly expenses`);
       }
     });
   }
 
   assignExpensesToUsers(expenses: Expense[]) {
-    this.users.forEach(u => (u.expenses = []));
+    const currentUsers = [...this.users()];
+    currentUsers.forEach(u => (u.expenses = []));
+    
     expenses.forEach(exp => {
-      const user = this.users.find(u => u.memberId === exp.payerId);
+      const user = currentUsers.find(u => u.memberId === exp.payerId);
       if (user) {
         const date = new Date(exp.date);
         user.expenses.push({
@@ -211,26 +231,21 @@ export class ExpensesPage implements OnInit, OnDestroy {
         });
       }
     });
+    this.users.set(currentUsers);
   }
 
-  get totalAllTime(): number {
-    return this.users.reduce((sum, user) => sum + user.totalMemberExpense, 0);
-  }
-  get averageAmount(): number {
-    return this.users.length ? this.totalAllTime / this.users.length : 0;
-  }
   previousMonth() {
-    const currentIndex = this.months.indexOf(this.selectedMonth);
-    if (currentIndex < this.months.length - 1) {
-      this.selectedMonth = this.months[currentIndex + 1];
+    const currentIndex = this.months().indexOf(this.selectedMonth());
+    if (currentIndex < this.months().length - 1) {
+      this.selectedMonth.set(this.months()[currentIndex + 1]);
       this.loadMonthlyExpenses();
     }
   }
 
   nextMonth() {
-    const currentIndex = this.months.indexOf(this.selectedMonth);
+    const currentIndex = this.months().indexOf(this.selectedMonth());
     if (currentIndex > 0) {
-      this.selectedMonth = this.months[currentIndex - 1];
+      this.selectedMonth.set(this.months()[currentIndex - 1]);
       this.loadMonthlyExpenses();
     }
   }
@@ -238,7 +253,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
   async openEditExpenseModal(expense: Expense) {
     const modal = await this.modalCtrl.create({
       component: EditExpenseModal,
-      componentProps: { expense, groups: this.groups },
+      componentProps: { expense, groups: this.groups() },
       breakpoints: [0, 0.75],
       initialBreakpoint: 0.75,
       cssClass: 'edit-modal'
@@ -247,12 +262,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     await modal.present();
   }
 
-  hasExpensesInSelectedMonth(): boolean {
-    return this.users.some(user => user.expenses?.length);
-  }
-
   async deleteExpense(expense: any, slidingItem: IonItemSliding) {
-    // Close the slider immediately to prevent UI glitches during modal animation
     await slidingItem.close();
 
     const modal = await this.modalCtrl.create({
@@ -287,15 +297,12 @@ export class ExpensesPage implements OnInit, OnDestroy {
   }
 
   private getFormattedMonth(): string | undefined {
-    if (!this.selectedMonth) {
-      return undefined;
-    }
+    const currentMonth = this.selectedMonth();
+    if (!currentMonth) return undefined;
 
-    const [monthName, year] = this.selectedMonth.split(' ');
+    const [monthName, year] = currentMonth.split(' ');
     const tempDate = new Date(`${monthName} 1, ${year}`);
-    if (isNaN(tempDate.getTime())) {
-      return undefined;
-    }
+    if (isNaN(tempDate.getTime())) return undefined;
 
     const monthIndex = tempDate.getMonth() + 1;
     return `${year}-${monthIndex.toString().padStart(2, '0')}`;
@@ -303,13 +310,13 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
   async openSettleModal(user: any) {
     const formattedMonth = this.getFormattedMonth();
-
-    const preloadedSettlements = this.settlementDataByUser[user.memberId] || [];
+    const currentSettlementData = this.settlementDataByUser();
+    const preloadedSettlements = currentSettlementData[user.memberId] || [];
 
     const modal = await this.modalCtrl.create({
       component: SettleExpenseModalComponent,
       componentProps: {
-        roomId: this.roomId,
+        roomId: this.roomId(),
         user,
         formattedMonth,
         preloadedSettlements,
@@ -324,17 +331,18 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
   // UI Helpers
   selectUser(id: number) {
-    this.selectedUser = id;
-    // Lazy-load settlement details the first time this user is viewed,
-    // instead of loading every user's settlements up front on page load.
-    if (!this.settlementDataByUser[id] && !this.settlementLoadingByUser[id]) {
+    this.selectedUser.set(id);
+    const currentSettlementData = this.settlementDataByUser();
+    const currentLoading = this.settlementLoadingByUser();
+    
+    if (!currentSettlementData[id] && !currentLoading[id]) {
       this.loadSettlementsForUser(id);
     }
   }
 
-  onScroll(event: any) { this.isSticky = event.detail.scrollTop > 150; }
-
-
+  onScroll(event: any) { 
+    this.isSticky.set(event.detail.scrollTop > 150); 
+  }
 
   groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
     if (!expenses || expenses.length === 0) return [];
@@ -382,59 +390,59 @@ export class ExpensesPage implements OnInit, OnDestroy {
     return 2;
   }
 
-  getGroupedExpenses(user: any): ExpenseDateGroup[] {
-    return this.groupExpensesByDate(user.expenses);
-  }
-
   prepareGroupedExpenses() {
-    if (!this.users) return;
-    this.users.forEach(user => {
-      this.groupedExpensesMap[user.memberId] =
-        this.groupExpensesByDate(user.expenses || []);
+    const currentUsers = this.users();
+    if (!currentUsers) return;
+    
+    const newMap: { [userId: number]: ExpenseDateGroup[] } = {};
+    currentUsers.forEach(user => {
+      newMap[user.memberId] = this.groupExpensesByDate(user.expenses || []);
     });
+    this.groupedExpensesMap.set(newMap);
   }
 
   loadSettlementsForUser(memberId: number) {
-    if (!this.selectedMonth) return;
+    const currentSelectedMonth = this.selectedMonth();
+    const currentRoomId = this.roomId();
+    if (!currentSelectedMonth || !currentRoomId) return;
 
-    const [monthName, year] = this.selectedMonth.split(' ');
+    const [monthName, year] = currentSelectedMonth.split(' ');
     const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth() + 1;
     const formattedMonth = `${year}-${monthIndex.toString().padStart(2, '0')}`;
 
-    this.settlementLoadingByUser[memberId] = true;
+    this.settlementLoadingByUser.update(state => ({ ...state, [memberId]: true }));
 
     this.expenseService
-      .getSettlementDetails(this.roomId!, memberId, formattedMonth)
+      .getSettlementDetails(currentRoomId, memberId, formattedMonth)
       .subscribe({
         next: (response: SettlementResponse) => {
-          this.settlementDataByUser[memberId] = response?.data?.settlements || [];
-          this.settlementLoadingByUser[memberId] = false;
+          this.settlementDataByUser.update(state => ({ 
+            ...state, 
+            [memberId]: response?.data?.settlements || [] 
+          }));
+          this.settlementLoadingByUser.update(state => ({ ...state, [memberId]: false }));
         },
         error: () => {
-          this.settlementLoadingByUser[memberId] = false;
+          this.settlementLoadingByUser.update(state => ({ ...state, [memberId]: false }));
         }
       });
   }
 
   async openAddMemberModal() {
-    if (!this.roomId) return;
+    const currentRoomId = this.roomId();
+    if (!currentRoomId) return;
 
     const modal = await this.modalCtrl.create({
       component: AddMemberModalComponent,
-      componentProps: { roomId: this.roomId },
+      componentProps: { roomId: currentRoomId },
       breakpoints: [0, 0.5, 0.55, 1],
       initialBreakpoint: 0.55,
     });
 
     await modal.present();
-
     const { data } = await modal.onDidDismiss();
-    if (data?.added) {
-      // groupService.refresh$ (if addMember triggers it) will handle this automatically.
-    }
   }
 
   openRoomSettings() {
-    // navigate to a dedicated room settings page for add/remove members, rename room, leave room
   }
 }

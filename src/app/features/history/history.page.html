@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border" [class.is-stuck]="isSticky">
+<ion-header class="ion-no-border" [class.is-stuck]="isSticky()">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
@@ -6,110 +6,100 @@
     <ion-title>History</ion-title>
   </ion-toolbar>
 
-  <ion-toolbar *ngIf="!isLoading" class="summary-toolbar">
-    <div class="summary-toolbar-inner">
-      <div class="summary-row">
-        <div class="summary-left">
-          <span class="balance-label">{{ filterType === 'all' ? 'Total activity' : filterType === 'credit' ? 'Total
-            received' : 'Total spent' }}</span>
-          <h1 class="balance-amount">₹{{ total | number:'1.2-2' }}</h1>
+  @if (!isLoading()) {
+    <ion-toolbar class="summary-toolbar">
+      <div class="summary-toolbar-inner">
+        <div class="summary-row">
+          <div class="summary-left">
+            <span class="balance-label">{{ filterType() === 'all' ? 'Total activity' : filterType() === 'credit' ? 'Total received' : 'Total spent' }}</span>
+            <h1 class="balance-amount">₹{{ total() | number:'1.2-2' }}</h1>
+          </div>
+
+          <div class="month-nav-pill">
+            <button class="nav-btn" (click)="previousMonth()" [disabled]="currentMonthIndex() === 0"
+              aria-label="Previous month">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </button>
+            <span class="month-label">{{ selectedMonth() }}</span>
+            <button class="nav-btn" (click)="nextMonth()" [disabled]="currentMonthIndex() === months().length - 1"
+              aria-label="Next month">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
         </div>
 
-        <div class="month-nav-pill">
-          <button class="nav-btn" (click)="previousMonth()" [disabled]="currentMonthIndex === 0"
-            aria-label="Previous month">
-            <ion-icon name="chevron-back-outline"></ion-icon>
+        <div class="filter-track" role="tablist">
+          <button class="filter-chip" role="tab" [class.active]="filterType() === 'all'"
+            (click)="filterExpenses('all')">All</button>
+          <button class="filter-chip credit" role="tab" [class.active]="filterType() === 'credit'"
+            (click)="filterExpenses('credit')">
+            <ion-icon name="arrow-down-outline"></ion-icon> Received
           </button>
-          <span class="month-label">{{ selectedMonth }}</span>
-          <button class="nav-btn" (click)="nextMonth()" [disabled]="currentMonthIndex === months.length - 1"
-            aria-label="Next month">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
+          <button class="filter-chip debit" role="tab" [class.active]="filterType() === 'debit'"
+            (click)="filterExpenses('debit')">
+            <ion-icon name="arrow-up-outline"></ion-icon> Spent
           </button>
         </div>
       </div>
+    </ion-toolbar>
 
-      <div class="filter-track" role="tablist">
-        <button class="filter-chip" role="tab" [class.active]="filterType === 'all'"
-          (click)="filterExpenses('all')">All</button>
-        <button class="filter-chip credit" role="tab" [class.active]="filterType === 'credit'"
-          (click)="filterExpenses('credit')">
-          <ion-icon name="arrow-down-outline"></ion-icon> Received
-        </button>
-        <button class="filter-chip debit" role="tab" [class.active]="filterType === 'debit'"
-          (click)="filterExpenses('debit')">
-          <ion-icon name="arrow-up-outline"></ion-icon> Spent
-        </button>
+    <ion-toolbar class="section-toolbar">
+      <div class="section-header">
+        <span class="section-title">Recent activity</span>
+        @if (!isLoadingExpenses()) {
+          <span class="section-count">{{ filteredExpenses().length }}</span>
+        }
+        <div class="h-line"></div>
       </div>
-    </div>
-  </ion-toolbar>
-
-  <ion-toolbar *ngIf="!isLoading" class="section-toolbar">
-    <div class="section-header">
-      <span class="section-title">Recent activity</span>
-      <span class="section-count" *ngIf="!isLoadingExpenses">{{ filteredExpenses.length }}</span>
-      <div class="h-line"></div>
-    </div>
-  </ion-toolbar>
+    </ion-toolbar>
+  }
 </ion-header>
 
 <ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
 
   <div class="page-container">
-
-    <ng-container *ngIf="isLoading; else mainContent">
+    @if (isLoading()) {
       <div class="skeleton-wrapper">
         <div class="summary-skel">
           <ion-skeleton-text animated style="width: 80px; height: 11px; margin-bottom: 8px;"></ion-skeleton-text>
           <ion-skeleton-text animated style="width: 130px; height: 30px;"></ion-skeleton-text>
         </div>
-
         <app-skeleton-list [count]="4"></app-skeleton-list>
       </div>
-    </ng-container>
-
-    <ng-template #mainContent>
-
+    } @else {
       <div class="list-wrapper">
-
-        <ng-container *ngIf="!isLoadingExpenses; else listSkeleton">
-
-          <div class="ledger-list" *ngIf="filteredExpenses.length; else emptyState">
-            <div class="ledger-row" *ngFor="let expense of filteredExpenses">
-              <div class="icon-box">
-                <i [class]="expense.iconName" [style.color]="getIconColor(expense.iconName)"></i>
-              </div>
-
-              <div class="text-group">
-                <span class="item-name">{{ expense.name }}</span>
-                <span class="room-badge">{{ expense.room }}</span>
-              </div>
-
-              <div class="card-amount">
-                <span class="amount-val" [ngClass]="expense.type">
-                  {{ expense.type === 'credit' ? '+' : '-' }} ₹{{ expense.total | number:'1.0-0' }}
-                </span>
-                <span class="date-val">{{ expense.date | date:'MMM dd' }}</span>
-              </div>
+        @if (!isLoadingExpenses()) {
+          @if (filteredExpenses().length) {
+            <div class="ledger-list">
+              @for (expense of filteredExpenses(); track expense.name + expense.date) {
+                <div class="ledger-row">
+                  <div class="icon-box">
+                    <i [class]="expense.iconName" [style.color]="getIconColor(expense.iconName)"></i>
+                  </div>
+                  <div class="text-group">
+                    <span class="item-name">{{ expense.name }}</span>
+                    <span class="room-badge">{{ expense.room }}</span>
+                  </div>
+                  <div class="card-amount">
+                    <span class="amount-val" [ngClass]="expense.type">
+                      {{ expense.type === 'credit' ? '+' : '-' }} ₹{{ expense.total | number:'1.0-0' }}
+                    </span>
+                    <span class="date-val">{{ expense.date | date:'MMM dd' }}</span>
+                  </div>
+                </div>
+              }
             </div>
-          </div>
-
-          <ng-template #emptyState>
+          } @else {
             <app-empty-state 
               iconName="file-tray-outline" 
               title="No data" 
-              message="No transactions in {{ selectedMonth }}">
+              message="No transactions in {{ selectedMonth() }}">
             </app-empty-state>
-          </ng-template>
-
-        </ng-container>
-
-        <ng-template #listSkeleton>
+          }
+        } @else {
           <app-skeleton-list [count]="4"></app-skeleton-list>
-        </ng-template>
-
+        }
       </div>
-
-    </ng-template>
-
+    }
   </div>
 </ion-content>
