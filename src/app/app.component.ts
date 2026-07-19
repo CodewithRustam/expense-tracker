@@ -2,12 +2,12 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { IonRouterOutlet, Platform } from '@ionic/angular';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { NetworkService } from './services/network-service';
-import { PushNotificationService } from './services/push-notification.service';
-import { AppUpdateService } from './services/app-update.service';
-import { StatusBarService } from './services/status-bar.service';
-import { SessionTimeoutService } from './services/session-timeout.service';
-import { BackButtonService } from './services/back-button.service';
+import { NetworkService } from './core/services/network-service';
+import { PushNotificationService } from './core/services/push-notification.service';
+import { AppUpdateService } from './core/services/app-update.service';
+import { StatusBarService } from './core/services/status-bar.service';
+import { SessionTimeoutService } from './core/services/session-timeout.service';
+import { BackButtonService } from './core/services/back-button.service';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({

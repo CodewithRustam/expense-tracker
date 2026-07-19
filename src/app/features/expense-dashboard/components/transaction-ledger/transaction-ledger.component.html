@@ -42,7 +42,7 @@
               <div class="timeline-card">
                 <ion-item-sliding #slidingItem
                   *ngFor="let exp of group.expenses; let last = last"
-                  [disabled]="user.badgeText === 'Settled up' || !exp.isEditShow"
+                  [disabled]="user?.badgeText === 'Settled up' || !exp.isEditShow"
                   class="tl-slide-item">
 
                   <!-- ion-item with zero padding — acts only as swipe wrapper -->
@@ -66,18 +66,14 @@
                   </ion-item>
 
                   <ion-item-options side="end">
-                    <ion-item-option class="swipe-btn swipe-edit"
-                      *ngIf="exp.isEditShow" (click)="editExpense(exp, slidingItem)">
+                    <ion-item-option class="swipe-btn swipe-edit" *ngIf="exp.isEditShow" (click)="editExpense(exp, slidingItem)">
                       <div class="swipe-content">
-                        <ion-icon name="create-outline"></ion-icon>
-                        <span>Edit</span>
+                        <i class="fa-solid fa-pen-to-square"></i>
                       </div>
                     </ion-item-option>
-                    <ion-item-option class="swipe-btn swipe-delete"
-                      color="danger" (click)="deleteExpense(exp, slidingItem)">
+                    <ion-item-option class="swipe-btn swipe-delete" (click)="deleteExpense(exp, slidingItem)">
                       <div class="swipe-content">
-                        <ion-icon name="trash-outline"></ion-icon>
-                        <span>Delete</span>
+                        <i class="fa-solid fa-trash-can"></i>
                       </div>
                     </ion-item-option>
                   </ion-item-options>

@@ -9,8 +9,8 @@ import { ExpensesPageRoutingModule } from './expenses-routing.module';
 import { ExpensesPage } from './expenses.page';
 
 // Pipes
-import { InitialsPipe } from '../pipes/initials.pipe';
-import { FirstNamePipe } from '../pipes/first-name.pipe';
+import { InitialsPipe } from '../shared/pipes/initials.pipe';
+import { FirstNamePipe } from '../shared/pipes/first-name.pipe';
 
 // Sub-components
 import { ExpenseStatsComponent } from '../features/expense-dashboard/components/expense-stats/expense-stats.component';

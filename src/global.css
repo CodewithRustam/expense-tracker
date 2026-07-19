@@ -156,7 +156,11 @@ ion-modal::part(content) {
   overflow: hidden;
 }
 
-ion-modal.global-modal::part(backdrop) {
+ion-modal {
+  --backdrop-opacity: 1 !important;
+}
+
+ion-modal::part(backdrop) {
   background: rgba(10, 10, 12, 0.6) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
@@ -1980,7 +1984,6 @@ ion-fab-button ion-icon {
 /* ion-item acts only as swipe host; visual design lives in tx-content-row */
 .tl-slide-item {
   --background: transparent;
-  display: block;
 }
 
 .tl-item-zero {
@@ -3515,37 +3518,48 @@ ion-item-sliding {
   background: transparent !important;
 }
 
+/* ========================================================
+   SLEEK IOS STYLE SWIPE BUTTONS
+======================================================== */
 ion-item-options {
   border-radius: 0;
-  background: transparent !important;
-  overflow: hidden;
+  /* Reset structural overrides to fix slider physics */
+  padding: 0;
+  gap: 0;
 }
 
-/* Edit action — indigo/blue */
-.swipe-btn.swipe-edit {
-  --background: #4f46e5 !important;
+/* Edit action — solid sleek indigo */
+.swipe-btn.swipe-edit,
+.swipe-btn.swipe-edit::part(native) {
+  background: #5468ff !important;
+  background-color: #7c8afb !important;
+  --background: #5468ff !important;
   height: 100%;
 }
 
-/* Delete action — red */
-.swipe-btn.swipe-delete {
-  --background: #e53935 !important;
+/* Delete action — solid sleek crimson */
+.swipe-btn.swipe-delete,
+.swipe-btn.swipe-delete::part(native) {
+  background: #ff3b30 !important;
+  background-color: #de4f20ed !important;
+  --background: #ff3b30 !important;
   height: 100%;
 }
 
 .swipe-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  width: 68px;
-  gap: 3px;
+  width: 76px;
 }
 
-.swipe-content ion-icon {
-  font-size: 1.2rem;
+.swipe-content i {
+  font-size: 1.4rem;
+  /* Slightly larger crisp icon */
   color: #ffffff !important;
+  /* Very subtle shadow for depth against the solid color */
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
 }
 
 .swipe-content span {

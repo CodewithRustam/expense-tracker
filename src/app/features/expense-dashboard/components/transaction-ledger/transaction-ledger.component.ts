@@ -41,9 +41,9 @@ export class TransactionLedgerComponent {
     return !!(list && list.length);
   }
 
-  editExpense(expense: any, slidingItem: any) {
+  async editExpense(expense: any, slidingItem: any) {
     if (slidingItem) {
-      slidingItem.close();
+      await slidingItem.close();
     }
     this.onEditExpense.emit(expense);
   }

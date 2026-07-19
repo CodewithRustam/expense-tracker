@@ -1,9 +1,9 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { IonInput, ModalController } from '@ionic/angular';
-import { ExpenseService } from '../services/expense';
-import { Group } from '../models/group.model';
-import { ApiExpense } from '../models/Expense/ApiExpense';
-import { Toastservice } from '../services/toastservice';
+import { ExpenseService } from '../core/services/expense';
+import { Group } from '../core/models/group.model';
+import { ApiExpense } from '../core/models/Expense/ApiExpense';
+import { Toastservice } from '../core/services/toastservice';
 import { finalize, take } from 'rxjs/operators';
 
 @Component({

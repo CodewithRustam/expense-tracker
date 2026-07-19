@@ -1,0 +1,146 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <div class="top-nav">
+
+      <!-- USER INFO & ACTIONS -->
+      <app-user-header
+        *ngIf="!isLoading; else headerSkeleton"
+        [title]="userName"
+        [subtitle]="greetingText"
+        [unreadCount]="unreadCount"
+        [initials]="userName ? userName.charAt(0) : 'U'"
+        avatarUrl="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light"
+        (avatarClick)="goToProfile()"
+        (notificationClick)="openNotifications()">
+      </app-user-header>
+
+      <ng-template #headerSkeleton>
+        <div class="user-section" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px;">
+          <ion-skeleton-text animated style="width:48px;height:48px;border-radius:16px;"></ion-skeleton-text>
+          <div style="display: flex; flex-direction: column;">
+            <ion-skeleton-text animated style="width:70px;height:11px;margin-bottom:4px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width:110px;height:18px;"></ion-skeleton-text>
+          </div>
+        </div>
+      </ng-template>
+
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true">
+
+  <div class="page-container">
+
+    <!-- ================= CHART / SPEND CARD ================= -->
+    <div class="chart-card" *ngIf="!isLoading; else balanceSkeleton">
+      <div class="chart-header">
+        <div class="header-info">
+          <span class="balance-label">Room spending</span>
+          <h1 class="chart-title">₹{{ selectedGroup?.totalAmount | number:'1.0-1' }}</h1>
+        </div>
+
+        <div class="group-selector">
+          <ion-select interface="popover" [value]="selectedGroup" (ionChange)="onGroupChange($event)"
+            toggleIcon="chevron-down-outline" class="custom-select">
+            <ion-select-option *ngFor="let group of groups" [value]="group">
+              {{ group.name }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <div class="chart-wrapper">
+        <apx-chart *ngIf="chartOptions?.series?.length" [series]="chartOptions.series" [chart]="chartOptions.chart"
+          [xaxis]="chartOptions.xaxis" [yaxis]="chartOptions.yaxis"
+          [dataLabels]="chartOptions.dataLabels" [colors]="chartOptions.colors" [grid]="chartOptions.grid"
+          [tooltip]="chartOptions.tooltip" [fill]="chartOptions.fill" [legend]="chartOptions.legend"
+          [stroke]="chartOptions.stroke" [markers]="chartOptions.markers">
+        </apx-chart>
+      </div>
+
+      <button class="analytics-link" (click)="openAnalytics()">
+        View full analytics
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+    </div>
+
+    <ng-template #balanceSkeleton>
+      <div class="chart-card skeleton-chart">
+        <div class="skeleton-header">
+          <ion-skeleton-text animated style="width:90px;height:11px;margin-bottom:8px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:120px;height:28px;"></ion-skeleton-text>
+        </div>
+        <div class="skeleton-bars-container">
+          <div class="skeleton-bar" *ngFor="let i of [1,2,3,4,5,6]">
+            <ion-skeleton-text animated></ion-skeleton-text>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="main-content">
+
+      <div class="total-summary-row" *ngIf="!isLoading">
+        <span class="summary-label">Total portfolio</span>
+        <span class="summary-value">₹{{ getTotalBalance() | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title">Your groups</span>
+        <span class="section-count" *ngIf="!isLoading">{{ groups.length }}</span>
+        <div class="h-line"></div>
+      </div>
+
+      <ng-container *ngIf="isLoading; else groupContent">
+        <app-skeleton-list [count]="4"></app-skeleton-list>
+      </ng-container>
+
+      <ng-template #groupContent>
+
+        <div class="group-list" *ngIf="groups.length > 0; else emptyState">
+          <div class="group-row" *ngFor="let group of groups" (click)="goToDetails(group)">
+            <div class="card-icon-wrapper" [ngClass]="getGroupColorClass(group.type)">
+              <ion-icon [name]="group.iconName || 'people-outline'"></ion-icon>
+            </div>
+
+            <div class="text-group">
+              <span class="group-name">{{ group.name }}</span>
+              <div class="group-meta">
+                <span>{{ group.type }}</span>
+                <span class="dot">&middot;</span>
+                <span>{{ group.month }}</span>
+              </div>
+            </div>
+
+            <div class="card-amount">
+              <span class="amount-value">₹{{ group.totalAmount | number:'1.0-0' }}</span>
+            </div>
+
+            <ion-icon name="chevron-forward-outline" class="row-chevron"></ion-icon>
+          </div>
+        </div>
+
+        <ng-template #emptyState>
+          <app-empty-state 
+            iconName="wallet-outline" 
+            title="No groups yet" 
+            message="Create your first group to start tracking expenses">
+          </app-empty-state>
+        </ng-template>
+
+      </ng-template>
+
+    </div>
+
+  </div>
+
+  <!-- FAB — must be a direct child of ion-content for slot="fixed" to work -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openAddExpense()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

@@ -1,17 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ExpenseService } from '../services/expense';
+import { ExpenseService } from '../core/services/expense';
 import { IonItemSliding, ModalController } from '@ionic/angular';
-import { AuthService } from '../services/auth-service';
-import { EditExpenseModal } from '../modals/edit-expense-modal/edit-expense-modal.component';
-import { SettleExpenseModalComponent, SettlementResponse } from '../modals/settle-expense-modal/settle-expense-modal.component';
-import { Toastservice } from '../services/toastservice';
-import { GlobalModalComponent } from '../modals/global-modal/global-modal.component';
+import { AuthService } from '../core/services/auth-service';
+import { EditExpenseModal } from '../shared/modals/edit-expense-modal/edit-expense-modal.component';
+import { SettleExpenseModalComponent, SettlementResponse } from '../shared/modals/settle-expense-modal/settle-expense-modal.component';
+import { Toastservice } from '../core/services/toastservice';
+import { GlobalModalComponent } from '../shared/modals/global-modal/global-modal.component';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import { GroupService } from '../services/group';
+import { GroupService } from '../core/services/group';
 import { Subscription, distinctUntilChanged, map } from 'rxjs';
-import { SettlementDetail } from '../models/Settlement/SettlementDetail';
-import { AddMemberModalComponent } from '../modals/add-member-modal/add-member-modal.component';
+import { SettlementDetail } from '../core/models/Settlement/SettlementDetail';
+import { AddMemberModalComponent } from '../shared/modals/add-member-modal/add-member-modal.component';
 
 interface Expense {
   expenseId: number;
@@ -73,7 +73,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const token = this.authService.getToken();
     if (token) {
       const decoded = this.authService.decodeToken(token);
-      this.currentUserId = decoded?.nameid ? +decoded.nameid : undefined;
+      let uid = decoded?.nameid || decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || decoded?.id || decoded?.userId || decoded?.sub;
+      this.currentUserId = uid ? +uid : undefined;
     }
 
     this.route.queryParamMap
@@ -314,7 +315,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
         preloadedSettlements,
         isPreloaded: preloadedSettlements.length > 0
       },
-      initialBreakpoint: 0.77,
+      breakpoints: [0, 0.65],
+      initialBreakpoint: 0.65,
     });
 
     await modal.present();

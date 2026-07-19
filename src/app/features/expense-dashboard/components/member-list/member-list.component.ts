@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
+import { FirstNamePipe } from '../../../../shared/pipes/first-name.pipe';
 
 @Component({
   selector: 'app-member-list',

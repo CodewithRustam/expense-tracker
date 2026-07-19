@@ -7,11 +7,11 @@ import {
   ApexLegend,
   ApexPlotOptions,
 } from 'ng-apexcharts';
-import { ExpenseService } from '../services/expense';
-import { MonthlyExpensesTrendResponse } from '../models/Expense/MonthlyExpensesTrendResponse';
-import { CategoryExpenses } from '../models/Expense/CategoryExpenses';
-import { TopSpend } from '../models/Expense/TopSpend';
-import { GroupService } from '../services/group';
+import { ExpenseService } from '../core/services/expense';
+import { MonthlyExpensesTrendResponse } from '../core/models/Expense/MonthlyExpensesTrendResponse';
+import { CategoryExpenses } from '../core/models/Expense/CategoryExpenses';
+import { TopSpend } from '../core/models/Expense/TopSpend';
+import { GroupService } from '../core/services/group';
 import { Subject, Subscription, from, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

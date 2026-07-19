@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from '../app/guards/auth-guard';
-import { RedirectGuard } from '../app/guards/redirect-guard';
+import { AuthGuard } from './core/guards/auth-guard';
+import { RedirectGuard } from './core/guards/redirect-guard';
 
 const routes: Routes = [
   {
@@ -21,17 +21,17 @@ const routes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule),
+    loadChildren: () => import('./features/auth/login/login.module').then(m => m.LoginPageModule),
     canActivate: [RedirectGuard]   // 👈 Added
   },
   {
     path: 'registration',
-    loadChildren: () => import('./registration/registration.module').then(m => m.RegistrationPageModule),
+    loadChildren: () => import('./features/auth/registration/registration.module').then(m => m.RegistrationPageModule),
     canActivate: [RedirectGuard]   // 👈 Added
   },
   {
     path: 'forgot-password',
-    loadChildren: () => import('../app/forgot-password/forgot-password-module').then(m => m.ForgotPasswordModule),
+    loadChildren: () => import('./features/auth/forgot-password/forgot-password-module').then(m => m.ForgotPasswordModule),
     canActivate: [RedirectGuard]   // 👈 Added
   },
   {
@@ -41,7 +41,7 @@ const routes: Routes = [
   },
   {
     path: 'reset-password',
-    loadChildren: () => import('./reset-password/reset-password.module').then(m => m.ResetPasswordPageModule),
+    loadChildren: () => import('./features/auth/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule),
     canActivate: [RedirectGuard]   // 👈 Optional: depends on your flow
   }
 ];

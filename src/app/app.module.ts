@@ -8,13 +8,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AddExpenseModalComponent } from './add-expense/add-expense.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CalendarPopoverComponent } from './calendar-popover/calendar-popover.component';
-import { AuthInterceptor } from './interceptors/auth-interceptor'; // Import the interceptor
+import { AuthInterceptor } from './core/interceptors/auth-interceptor'; // Import the interceptor
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { EditExpenseModal } from './modals/edit-expense-modal/edit-expense-modal.component';
-import { NotificationListModal } from './modals/notification-list-modal/notification-list-modal.component';
-import { SettleExpenseModalComponent } from './modals/settle-expense-modal/settle-expense-modal.component';
+import { EditExpenseModal } from './shared/modals/edit-expense-modal/edit-expense-modal.component';
+import { NotificationListModal } from './shared/modals/notification-list-modal/notification-list-modal.component';
+import { SettleExpenseModalComponent } from './shared/modals/settle-expense-modal/settle-expense-modal.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { AddMemberModalComponent } from './modals/add-member-modal/add-member-modal.component';
+import { AddMemberModalComponent } from './shared/modals/add-member-modal/add-member-modal.component';
 
 @NgModule({
   declarations: [

@@ -10,7 +10,7 @@ const routes: Routes = [
       {
         path: 'home',
         loadChildren: () =>
-          import('../home/home.module').then(m => m.HomePageModule)
+          import('../features/dashboard/home/home.module').then(m => m.HomePageModule)
       },
       {
         path: 'expenses',
@@ -20,12 +20,12 @@ const routes: Routes = [
       {
         path: 'profile',
         loadChildren: () =>
-          import('../profile/profile.module').then(m => m.ProfilePageModule)
+          import('../features/profile/profile.module').then(m => m.ProfilePageModule)
       },
       {
         path: 'history',
         loadChildren: () =>
-          import('../history/history.module').then(m => m.HistoryPageModule)
+          import('../features/history/history.module').then(m => m.HistoryPageModule)
       },
       {
         path: 'charts',

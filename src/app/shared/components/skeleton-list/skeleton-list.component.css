@@ -1,0 +1,23 @@
+.skeleton-list {
+  background: transparent;
+  padding: 0;
+
+  .skeleton-item {
+    --background: transparent;
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    margin-bottom: 12px;
+    background: var(--surface, var(--ion-color-step-100, #1e1e1e));
+    border: 1px solid var(--border-hairline, transparent);
+    box-shadow: var(--shadow-card, none);
+    border-radius: 16px;
+
+    ion-avatar {
+      margin-right: 16px;
+      
+      ion-skeleton-text {
+        border-radius: 12px;
+      }
+    }
+  }
+}
