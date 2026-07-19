@@ -76,11 +76,11 @@
       </div>
     </div>
 
-    <!-- TRANSACTION LEDGER SUB-COMPONENT -->
     <app-transaction-ledger
       [isLoadingExpenses]="isLoadingExpenses"
       [users]="users"
       [selectedUser]="selectedUser"
+      [currentUserId]="currentUserId"
       [groupedExpensesMap]="groupedExpensesMap"
       (onEditExpense)="openEditExpenseModal($event)"
       (onDeleteExpense)="deleteExpense($event.expense, $event.slidingItem)">

@@ -22,7 +22,7 @@ export class ExpenseService {
   refresh$ = this.refreshSubject.asObservable();
 
   constructor(
-    private http: HttpClient // AuthService is removed since the Interceptor handles tokens
+    private http: HttpClient
   ) { }
 
   // =====================================

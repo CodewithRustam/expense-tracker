@@ -1278,6 +1278,9 @@ app-groups .chart-card .apexcharts-legend {
 .card-amount {
   flex-shrink: 0;
   text-align: right;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink-1);
 }
 
 .amount-value {
@@ -1660,7 +1663,7 @@ ion-fab-button ion-icon {
 
 .hub-personal-zone .status-stack .st-val {
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.2px;
 }
 
@@ -1764,66 +1767,299 @@ ion-fab-button ion-icon {
   padding: 0 16px 8px;
 }
 
+/* ==========================================================================
+   Timeline Ledger Layout — Premium Design
+   ========================================================================== */
+.timeline-ledger-container {
+  position: relative;
+  padding: 8px 14px 20px 14px;
+}
+
+/* Override: Timeline card amounts use neutral color, not debit/credit green */
+.timeline-card .tx-amount,
+.timeline-card .tx-amount.pos {
+  color: var(--ink-1) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Continuous vertical timeline line */
+.timeline-ledger-container::before {
+  content: '';
+  position: absolute;
+  top: 42px;
+  bottom: 20px;
+  left: 31px;
+  /* center of 30px node + 14px padding */
+  width: 1.5px;
+  background: linear-gradient(to bottom, var(--border-hairline), transparent);
+  z-index: 1;
+}
+
+/* Each date group */
+.timeline-group {
+  position: relative;
+  z-index: 2;
+}
+
+/* Date label above node */
+.timeline-date-header {
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.timeline-date-label {
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-3);
+}
+
+/* Row: node + card side by side */
+.timeline-row-content {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Circular icon node sitting on timeline line */
+.timeline-node-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
+  margin-top: 1px;
+}
+
+.timeline-node-circle i {
+  font-size: 0.95rem;
+}
+
+/* The grouped transaction card */
+.timeline-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* Ion-item inside timeline card — tight, controlled padding */
+.timeline-card .ledger-glass-panel {
+  --background: transparent !important;
+  --min-height: auto !important;
+  --padding-top: 8px !important;
+  --padding-bottom: 8px !important;
+  --padding-start: 12px !important;
+  --padding-end: 12px !important;
+  --inner-padding-end: 0 !important;
+}
+
+/* Ledger-slider inside timeline card */
+.timeline-card .ledger-slider {
+  padding: 0;
+}
+
+.timeline-card .ledger-slider .ledger-glass-panel {
+  position: relative;
+  --min-height: auto;
+}
+
+/* Divider between items in same card */
+.timeline-card .ledger-slider:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tx-main-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tx-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.tx-top-row .tx-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-1);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.tx-top-row .tx-amount {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-1) !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tx-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tx-bottom-row .share-amount {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* Timeline Category Pill Badges */
+.category-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.2px;
+}
+
+.category-badge.badge-misc {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.category-badge.badge-utility {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+
+.category-badge.badge-veg {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
+
+.category-badge.badge-dairy {
+  background: rgba(168, 162, 158, 0.15);
+  color: #d6d3d1;
+}
+
+.category-badge.badge-cook {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.category-badge.badge-default {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+}
+
 .ledger-glass-panel {
-  --background: var(--surface-sunken) !important;
-  --background-activated: var(--border-hairline) !important;
+  --background: transparent !important;
+  --background-activated: transparent !important;
   --background-focused: transparent !important;
   --background-hover: transparent !important;
   --ripple-color: transparent !important;
   --box-shadow: none !important;
 }
 
-.ledger-card {
-  padding: 0;
+/* ── NEW: Zero-padding ion-item wrapper ───────────────────────── */
+/* ion-item acts only as swipe host; visual design lives in tx-content-row */
+.tl-slide-item {
+  --background: transparent;
+  display: block;
 }
 
-.ledger-group-date {
-  font-size: 0.68rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--ink-3);
-  padding: 16px 4px 6px;
+.tl-item-zero {
+  --background: transparent !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --padding-top: 0 !important;
+  --padding-bottom: 0 !important;
+  --inner-padding-end: 0 !important;
+  --inner-padding-start: 0 !important;
+  --min-height: auto !important;
+  --ripple-color: transparent !important;
+  --box-shadow: none !important;
 }
 
-.ledger-slider {
-  padding: 0;
+/* Actual visible row — we own 100% of the padding here */
+.tx-content-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
 }
 
-.ledger-slider .ledger-glass-panel {
-  position: relative;
-  --min-height: auto;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  --padding-start: 4px;
-  --padding-end: 4px;
-  transition: background 0.15s ease, transform 0.28s cubic-bezier(0.36, 0.66, 0.04, 1);
+.tx-content-row.no-border {
+  border-bottom: none;
 }
 
-.timeline-item {
-  animation: rowIn 0.35s ease backwards;
+.tx-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
-.ledger-slider .ledger-glass-panel:active {
-  background: var(--border-hairline) !important;
+.tx-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.ledger-slider:not(:last-child) .ledger-glass-panel::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 54px;
-  right: 4px;
-  height: 1px;
-  background: var(--border-hairline);
+.tx-amt {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 1px;
+  /* align with title baseline */
 }
+
+.tx-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.share-chip {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* ──────────────────────────────────────────────────────────────── */
 
 .transaction-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
-  gap: 14px;
+  gap: 10px;
 }
 
 .row-left {
@@ -3157,7 +3393,8 @@ ion-datetime {
 }
 
 .premium-close-btn ion-icon {
-  font-size: 1.35rem; /* larger, clearer Close 'X' icon */
+  font-size: 1.35rem;
+  /* larger, clearer Close 'X' icon */
   color: var(--ink-2, #64748b) !important;
 }
 
@@ -3171,13 +3408,16 @@ ion-datetime {
   .premium-pill-btn {
     background: rgba(165, 180, 252, 0.15);
   }
+
   .premium-pill-btn ion-icon,
   .premium-pill-btn span {
     color: #a5b4fc !important;
   }
+
   .premium-close-btn {
     background: rgba(255, 255, 255, 0.08);
   }
+
   .premium-close-btn ion-icon {
     color: #ffffff !important;
   }
@@ -3272,19 +3512,24 @@ ion-datetime {
 }
 
 ion-item-sliding {
-  margin-bottom: 14px;
-  border-radius: var(--radius-lg);
   background: transparent !important;
 }
 
 ion-item-options {
-  background: var(--debit) !important;
-  border-radius: var(--radius-lg);
-  margin-bottom: 1px;
+  border-radius: 0;
+  background: transparent !important;
+  overflow: hidden;
 }
 
+/* Edit action — indigo/blue */
+.swipe-btn.swipe-edit {
+  --background: #4f46e5 !important;
+  height: 100%;
+}
+
+/* Delete action — red */
 .swipe-btn.swipe-delete {
-  --background: transparent !important;
+  --background: #e53935 !important;
   height: 100%;
 }
 
@@ -3294,28 +3539,21 @@ ion-item-options {
   align-items: center;
   justify-content: center;
   height: 100%;
-  width: 76px;
-  gap: 4px;
+  width: 68px;
+  gap: 3px;
 }
 
 .swipe-content ion-icon {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   color: #ffffff !important;
-  animation: trashPulse 1.5s infinite ease-in-out;
 }
 
 .swipe-content span {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: #ffffff !important;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-@keyframes trashPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  letter-spacing: 0.6px;
 }
 
 /* Card Elements Layout */
@@ -3495,7 +3733,8 @@ ion-item-options {
   animation: bellSway 3s infinite ease-in-out;
 }
 
-.glow-ring-1, .glow-ring-2 {
+.glow-ring-1,
+.glow-ring-2 {
   position: absolute;
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 50%;
@@ -3529,12 +3768,31 @@ ion-item-options {
 }
 
 @keyframes bellSway {
-  0%, 100% { transform: rotate(0); }
-  15% { transform: rotate(15deg); }
-  30% { transform: rotate(-12deg); }
-  45% { transform: rotate(9deg); }
-  60% { transform: rotate(-6deg); }
-  75% { transform: rotate(3deg); }
+
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  15% {
+    transform: rotate(15deg);
+  }
+
+  30% {
+    transform: rotate(-12deg);
+  }
+
+  45% {
+    transform: rotate(9deg);
+  }
+
+  60% {
+    transform: rotate(-6deg);
+  }
+
+  75% {
+    transform: rotate(3deg);
+  }
 }
 
 @keyframes rippleGlow {
@@ -3542,6 +3800,7 @@ ion-item-options {
     transform: scale(0.85);
     opacity: 1;
   }
+
   100% {
     transform: scale(1.35);
     opacity: 0;

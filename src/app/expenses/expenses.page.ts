@@ -53,7 +53,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
   isNextMonthDisabled = false;
   isPrevMonthDisabled = false;
   isSticky: boolean = false;
-  private currentUserId: number | undefined;
+  currentUserId: number | undefined;
   groupedExpensesMap: { [userId: number]: ExpenseDateGroup[] } = {};
 
   settlementDataByUser: { [memberId: number]: SettlementDetail[] } = {};
