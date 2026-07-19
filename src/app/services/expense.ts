@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable, Subject, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Group } from '../models/group.model';
@@ -15,14 +15,13 @@ import { SettlementDetail } from '../models/Settlement/SettlementDetail';
   providedIn: 'root'
 })
 export class ExpenseService {
-  private apiUrl = 'https://financetracker.runasp.net/api/Expenses';
 
   // ✅ Single Global Refresh Stream
   private refreshSubject = new Subject<void>();
   refresh$ = this.refreshSubject.asObservable();
 
   constructor(
-    private http: HttpClient
+    private apiService: ApiService
   ) { }
 
   // =====================================
@@ -47,27 +46,27 @@ export class ExpenseService {
   // =====================================
 
   getExpenseMonths(): Observable<{ success: boolean; message: string; data: string[] }> {
-    return this.http.get<{ success: boolean; message: string; data: string[] }>(
-      `${this.apiUrl}/get-userexpesne-months`
+    return this.apiService.get<{ success: boolean; message: string; data: string[] }>(
+      `Expenses/get-userexpesne-months`
     );
   }
 
   getGroups(): Observable<{ success: boolean; data?: Group[] }> {
-    return this.http.get<{ success: boolean; data?: Group[] }>(
-      `${this.apiUrl}/groups`
+    return this.apiService.get<{ success: boolean; data?: Group[] }>(
+      `Expenses/groups`
     );
   }
 
   getExpenses(roomId: number, month?: string): Observable<ExpenseResponse> {
-    let url = `${this.apiUrl}/get-room-expenses?roomId=${roomId}`;
+    let url = `Expenses/get-room-expenses?roomId=${roomId}`;
     if (month) url += `&month=${month}`;
 
-    return this.http.get<ExpenseResponse>(url);
+    return this.apiService.get<ExpenseResponse>(url);
   }
 
   addExpense(expense: ApiExpense): Observable<AddExpenseResponse> {
-    return this.http.post<AddExpenseResponse>(
-      `${this.apiUrl}/add-expense`,
+    return this.apiService.post<AddExpenseResponse>(
+      `Expenses/add-expense`,
       expense
     ).pipe(
       tap(() => this.triggerRefresh()),
@@ -76,8 +75,8 @@ export class ExpenseService {
   }
 
   updateExpense(expense: ApiExpense): Observable<AddExpenseResponse> {
-    return this.http.post<AddExpenseResponse>(
-      `${this.apiUrl}/update-expense`,
+    return this.apiService.post<AddExpenseResponse>(
+      `Expenses/update-expense`,
       expense
     ).pipe(
       tap(() => this.triggerRefresh()),
@@ -86,8 +85,8 @@ export class ExpenseService {
   }
 
   deleteExpense(id: number): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/delete-expense/${id}`
+    return this.apiService.delete<{ success: boolean; message: string }>(
+      `Expenses/delete-expense/${id}`
     ).pipe(
       tap(() => this.triggerRefresh()),
       catchError(this.handleError('Failed to delete expense.'))
@@ -95,8 +94,8 @@ export class ExpenseService {
   }
 
   getUserExpenses(month: string): Observable<{ userExpenseResponse: UserExpenseResponse[] }> {
-    return this.http.get<ExpenseResponse>(
-      `${this.apiUrl}/get-user-expenses?month=${month}`
+    return this.apiService.get<ExpenseResponse>(
+      `Expenses/get-user-expenses?month=${month}`
     ).pipe(
       map(response => ({
         userExpenseResponse: response.data as UserExpenseResponse[]
@@ -105,18 +104,18 @@ export class ExpenseService {
   }
 
   getMonthlyExpensesTrend(roomId: number, month: string): Observable<MonthlyExpensesTrendResponse> {
-    return this.http.get<{ data: MonthlyExpensesTrendResponse }>(
-      `${this.apiUrl}/trend-expenses?roomId=${roomId}&month=${month}`
+    return this.apiService.get<{ data: MonthlyExpensesTrendResponse }>(
+      `Expenses/trend-expenses?roomId=${roomId}&month=${month}`
     ).pipe(
       map(response => response.data)
     );
   }
 
   getSettlementDetails(roomId: number, memberId: number, month?: string): Observable<any> {
-    let url = `${this.apiUrl}/get-settlement-details?roomId=${roomId}&memberId=${memberId}`;
+    let url = `Expenses/get-settlement-details?roomId=${roomId}&memberId=${memberId}`;
     if (month) url += `&month=${month}`;
 
-    return this.http.get<any>(url);
+    return this.apiService.get<any>(url);
   }
 
   settleBalance(selectedMember: SettlementDetail, roomId: number, payerName: string, monthLabel: string): Observable<any> {
@@ -129,8 +128,8 @@ export class ExpenseService {
       settlementMonth: new Date()
     };
 
-    return this.http.post<any>(
-      `${this.apiUrl}/expenses-settle`,
+    return this.apiService.post<any>(
+      `Expenses/expenses-settle`,
       payload
     ).pipe(
       tap(() => this.triggerRefresh()),
@@ -139,8 +138,8 @@ export class ExpenseService {
   }
 
   getRoomTrend(roomId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/trend-home-expenses?roomId=${roomId}`
+    return this.apiService.get<any>(
+      `Expenses/trend-home-expenses?roomId=${roomId}`
     );
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable, BehaviorSubject, Subject } from 'rxjs'; // Added Subject
 import { tap, map } from 'rxjs/operators';
 import { AppNotification } from '../models/app-notification';
@@ -10,7 +10,6 @@ import { AuthService } from './auth-service';
 })
 export class NotificationService {
 
-  private baseUrl = 'https://financetracker.runasp.net/api/notifications';
 
   // ✅ Global Refresh Stream (The missing part)
   private refreshSubject = new Subject<void>();
@@ -21,7 +20,7 @@ export class NotificationService {
   public unreadCount$ = this.unreadCountSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
+    private apiService: ApiService,
     private authService: AuthService
   ) { }
 
@@ -54,12 +53,12 @@ export class NotificationService {
   // ================================
 
   registerPushToken(deviceToken: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/app-register`, { deviceToken });
+    return this.apiService.post<any>(`notifications/app-register`, { deviceToken });
   }
 
   getAll(): Observable<AppNotification[]> {
-    return this.http
-      .get<any>(`${this.baseUrl}/get-notifications`)
+    return this.apiService
+      .get<any>(`notifications/get-notifications`)
       .pipe(
         map(res => {
           return Array.isArray(res) ? res : (res?.data || []);
@@ -72,8 +71,8 @@ export class NotificationService {
   }
 
   markAllAsRead(): Observable<any> {
-    return this.http
-      .put(`${this.baseUrl}/mark-all-read?userId=${this.userId}`, {})
+    return this.apiService
+      .put<any>(`notifications/mark-all-read?userId=${this.userId}`, {})
       .pipe(
         tap(() => {
           this.setUnreadCount(0);
@@ -83,8 +82,8 @@ export class NotificationService {
   }
 
   clearAll(): Observable<any> {
-    return this.http
-      .delete(`${this.baseUrl}/clear-all?userId=${this.userId}`)
+    return this.apiService
+      .delete<any>(`notifications/clear-all?userId=${this.userId}`)
       .pipe(
         tap(() => {
           this.setUnreadCount(0);
@@ -94,8 +93,8 @@ export class NotificationService {
   }
 
   deleteNotification(id: number): Observable<any> {
-    return this.http
-      .delete(`${this.baseUrl}/delete-notification?notificationId=${id}`)
+    return this.apiService
+      .delete<any>(`notifications/delete-notification?notificationId=${id}`)
       .pipe(
         tap(() => {
           this.decreaseUnreadCount();
@@ -111,7 +110,7 @@ export class NotificationService {
       Body: body
     };
 
-    return this.http.post(`${this.baseUrl}/send`, payload).pipe(
+    return this.apiService.post<any>(`notifications/send`, payload).pipe(
       tap(() => this.triggerRefresh()) // ✅ Refresh when new notification is sent
     );
   }

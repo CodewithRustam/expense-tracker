@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuthService } from './auth-service';
@@ -21,14 +21,13 @@ export interface CreateRoomPayload {
 })
 export class GroupService {
 
-  private baseUrl = 'https://financetracker.runasp.net/api/rooms';
 
   // 🔥 Global Refresh Stream
   private refreshSubject = new Subject<void>();
   refresh$ = this.refreshSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
+    private apiService: ApiService,
     private authService: AuthService
   ) { }
 
@@ -45,33 +44,33 @@ export class GroupService {
   // ================================
 
   getGroups(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/get-rooms`);
+    return this.apiService.get<any>(`rooms/get-rooms`);
   }
 
   getGroupById(id: number, month?: string): Observable<any> {
-    const url = month
-      ? `${this.baseUrl}/details/${id}?month=${month}`
-      : `${this.baseUrl}/details/${id}`;
+    const endpoint = month
+      ? `rooms/details/${id}?month=${month}`
+      : `rooms/details/${id}`;
 
-    return this.http.get<any>(url);
+    return this.apiService.get<any>(endpoint);
   }
 
   // 🔥 UPDATED CREATE ENDPOINT 🔥
   createGroup(payload: CreateRoomPayload): Observable<any> {
     // Hits: POST /api/rooms/create
-    return this.http.post(`${this.baseUrl}/create`, payload).pipe(
+    return this.apiService.post<any>(`rooms/create`, payload).pipe(
       tap(() => this.triggerRefresh())
     );
   }
 
   updateGroup(id: number, group: Partial<Group>): Observable<any> {
-    return this.http.put(`${this.baseUrl}/update/${id}`, group).pipe(
+    return this.apiService.put<any>(`rooms/update/${id}`, group).pipe(
       tap(() => this.triggerRefresh())
     );
   }
 
   deleteGroup(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/delete/${id}`).pipe(
+    return this.apiService.delete<any>(`rooms/delete/${id}`).pipe(
       tap(() => this.triggerRefresh())
     );
   }

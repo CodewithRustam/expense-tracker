@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { NavController } from '@ionic/angular';
 
@@ -14,15 +14,14 @@ export interface ApiResponse {
 })
 export class AuthService {
   private tokenKey = 'jwtToken';
-  private apiBase = 'https://financetracker.runasp.net/api/account';
 
-  constructor(private http: HttpClient, private navCtrl: NavController) { }
+  constructor(private apiService: ApiService, private navCtrl: NavController) { }
 
   login(userName: string, password: string, rememberMe: boolean): Observable<boolean> {
     const payload = { userName, password };
 
-    return this.http.post<{ success: boolean; message: string; token?: string }>(
-      `${this.apiBase}/login`,
+    return this.apiService.post<{ success: boolean; message: string; token?: string }>(
+      'account/login',
       payload
     ).pipe(
       tap(res => {
@@ -42,8 +41,8 @@ export class AuthService {
   register(userName: string, email: string, password: string, confirmPassword: string): Observable<boolean> {
     const payload = { userName, email, password, confirmPassword };
 
-    return this.http.post<{ success: boolean; message: string }>(
-      `${this.apiBase}/register`,
+    return this.apiService.post<{ success: boolean; message: string }>(
+      'account/register',
       payload
     ).pipe(
       map(res => res.success)
@@ -54,10 +53,9 @@ export class AuthService {
     const payload = { Email: email }; // Use correct case to match backend
     console.log('Forgot Password payload:', payload);
 
-    return this.http.post<{ success: boolean; message: string; data?: any }>(
-      `${this.apiBase}/forgot-password`,
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
+    return this.apiService.post<{ success: boolean; message: string; data?: any }>(
+      'account/forgot-password',
+      payload
     ).pipe(
       catchError(err => {
         console.error('Forgot Password API error:', err);
@@ -66,15 +64,14 @@ export class AuthService {
     );
   }
   verifyResetPasswordLink(token: string): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.apiBase}/verify-resetpassword-link`, { shortCode: token });
+    return this.apiService.post<ApiResponse>('account/verify-resetpassword-link', { shortCode: token });
   }
   resetPassword(token: string, password: string): Observable<ApiResponse> {
     const payload = { token, password };
 
-    return this.http.post<ApiResponse>(
-      `${this.apiBase}/reset-password`,
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
+    return this.apiService.post<ApiResponse>(
+      'account/reset-password',
+      payload
     );
   }
   // Logout
