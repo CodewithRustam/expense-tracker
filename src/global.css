@@ -1411,6 +1411,7 @@ ion-fab-button ion-icon {
   align-items: center;
   gap: 8px;
   min-width: 0;
+  flex: 1;
 }
 
 .room-name {
@@ -2167,26 +2168,42 @@ ion-fab-button ion-icon {
 }
 
 .empty-ledger {
-  padding: 56px 20px;
-  color: var(--ink-3);
+  padding: 64px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-.empty-ledger i {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+.empty-ledger i,
+.empty-ledger ion-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
   background: var(--surface-sunken);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  color: var(--ink-3);
+  font-size: 2rem;
+  color: var(--ink-2);
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .empty-ledger p {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: var(--ink-1);
+  letter-spacing: -0.2px;
+}
+
+.empty-ledger .sub-msg {
   font-size: 0.85rem;
-  font-weight: 500;
-  margin: 0;
+  color: var(--ink-3);
+  max-width: 200px;
+  line-height: 1.4;
 }
 
 .room-name-skeleton {

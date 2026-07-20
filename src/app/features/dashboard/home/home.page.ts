@@ -6,6 +6,7 @@ import { Group } from '../../../core/models/group.model';
 import { GroupService } from '../../../core/services/group';
 import { AuthService } from '../../../core/services/auth-service';
 import { NotificationService } from '../../../core/services/notification-service';
+import { AddGroupModalComponent } from '../../../shared/modals/add-group-modal/add-group-modal.component';
 import { NotificationListModal } from '../../../shared/modals/notification-list-modal/notification-list-modal.component';
 import { AppComponent } from '../../../app.component';
 import { ExpenseService } from '../../../core/services/expense';
@@ -135,6 +136,16 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.refreshSubscription?.unsubscribe();
+  }
+
+  async openAddGroupModal() {
+    const modal = await this.modalCtrl.create({
+      component: AddGroupModalComponent,
+      breakpoints: [0, 0.5, 0.9],
+      initialBreakpoint: 0.5,
+      cssClass: 'bottom-sheet-modal'
+    });
+    await modal.present();
   }
 
   applyChartData() {

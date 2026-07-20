@@ -1,0 +1,50 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Remove User</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="edit-expense-content">
+  <div class="modal-sheet-content scroll-fix-wrapper">
+
+    <div class="sheet-section-label" style="text-align: center; margin-bottom: 24px; font-size: 1.1rem; color: var(--ion-color-medium);">
+      Select a user to remove from this room
+    </div>
+
+    <div class="server-error" *ngIf="serverErrorMsg">{{ serverErrorMsg }}</div>
+
+    <div class="room-container-inline" *ngIf="users && users.length > 0">
+      <div class="room-inline-scroll">
+        <div class="room-inline-track">
+          <div *ngFor="let user of users" class="room-chip" 
+               [class.active]="removingUserId === user.memberId"
+               (click)="selectUser(user.memberId)">
+            <div class="chip-avatar">{{ user.memberName ? user.memberName.charAt(0).toUpperCase() : '?' }}</div>
+            <span class="chip-name">{{ user.memberName }}</span>
+            <div class="active-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Button -->
+    <div class="footer-pad" *ngIf="users && users.length > 0" style="margin-top: 30px;">
+      <ion-button expand="block" class="main-btn" color="danger" [disabled]="!removingUserId || isSubmitting" (click)="confirmRemove()">
+        <ion-spinner name="dots" *ngIf="isSubmitting"></ion-spinner>
+        <span *ngIf="!isSubmitting">Confirm Remove</span>
+      </ion-button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!users || users.length === 0" class="empty-state fade-in" style="padding: 40px 20px; text-align: center;">
+      <ion-icon name="people-outline" style="font-size: 48px; color: var(--ion-color-medium);"></ion-icon>
+      <p style="color: var(--ion-color-medium); margin-top: 12px;">No users available to remove.</p>
+    </div>
+
+  </div>
+</ion-content>

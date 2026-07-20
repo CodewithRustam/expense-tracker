@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ExpenseService } from '../core/services/expense';
-import { IonItemSliding, ModalController } from '@ionic/angular';
+import { IonItemSliding, ModalController, AlertController, NavController } from '@ionic/angular';
 import { AuthService } from '../core/services/auth-service';
 import { EditExpenseModal } from '../shared/modals/edit-expense-modal/edit-expense-modal.component';
 import { SettleExpenseModalComponent, SettlementResponse } from '../shared/modals/settle-expense-modal/settle-expense-modal.component';
@@ -12,6 +12,7 @@ import { GroupService } from '../core/services/group';
 import { Subscription, distinctUntilChanged, map } from 'rxjs';
 import { SettlementDetail } from '../core/models/Settlement/SettlementDetail';
 import { AddMemberModalComponent } from '../shared/modals/add-member-modal/add-member-modal.component';
+import { RemoveMemberModalComponent } from '../shared/modals/remove-member-modal/remove-member-modal.component';
 
 interface Expense {
   expenseId: number;
@@ -46,6 +47,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private modalCtrl = inject(ModalController);
   private groupService = inject(GroupService);
+  private alertCtrl = inject(AlertController);
+  private navCtrl = inject(NavController);
 
   // Signal State
   months = signal<string[]>([]);
@@ -448,8 +451,81 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     await modal.present();
     const { data } = await modal.onDidDismiss();
+    
+    if (data?.added) {
+      if (this.selectedMonth()) {
+        this.loadMonthlyExpenses();
+      } else {
+        this.loadInitialData();
+      }
+    }
   }
 
-  openRoomSettings() {
+  async removeUser() {
+    const currentRoomId = this.roomId();
+    if (!currentRoomId) return;
+
+    // Optional: filter out the current user if they shouldn't remove themselves
+    const otherUsers = this.users().filter(u => u.memberId !== this.currentUserId());
+
+    const modal = await this.modalCtrl.create({
+      component: RemoveMemberModalComponent,
+      componentProps: { 
+        roomId: currentRoomId,
+        users: otherUsers
+      },
+      breakpoints: [0, 0.5, 0.75, 1],
+      initialBreakpoint: 0.5,
+    });
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.removed) {
+      if (this.selectedMonth()) {
+        this.loadMonthlyExpenses();
+      } else {
+        this.loadInitialData();
+      }
+    }
+  }
+
+  async deleteGroup() {
+    const currentRoomId = this.roomId();
+    if (!currentRoomId) return;
+
+    const modal = await this.modalCtrl.create({
+      component: GlobalModalComponent,
+      backdropDismiss: true,
+      cssClass: 'global-modal',
+      mode: 'ios',
+      componentProps: {
+        message: 'Are you sure you want to completely delete this room? This action cannot be undone.',
+        confirmText: 'Delete',
+        danger: true
+      }
+    });
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+
+    if (data === true) {
+      this.isLoading.set(true);
+      this.groupService.deleteGroup(currentRoomId).subscribe({
+        next: async (res) => {
+          this.isLoading.set(false);
+          if (res.success || res.isSuccess || res.Success) {
+            this.toast.success('Group deleted successfully');
+            this.navCtrl.navigateRoot('/tabs/home');
+          } else {
+            this.toast.error(res.message || res.Message || 'Failed to delete group');
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.toast.error(err.error?.message || err.error?.Message || 'Failed to delete group');
+        }
+      });
+    }
   }
 }

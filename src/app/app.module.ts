@@ -15,6 +15,7 @@ import { NotificationListModal } from './shared/modals/notification-list-modal/n
 import { SettleExpenseModalComponent } from './shared/modals/settle-expense-modal/settle-expense-modal.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { AddMemberModalComponent } from './shared/modals/add-member-modal/add-member-modal.component';
+import { RemoveMemberModalComponent } from './shared/modals/remove-member-modal/remove-member-modal.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { AddMemberModalComponent } from './shared/modals/add-member-modal/add-me
     EditExpenseModal, 
     NotificationListModal, 
     SettleExpenseModalComponent, 
-    AddMemberModalComponent
+    AddMemberModalComponent,
+    RemoveMemberModalComponent
   ],
   imports: [
     BrowserModule,

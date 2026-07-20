@@ -20,10 +20,15 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       </div>
     </div>
     
-    <button class="action-icon" (click)="onNotificationClick()" aria-label="Notifications">
-      <ion-icon name="notifications-outline"></ion-icon>
-      <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
-    </button>
+    <div class="actions-group" style="display: flex; gap: 10px;">
+      <button class="action-icon" (click)="onAddGroupClick()" aria-label="Add Group">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </button>
+      <button class="action-icon" (click)="onNotificationClick()" aria-label="Notifications">
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+      </button>
+    </div>
   `,
   styleUrls: ['./user-header.component.css']
 })
@@ -36,6 +41,7 @@ export class UserHeaderComponent {
 
   @Output() avatarClick = new EventEmitter<void>();
   @Output() notificationClick = new EventEmitter<void>();
+  @Output() addGroupClick = new EventEmitter<void>();
 
   onAvatarClick() {
     this.avatarClick.emit();
@@ -43,5 +49,9 @@ export class UserHeaderComponent {
 
   onNotificationClick() {
     this.notificationClick.emit();
+  }
+
+  onAddGroupClick() {
+    this.addGroupClick.emit();
   }
 }

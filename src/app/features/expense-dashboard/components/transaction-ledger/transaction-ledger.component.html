@@ -93,8 +93,9 @@
   <!-- EMPTY STATE -->
   <ng-container *ngIf="!isLoadingExpenses && !hasExpenses()">
     <div class="empty-ledger">
-      <i class="fa-solid fa-ghost"></i>
-      <p>No transactions this month</p>
+      <ion-icon name="receipt-outline"></ion-icon>
+      <p>You're all caught up!</p>
+      <span class="sub-msg">No transactions to show for this month</span>
     </div>
   </ng-container>
 

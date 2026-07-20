@@ -1,0 +1,107 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Create New Group</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="close-btn">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="modal-sheet-content">
+    <p class="modal-sheet-subtitle">Set up your group and invite members</p>
+
+    <form [formGroup]="groupForm" (ngSubmit)="onCreateGroup()">
+
+      <!-- Group Name -->
+      <div class="input-row">
+        <div class="icon-square primary-tint">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <div class="input-body" [class.has-error]="f['name'].invalid && f['name'].touched">
+          <ion-label>Group Name</ion-label>
+          <input type="text" placeholder="Enter Group Name" formControlName="name" class="native-input" />
+        </div>
+      </div>
+      <div class="field-error" *ngIf="f['name'].invalid && f['name'].touched">
+        <span *ngIf="f['name'].errors?.['required']">Group name is required.</span>
+        <span *ngIf="f['name'].errors?.['minlength']">Minimum 3 characters required.</span>
+      </div>
+
+      <!-- Members Section Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px 20px 8px 20px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--ion-color-dark);">Members (Optional)</h3>
+        <ion-button fill="clear" size="small" (click)="addMember()"
+          style="--padding-start: 8px; --padding-end: 8px; font-weight: 600; margin: 0;">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon> Add
+        </ion-button>
+      </div>
+
+      <!-- Members FormArray -->
+      <div formArrayName="members">
+        @for (member of members.controls; track $index; let i = $index) {
+
+        <div class="divider" style="margin-left: 0"></div>
+
+        <div [formGroupName]="i">
+          <!-- Member Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 0 20px;">
+            <ion-label color="medium"
+              style="font-weight: 500; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase;">
+              Member {{ i + 1 }}
+            </ion-label>
+            <ion-button fill="clear" color="danger" size="small" (click)="removeMember(i)"
+              style="margin: 0; height: 24px; --padding-start: 0; --padding-end: 0;">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+
+          <!-- Member Name -->
+          <div class="input-row">
+            <div class="icon-square success-tint">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="input-body" [class.has-error]="member.get('name')?.invalid && member.get('name')?.touched">
+              <ion-label>Name</ion-label>
+              <input type="text" placeholder="Enter Name" formControlName="name" class="native-input" />
+            </div>
+          </div>
+          <div class="field-error" *ngIf="member.get('name')?.invalid && member.get('name')?.touched">
+            <span *ngIf="member.get('name')?.errors?.['required']">Name required.</span>
+            <span *ngIf="member.get('name')?.errors?.['minlength']">Min 2 chars.</span>
+            <span *ngIf="member.get('name')?.errors?.['pattern']">Letters only.</span>
+          </div>
+
+          <!-- Member Email -->
+          <div class="input-row">
+            <div class="icon-square warning-tint">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <div class="input-body" [class.has-error]="member.get('email')?.invalid && member.get('email')?.touched">
+              <ion-label>Email</ion-label>
+              <input type="email" placeholder="Enter Email" formControlName="email" class="native-input" />
+            </div>
+          </div>
+          <div class="field-error" *ngIf="member.get('email')?.invalid && member.get('email')?.touched">
+            <span *ngIf="member.get('email')?.errors?.['required']">Email required.</span>
+            <span *ngIf="member.get('email')?.errors?.['email']">Invalid email.</span>
+          </div>
+
+        </div>
+        }
+      </div>
+
+      <div class="server-error" *ngIf="serverErrorMsg" style="padding: 0 16px;">{{ serverErrorMsg }}</div>
+
+      <div class="footer-pad" style="padding: 16px;">
+        <ion-button expand="block" type="submit" class="main-btn" [disabled]="groupForm.invalid || isSubmitting">
+          <ion-spinner name="dots" *ngIf="isSubmitting"></ion-spinner>
+          <span *ngIf="!isSubmitting">Create Group</span>
+        </ion-button>
+      </div>
+
+    </form>
+  </div>
+</ion-content>

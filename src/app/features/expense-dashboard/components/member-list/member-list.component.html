@@ -10,7 +10,8 @@
         <span class="chip-name">{{ u.memberName | firstName }}</span>
       </div>
 
-      <div class="member-chip add-chip" *ngIf="isNextMonthDisabled" (click)="addMember()" role="button" aria-label="Add member">
+      <div class="member-chip add-chip" *ngIf="isNextMonthDisabled" (click)="addMember()" role="button"
+        aria-label="Add member">
         <div class="avatar-sq add-sq"><i class="fa-solid fa-plus"></i></div>
         <span class="chip-name">Add</span>
       </div>
@@ -20,6 +21,7 @@
 
 <ng-template #membersSkeleton>
   <div class="member-chip" *ngFor="let i of [1,2,3]">
-    <ion-skeleton-text animated class="skeleton-avatar" style="width: 40px; height: 40px; border-radius: 12px; margin: 0;"></ion-skeleton-text>
+    <ion-skeleton-text animated class="skeleton-avatar"
+      style="width: 40px; height: 40px; border-radius: 12px; margin: 0;"></ion-skeleton-text>
   </div>
 </ng-template>

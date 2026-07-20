@@ -15,6 +15,12 @@ export interface CreateRoomPayload {
   members: InviteMemberPayload[];
 }
 
+export interface AddMemberPayload {
+  roomId: number;
+  name: string;
+  email: string;
+}
+
 interface GroupState {
   groups: Group[];
   isLoading: boolean;
@@ -101,8 +107,20 @@ export class GroupService {
     );
   }
 
-  deleteGroup(id: number): Observable<any> {
-    return this.apiService.delete<any>(`rooms/delete/${id}`).pipe(
+  addMember(payload: AddMemberPayload): Observable<any> {
+    return this.apiService.post<any>(`rooms/add-member`, payload).pipe(
+      tap(() => this.triggerRefresh())
+    );
+  }
+
+  removeMember(roomId: number, memberId: number): Observable<any> {
+    return this.apiService.delete<any>(`rooms/remove-member/${roomId}/${memberId}`).pipe(
+      tap(() => this.triggerRefresh())
+    );
+  }
+
+  deleteGroup(roomId: number): Observable<any> {
+    return this.apiService.delete<any>(`rooms/delete/${roomId}`).pipe(
       tap(() => this.triggerRefresh())
     );
   }

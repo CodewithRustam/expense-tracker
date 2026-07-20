@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://financetracker.runasp.net/api'
+  apiUrl: 'https://localhost:7247/api'
 };
 
 /*

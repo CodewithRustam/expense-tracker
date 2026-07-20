@@ -7,7 +7,7 @@
       <app-user-header [title]="userName()" [subtitle]="greetingText()"
         [unreadCount]="notificationService.unreadCount()" [initials]="userName() ? userName().charAt(0) : 'U'"
         avatarUrl="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light"
-        (avatarClick)="goToProfile()" (notificationClick)="openNotifications()">
+        (avatarClick)="goToProfile()" (notificationClick)="openNotifications()" (addGroupClick)="openAddGroupModal()">
       </app-user-header>
       } @else {
       <!-- Skeleton matching app-user-header perfectly -->
