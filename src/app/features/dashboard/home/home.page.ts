@@ -111,9 +111,7 @@ export class HomePage implements OnInit, OnDestroy {
     setTimeout(() => this.playHeaderAnim.set(true), 10);
 
     this.notificationService.getAll().subscribe();
-    if (this.groupService.groups().length === 0) {
-      this.groupService.loadGroups();
-    }
+    this.groupService.loadGroups();
     const current = this.selectedGroup();
   }
 
