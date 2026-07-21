@@ -100,6 +100,12 @@ export class HomePage implements OnInit, OnDestroy {
       this.groupService.loadGroups();
       this.notificationService.getAll().subscribe();
     });
+
+    // Initial load
+    if (this.groupService.groups().length === 0) {
+      this.groupService.loadGroups();
+    }
+    this.notificationService.getAll().subscribe();
   }
 
   // Chart Cache
@@ -109,10 +115,6 @@ export class HomePage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.playHeaderAnim.set(false);
     setTimeout(() => this.playHeaderAnim.set(true), 10);
-
-    this.notificationService.getAll().subscribe();
-    this.groupService.loadGroups();
-    const current = this.selectedGroup();
   }
 
   ionViewDidEnter() {
@@ -122,8 +124,6 @@ export class HomePage implements OnInit, OnDestroy {
         // Delay slightly to ensure transition is fully done before drawing
         setTimeout(() => this.renderChart.set(true), 50);
       }
-      // Fetch fresh data in background
-      this.fetchTrendData(current.roomId);
     }
   }
 

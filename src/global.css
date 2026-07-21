@@ -3535,6 +3535,11 @@ ion-item-sliding {
   background: transparent !important;
 }
 
+.notif-sliding-item {
+  margin-bottom: 14px;
+  display: block;
+}
+
 /* ========================================================
    SLEEK IOS STYLE SWIPE BUTTONS
 ======================================================== */

@@ -38,7 +38,7 @@
       <div class="list-wrapper" *ngIf="notifications.length > 0; else emptyView">
 
         <ion-list class="bg-transparent" lines="none">
-          <ion-item-sliding #slidingItem *ngFor="let n of notifications; trackBy: trackById"
+          <ion-item-sliding class="notif-sliding-item" #slidingItem *ngFor="let n of notifications; trackBy: trackById"
             (ionDrag)="onDrag($event, n)" (ionSwipe)="onSwipeDelete(n, slidingItem)" (ionItemDidClose)="resetColor(n)">
 
             <ion-item class="notification-item" [class.unread]="!n.isRead" [class.collapsing]="n.collapsing">
