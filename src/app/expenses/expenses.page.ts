@@ -57,11 +57,12 @@ export class ExpensesPage implements OnInit, OnDestroy {
   selectedUser = signal<number | undefined>(undefined);
   roomId = signal<number | undefined>(undefined);
   roomName = signal<string>('');
+  createdById = signal<string>('');
   isLoading = signal<boolean>(true);
   isLoadingExpenses = signal<boolean>(false);
   groups = signal<{ roomId: number | undefined; name: string }[]>([]);
   expenses = signal<Expense[]>([]);
-  currentUserId = signal<number | undefined>(undefined);
+  currentUserId = signal<string>('');
   groupedExpensesMap = signal<{ [userId: number]: ExpenseDateGroup[] }>({});
 
   settlementDataByUser = signal<{ [memberId: number]: SettlementDetail[] }>({});
@@ -91,9 +92,13 @@ export class ExpensesPage implements OnInit, OnDestroy {
     return this.users().some(user => user.expenses?.length);
   });
 
+  isRoomCreator = computed(() => {
+    return this.currentUserId() === this.createdById();
+  });
+
   isSticky = signal<boolean>(false);
   public playHeaderAnim = signal<boolean>(false);
-  
+
   private refreshSub: Subscription | undefined;
 
   ionViewWillEnter() {
@@ -106,7 +111,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     if (token) {
       const decoded = this.authService.decodeToken(token);
       let uid = decoded?.nameid || decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || decoded?.id || decoded?.userId || decoded?.sub;
-      this.currentUserId.set(uid ? +uid : undefined);
+      this.currentUserId.set(uid);
     }
 
     this.route.queryParamMap
@@ -166,6 +171,9 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
   populateExpenses(data: any) {
     if (data.roomName) this.roomName.set(data.roomName);
+    if (data.createdByUserId) {
+      this.createdById.set(data.createdByUserId);
+    }
 
     if (data.availableMonths?.length) {
       this.months.set(data.availableMonths.map((month: string) => {
@@ -205,7 +213,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const currentRoomId = this.roomId();
     const currentSelectedMonth = this.selectedMonth();
     if (!currentRoomId || !currentSelectedMonth) return;
-    
+
     this.isLoadingExpenses.set(true);
 
     const [monthName, year] = currentSelectedMonth.split(' ');
@@ -229,7 +237,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
   assignExpensesToUsers(expenses: Expense[]) {
     const currentUsers = [...this.users()];
     currentUsers.forEach(u => (u.expenses = []));
-    
+
     expenses.forEach(exp => {
       const user = currentUsers.find(u => u.memberId === exp.payerId);
       if (user) {
@@ -344,14 +352,14 @@ export class ExpensesPage implements OnInit, OnDestroy {
     this.selectedUser.set(id);
     const currentSettlementData = this.settlementDataByUser();
     const currentLoading = this.settlementLoadingByUser();
-    
+
     if (!currentSettlementData[id] && !currentLoading[id]) {
       this.loadSettlementsForUser(id);
     }
   }
 
-  onScroll(event: any) { 
-    this.isSticky.set(event.detail.scrollTop > 150); 
+  onScroll(event: any) {
+    this.isSticky.set(event.detail.scrollTop > 150);
   }
 
   groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
@@ -403,7 +411,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
   prepareGroupedExpenses() {
     const currentUsers = this.users();
     if (!currentUsers) return;
-    
+
     const newMap: { [userId: number]: ExpenseDateGroup[] } = {};
     currentUsers.forEach(user => {
       newMap[user.memberId] = this.groupExpensesByDate(user.expenses || []);
@@ -426,9 +434,9 @@ export class ExpensesPage implements OnInit, OnDestroy {
       .getSettlementDetails(currentRoomId, memberId, formattedMonth)
       .subscribe({
         next: (response: SettlementResponse) => {
-          this.settlementDataByUser.update(state => ({ 
-            ...state, 
-            [memberId]: response?.data?.settlements || [] 
+          this.settlementDataByUser.update(state => ({
+            ...state,
+            [memberId]: response?.data?.settlements || []
           }));
           this.settlementLoadingByUser.update(state => ({ ...state, [memberId]: false }));
         },
@@ -451,7 +459,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     await modal.present();
     const { data } = await modal.onDidDismiss();
-    
+
     if (data?.added) {
       if (this.selectedMonth()) {
         this.loadMonthlyExpenses();
@@ -470,7 +478,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     const modal = await this.modalCtrl.create({
       component: RemoveMemberModalComponent,
-      componentProps: { 
+      componentProps: {
         roomId: currentRoomId,
         users: otherUsers
       },
@@ -480,7 +488,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     await modal.present();
     const { data } = await modal.onDidDismiss();
-    
+
     if (data?.removed) {
       if (this.selectedMonth()) {
         this.loadMonthlyExpenses();

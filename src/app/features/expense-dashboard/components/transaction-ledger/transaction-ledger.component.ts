@@ -9,7 +9,7 @@ export class TransactionLedgerComponent {
   @Input() isLoadingExpenses = false;
   @Input() users: any[] = [];
   @Input() selectedUser: number | undefined;
-  @Input() currentUserId: number | undefined;
+  @Input() currentUserId!: string;
   @Input() groupedExpensesMap: { [key: string]: any[] } = {};
 
   @Output() onEditExpense = new EventEmitter<any>();
@@ -27,10 +27,10 @@ export class TransactionLedgerComponent {
 
   getIconColor(iconName: string | undefined): string {
     if (!iconName) return '#666';
-    const iconMap: any = { 
-      'fa-solid fa-leaf': '#27ae60', 
-      'fa-solid fa-drumstick-bite': '#e74c3c', 
-      'fa-solid fa-burn': '#f1c40f' 
+    const iconMap: any = {
+      'fa-solid fa-leaf': '#27ae60',
+      'fa-solid fa-drumstick-bite': '#e74c3c',
+      'fa-solid fa-burn': '#f1c40f'
     };
     return iconMap[iconName] || '#666';
   }
