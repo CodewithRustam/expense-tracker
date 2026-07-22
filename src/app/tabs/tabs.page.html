@@ -1,20 +1,60 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom">
     
-    <ion-tab-button tab="home">
-      <i class="fas fa-home tab-icon"></i>
-      <ion-label>Home</ion-label>
-    </ion-tab-button>
+    <!-- FAR LEFT: Brand Logo -->
+    <div class="top-nav-left">
+      <div class="sidebar-header">
+        <i class="fas fa-wallet brand-icon"></i>
+        <span class="brand-title">ExpenseTracker</span>
+      </div>
+    </div>
 
-    <ion-tab-button tab="charts">
-      <i class="fas fa-chart-pie tab-icon"></i>
-      <ion-label>Analytics</ion-label>
-    </ion-tab-button>
+    <!-- CENTER: Navigation Tabs -->
+    <div class="top-nav-center">
+      <ion-tab-button tab="home">
+        <i class="fas fa-home tab-icon"></i>
+        <ion-label>Home</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button tab="history">
-      <i class="fas fa-history tab-icon"></i>
-      <ion-label>History</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="charts">
+        <i class="fas fa-chart-pie tab-icon"></i>
+        <ion-label>Analytics</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="history">
+        <i class="fas fa-history tab-icon"></i>
+        <ion-label>History</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="profile">
+        <i class="fas fa-user tab-icon"></i>
+        <ion-label>Profile</ion-label>
+      </ion-tab-button>
+    </div>
+
+    <!-- FAR RIGHT: User Profile + Action Buttons -->
+    <div class="top-nav-right">
+      <div class="user-header-desktop" (click)="goToProfile()">
+        <ion-avatar class="desktop-avatar">
+          <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&facialHairType=BeardLight&clotheType=BlazerSweater&clotheColor=Blue03&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light" alt="Avatar">
+        </ion-avatar>
+        <div class="greeting-text">
+          <h2 class="user-name">{{ userName() }}</h2>
+        </div>
+      </div>
+
+      <div class="actions-group">
+        <button class="action-icon" (click)="openAddGroupModal()" aria-label="Add Group">
+          <ion-icon name="add-circle-outline"></ion-icon>
+        </button>
+        <button class="action-icon" (click)="openNotifications()" aria-label="Notifications">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <span class="notification-badge" *ngIf="notificationService.unreadCount() > 0">
+            {{ notificationService.unreadCount() > 9 ? '9+' : notificationService.unreadCount() }}
+          </span>
+        </button>
+      </div>
+    </div>
 
   </ion-tab-bar>
 </ion-tabs>

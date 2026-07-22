@@ -1,13 +1,52 @@
-<ion-header class="ion-no-border">
+<!-- Mobile Header (<768px) -->
+<ion-header class="ion-no-border mobile-only-header">
   <ion-toolbar [class.animate-header]="playHeaderAnim()">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
     </ion-buttons>
     <ion-title>Analytics</ion-title>
   </ion-toolbar>
+</ion-header>
 
-  @if (!isLoading() && hasData()) {
-    <ion-toolbar class="segment-toolbar">
+<ion-content>
+  @if (isLoading()) {
+  <div class="page-container" style="padding-top: 14px;">
+    <div class="chart-card skeleton-card" style="display:block;">
+      <div class="hero-header-row" style="margin-bottom: 24px;">
+        <div class="internal-group-selector" style="border:none; background:transparent; padding:0;">
+          <ion-skeleton-text animated
+            style="width:110px; height:34px; border-radius:999px; margin:0;"></ion-skeleton-text>
+        </div>
+        <div class="month-nav-pill" style="border:none; background:transparent; padding:0;">
+          <ion-skeleton-text animated
+            style="width:140px; height:34px; border-radius:999px; margin:0;"></ion-skeleton-text>
+        </div>
+      </div>
+      <div style="height: 260px; margin: 0 -10px; display: flex; justify-content: center; align-items: center;">
+        <ion-skeleton-text animated
+          style="width: 220px; height: 220px; border-radius: 50%; margin: 0;"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <div class="list-wrapper" style="margin-top: 16px;">
+      @for (i of [1,2,3]; track i) {
+      <div class="row-item skeleton-card">
+        <ion-skeleton-text animated class="skeleton-icon"></ion-skeleton-text>
+        <div style="flex:1">
+          <ion-skeleton-text animated style="width: 55%; height: 15px; margin-bottom: 6px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 35%; height: 10px;"></ion-skeleton-text>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  } @else {
+  <div class="page-container" style="padding-top: 0;">
+
+    <!-- ================= CATEGORIES / TOP SPENDS SEGMENT (Sticky Pinned on Top) ================= -->
+    @if (hasData()) {
+    <div
+      style="position: sticky; top: -1px; z-index: 100; background: var(--background, #12131a); padding: 12px 20px 14px; margin-bottom: 12px;">
       <div class="neon-segment">
         <button class="seg-btn" [class.active]="activeTab() === 'categories'" (click)="switchTab('categories')">
           Categories
@@ -16,142 +55,109 @@
           Top Spends
         </button>
       </div>
-    </ion-toolbar>
-  }
-</ion-header>
-
-<ion-content>
-  @if (isLoading()) {
-    <div class="page-container">
-      <div class="chart-card skeleton-card" style="display:block;">
-        <div class="hero-header-row" style="margin-bottom: 24px;">
-          <div class="internal-group-selector" style="border:none; background:transparent; padding:0;">
-            <ion-skeleton-text animated style="width:110px; height:34px; border-radius:999px; margin:0;"></ion-skeleton-text>
-          </div>
-          <div class="month-nav-pill" style="border:none; background:transparent; padding:0;">
-            <ion-skeleton-text animated style="width:140px; height:34px; border-radius:999px; margin:0;"></ion-skeleton-text>
-          </div>
-        </div>
-        <div style="height: 260px; margin: 0 -10px; display: flex; justify-content: center; align-items: center;">
-          <ion-skeleton-text animated style="width: 220px; height: 220px; border-radius: 50%; margin: 0;"></ion-skeleton-text>
-        </div>
-      </div>
-
-      <div class="list-wrapper" style="margin-top: 16px;">
-        @for (i of [1,2,3]; track i) {
-          <div class="row-item skeleton-card">
-            <ion-skeleton-text animated class="skeleton-icon"></ion-skeleton-text>
-            <div style="flex:1">
-              <ion-skeleton-text animated style="width: 55%; height: 15px; margin-bottom: 6px;"></ion-skeleton-text>
-              <ion-skeleton-text animated style="width: 35%; height: 10px;"></ion-skeleton-text>
-            </div>
-          </div>
-        }
-      </div>
     </div>
-  } @else {
-    <div class="page-container">
+    }
 
-      <!-- ================= CHART CARD ================= -->
-      <div class="chart-card">
+    <!-- ================= CHART CARD ================= -->
+    <div class="chart-card">
 
-        <!-- Group Selector and Month Nav -->
-        <div class="hero-header-row">
-          <div class="internal-group-selector">
-            <ion-select interface="popover" [value]="selectedGroup()" (ionChange)="onGroupChange($event)"
-              toggleIcon="chevron-down-outline" class="custom-select">
-              @for (g of groups(); track g.roomId) {
-                <ion-select-option [value]="g">
-                  {{ g.name }}
-                </ion-select-option>
-              }
-            </ion-select>
-          </div>
-
-          <div class="month-nav-pill">
-            <button class="nav-btn" (click)="previousMonth()" [disabled]="isLoading()" aria-label="Previous month">
-              <ion-icon name="chevron-back-outline"></ion-icon>
-            </button>
-            <span class="month-label">{{ currentMonthLabel() }}</span>
-            <button class="nav-btn" (click)="nextMonth()" [disabled]="isLoading() || !canNavigateNext()"
-              aria-label="Next month">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </button>
-          </div>
+      <!-- Group Selector and Month Nav -->
+      <div class="hero-header-row">
+        <div class="internal-group-selector">
+          <ion-select interface="popover" [value]="selectedGroup()" (ionChange)="onGroupChange($event)"
+            toggleIcon="chevron-down-outline" class="custom-select">
+            @for (g of groups(); track g.roomId) {
+            <ion-select-option [value]="g">
+              {{ g.name }}
+            </ion-select-option>
+            }
+          </ion-select>
         </div>
 
-        @if (hasData()) {
-          <div class="chart-wrapper">
-            @if (renderChart()) {
-              <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart" [labels]="chartOptions().labels"
-                [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
-                [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
-                [responsive]="chartOptions().responsive">
-              </apx-chart>
-            }
-          </div>
-        } @else if (!hasData()) {
-          <div class="empty-chart-placeholder">
-            <div class="empty-icon-circle">
-              <ion-icon name="stats-chart-outline"></ion-icon>
-            </div>
-            <p class="empty-text">No expenses recorded for<br>{{ currentMonthLabel() }}</p>
-          </div>
-        }
+        <div class="month-nav-pill">
+          <button class="nav-btn" (click)="previousMonth()" [disabled]="isLoading()" aria-label="Previous month">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </button>
+          <span class="month-label">{{ currentMonthLabel() }}</span>
+          <button class="nav-btn" (click)="nextMonth()" [disabled]="isLoading() || !canNavigateNext()"
+            aria-label="Next month">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
       </div>
 
-      <!-- ================= LIST ================= -->
       @if (hasData()) {
-        <div class="list-wrapper">
-
-          @if (activeTab() === 'categories') {
-            <div class="row-list">
-              @for (c of trendData().categoryExpenses; track c.categoryName) {
-                <div class="row-item">
-                  <div class="icon-box">
-                    <i [class]="c.iconName" [style.color]="getIconColor(c.iconName)"></i>
-                  </div>
-                  <div class="text-group">
-                    <span class="item-name">{{ c.categoryName || 'Unknown' }}</span>
-                    <span class="item-meta">{{ getLatestDate(c.monthlyTotals) | date:'MMM yyyy' }}</span>
-                  </div>
-                  <div class="card-amount">₹{{ getCategoryTotal(c) | number:'1.0-0' }}</div>
-                </div>
-              }
-            </div>
-          }
-
-          @if (activeTab() === 'topSpends') {
-            <div class="row-list">
-              @for (t of trendData().topSpends; track t.categoryName) {
-                <div class="row-item">
-                  <div class="icon-box">
-                    <i [class]="t.iconName" [style.color]="getIconColor(t.iconName)"></i>
-                  </div>
-                  <div class="text-group">
-                    <span class="item-name">{{ t.categoryName }}</span>
-                    <span class="item-meta">{{ getLatestDate(t.monthlyTotals) | date:'MMM dd' }}</span>
-                  </div>
-                  <div class="card-amount">₹{{ getTopSpendTotal(t) | number:'1.0-0' }}</div>
-                </div>
-              }
-            </div>
-          }
-
-          @if ((activeTab() === 'categories' && trendData().categoryExpenses.length === 0)
-                || (activeTab() === 'topSpends' && trendData().topSpends.length === 0)) {
-            <div class="empty-container">
-              <div class="empty-circle">
-                <ion-icon name="pie-chart-outline"></ion-icon>
-              </div>
-              <h3 class="empty-title">No data</h3>
-              <p class="empty-message">No expenses found for {{ currentMonthLabel() }}</p>
-            </div>
-          }
-
+      <div class="chart-wrapper">
+        @if (renderChart()) {
+        <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart"
+          [labels]="chartOptions().labels" [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
+          [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
+          [responsive]="chartOptions().responsive">
+        </apx-chart>
+        }
+      </div>
+      } @else if (!hasData()) {
+      <div class="empty-chart-placeholder">
+        <div class="empty-icon-circle">
+          <ion-icon name="stats-chart-outline"></ion-icon>
         </div>
+        <p class="empty-text">No expenses recorded for<br>{{ currentMonthLabel() }}</p>
+      </div>
+      }
+    </div>
+
+    <!-- ================= LIST ================= -->
+    @if (hasData()) {
+    <div class="list-wrapper">
+
+      @if (activeTab() === 'categories') {
+      <div class="row-list">
+        @for (c of trendData().categoryExpenses; track c.categoryName) {
+        <div class="row-item">
+          <div class="icon-box">
+            <i [class]="c.iconName" [style.color]="getIconColor(c.iconName)"></i>
+          </div>
+          <div class="text-group">
+            <span class="item-name">{{ c.categoryName || 'Unknown' }}</span>
+            <span class="item-meta">{{ getLatestDate(c.monthlyTotals) | date:'MMM yyyy' }}</span>
+          </div>
+          <div class="card-amount">₹{{ getCategoryTotal(c) | number:'1.0-0' }}</div>
+        </div>
+        }
+      </div>
+      }
+
+      @if (activeTab() === 'topSpends') {
+      <div class="row-list">
+        @for (t of trendData().topSpends; track t.categoryName) {
+        <div class="row-item">
+          <div class="icon-box">
+            <i [class]="t.iconName" [style.color]="getIconColor(t.iconName)"></i>
+          </div>
+          <div class="text-group">
+            <span class="item-name">{{ t.categoryName }}</span>
+            <span class="item-meta">{{ getLatestDate(t.monthlyTotals) | date:'MMM dd' }}</span>
+          </div>
+          <div class="card-amount">₹{{ getTopSpendTotal(t) | number:'1.0-0' }}</div>
+        </div>
+        }
+      </div>
+      }
+
+      @if ((activeTab() === 'categories' && trendData().categoryExpenses.length === 0)
+      || (activeTab() === 'topSpends' && trendData().topSpends.length === 0)) {
+      <div class="empty-container">
+        <div class="empty-circle">
+          <ion-icon name="pie-chart-outline"></ion-icon>
+        </div>
+        <h3 class="empty-title">No data</h3>
+        <p class="empty-message">No expenses found for {{ currentMonthLabel() }}</p>
+      </div>
       }
 
     </div>
+    }
+
+  </div>
   }
 </ion-content>

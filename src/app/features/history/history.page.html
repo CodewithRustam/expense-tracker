@@ -1,4 +1,5 @@
-<ion-header class="ion-no-border" [class.is-stuck]="isSticky()">
+<!-- Mobile Header (<768px) -->
+<ion-header class="ion-no-border mobile-only-header" [class.is-stuck]="isSticky()">
   <ion-toolbar [class.animate-header]="playHeaderAnim()">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
@@ -10,10 +11,22 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+</ion-header>
 
-  @if (!isLoading()) {
-    <ion-toolbar class="summary-toolbar">
-      <div class="summary-toolbar-inner">
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+
+  <div class="page-container" style="padding-top: 14px;">
+    @if (isLoading()) {
+      <div class="skeleton-wrapper">
+        <div class="summary-skel">
+          <ion-skeleton-text animated style="width: 80px; height: 11px; margin-bottom: 8px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 130px; height: 30px;"></ion-skeleton-text>
+        </div>
+        <app-skeleton-list [count]="4"></app-skeleton-list>
+      </div>
+    } @else {
+      <!-- SUMMARY & FILTERS -->
+      <div class="summary-toolbar-inner" style="margin-bottom: 20px; padding: 0 20px;">
         <div class="summary-row">
           <div class="summary-left">
             <span class="balance-label">{{ filterType() === 'all' ? 'Total activity' : filterType() === 'credit' ? 'Total received' : 'Total spent' }}</span>
@@ -46,32 +59,17 @@
           </button>
         </div>
       </div>
-    </ion-toolbar>
 
-    <ion-toolbar class="section-toolbar">
-      <div class="section-header">
+      <!-- SECTION HEADER -->
+      <div class="section-header" style="margin-bottom: 16px; padding: 0 20px;">
         <span class="section-title">Recent activity</span>
         @if (!isLoadingExpenses()) {
           <span class="section-count">{{ filteredExpenses().length }}</span>
         }
         <div class="h-line"></div>
       </div>
-    </ion-toolbar>
-  }
-</ion-header>
 
-<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
-
-  <div class="page-container">
-    @if (isLoading()) {
-      <div class="skeleton-wrapper">
-        <div class="summary-skel">
-          <ion-skeleton-text animated style="width: 80px; height: 11px; margin-bottom: 8px;"></ion-skeleton-text>
-          <ion-skeleton-text animated style="width: 130px; height: 30px;"></ion-skeleton-text>
-        </div>
-        <app-skeleton-list [count]="4"></app-skeleton-list>
-      </div>
-    } @else {
+      <!-- LIST -->
       <div class="list-wrapper">
         @if (!isLoadingExpenses()) {
           @if (filteredExpenses().length) {

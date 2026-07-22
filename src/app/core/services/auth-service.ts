@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap, Subject } from 'rxjs';
 import { NavController } from '@ionic/angular';
 
 export interface ApiResponse {
@@ -14,6 +14,9 @@ export interface ApiResponse {
 })
 export class AuthService {
   private tokenKey = 'jwtToken';
+
+  private logoutSubject = new Subject<void>();
+  public logout$ = this.logoutSubject.asObservable();
 
   constructor(private apiService: ApiService, private navCtrl: NavController) { }
 
@@ -78,6 +81,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.tokenKey);
     sessionStorage.removeItem(this.tokenKey);
+    this.logoutSubject.next();
   }
 
   isAuthenticated(): boolean {
@@ -131,6 +135,9 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     sessionStorage.removeItem(this.tokenKey);
     localStorage.removeItem('rememberedUser');
-    this.navCtrl.navigateRoot('/login');
+    this.logoutSubject.next();
+    this.navCtrl.navigateRoot('/login').then(() => {
+      window.location.reload();
+    });
   }
 }

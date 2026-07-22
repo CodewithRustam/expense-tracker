@@ -47,11 +47,23 @@ export class GroupService {
   constructor(
     private apiService: ApiService,
     private authService: AuthService
-  ) { }
+  ) {
+    this.authService.logout$.subscribe(() => {
+      this.clearState();
+    });
+  }
 
   // ================================
   // STATE MANAGEMENT
   // ================================
+
+  public clearState(): void {
+    this.state.set({
+      groups: [],
+      isLoading: false,
+      error: null
+    });
+  }
 
   // Global Refresh Stream (Backward Compatibility during migration)
   private refreshSubject = new Subject<void>();

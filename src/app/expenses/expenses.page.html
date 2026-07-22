@@ -1,4 +1,5 @@
-<ion-header class="ion-no-border" [translucent]="true">
+<!-- Mobile Header (Visible <768px, Hidden >=768px) -->
+<ion-header class="ion-no-border mobile-only-header">
   <ion-toolbar [class.animate-header]="playHeaderAnim()">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
@@ -30,82 +31,116 @@
 
 <ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
 
-  <div class="expense-desktop-shell">
+  <div class="expense-page-wrapper">
 
-    <!-- ============== SUMMARY + MEMBERS ================= -->
-    <div class="hub-container">
-      <div class="glass-hub">
+    <!-- DESKTOP CENTRED PAGE TITLE (Visible >=768px, Hidden <768px) -->
+    <div class="desktop-only-title-row" style="align-items: center; justify-content: center; position: relative; margin-bottom: 24px; width: 100%;">
+      <h2 style="font-size: 16px; font-weight: 700; color: #ffffff; margin: 0; text-align: center; letter-spacing: -0.2px;">Expenses History</h2>
+      
+      @if (isRoomCreator()) {
+        <div style="position: absolute; right: 0;">
+          <ion-button id="expenses-menu-btn-desktop" aria-label="Room options" fill="clear" style="--padding-start: 4px; --padding-end: 4px;">
+            <ion-icon name="ellipsis-vertical" slot="icon-only" style="color: #94a3b8; font-size: 20px;"></ion-icon>
+          </ion-button>
+          <ion-popover trigger="expenses-menu-btn-desktop" dismissOnSelect="true" alignment="end" side="bottom">
+            <ng-template>
+              <ion-list lines="none" style="background: transparent; padding: 0; margin: 0;">
+                <ion-item button (click)="removeUser()" detail="false" style="--background: transparent;">
+                  <ion-icon name="person-remove" slot="start"></ion-icon>
+                  <ion-label>Remove User</ion-label>
+                </ion-item>
+                <ion-item button (click)="deleteGroup()" detail="false" style="--background: transparent;">
+                  <ion-icon name="trash" slot="start"></ion-icon>
+                  <ion-label>Delete Group</ion-label>
+                </ion-item>
+              </ion-list>
+            </ng-template>
+          </ion-popover>
+        </div>
+      }
+    </div>
 
-        <!-- HEADER -->
-        <div class="hub-header-row">
-          @if (!isLoading()) {
-            <div class="room-title-group">
-              <h1 class="room-name" title="{{ roomName() }}">{{ roomName() }}</h1>
-            </div>
+    <!-- DESKTOP SPLIT SHELL (2 Grid Columns on Desktop, Standard Flow on Mobile) -->
+    <div class="expense-desktop-shell">
 
-            <div class="month-capsule">
-              <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled()"
-                aria-label="Previous month">
-                <i class="fa-solid fa-chevron-left"></i>
-              </ion-button>
-              <span class="selected-month">{{ selectedMonth() }}</span>
-              <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled()" aria-label="Next month">
-                <i class="fa-solid fa-chevron-right"></i>
-              </ion-button>
-            </div>
-          } @else {
-            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-              <ion-skeleton-text animated class="room-name-skeleton" style="width:140px;height:24px;margin:0;"></ion-skeleton-text>
-              <ion-skeleton-text animated class="month-skel" style="width:100px;height:24px;margin:0;"></ion-skeleton-text>
-            </div>
-          }
+      <!-- COLUMN 1: HUB CONTAINER -->
+      <div class="hub-container">
+        <div class="glass-hub">
+
+          <!-- HEADER -->
+          <div class="hub-header-row">
+            @if (!isLoading()) {
+              <div class="room-title-group">
+                <h1 class="room-name" title="{{ roomName() }}">{{ roomName() }}</h1>
+              </div>
+
+              <div class="month-capsule">
+                <ion-button fill="clear" (click)="previousMonth()" [disabled]="isPrevMonthDisabled()"
+                  aria-label="Previous month">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </ion-button>
+                <span class="selected-month">{{ selectedMonth() }}</span>
+                <ion-button fill="clear" (click)="nextMonth()" [disabled]="isNextMonthDisabled()" aria-label="Next month">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </ion-button>
+              </div>
+            } @else {
+              <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <ion-skeleton-text animated class="room-name-skeleton" style="width:140px;height:24px;margin:0;"></ion-skeleton-text>
+                <ion-skeleton-text animated class="month-skel" style="width:100px;height:24px;margin:0;"></ion-skeleton-text>
+              </div>
+            }
+          </div>
+
+          <!-- STATS SUB-COMPONENT -->
+          <app-expense-stats *ngIf="totalAllTime() > 0"
+            [isLoadingExpenses]="isLoadingExpenses()"
+            [totalAllTime]="totalAllTime()"
+            [averageAmount]="averageAmount()">
+          </app-expense-stats>
+
+          <!-- MEMBERS SUB-COMPONENT -->
+          <app-member-list
+            [isLoading]="isLoading()"
+            [users]="users()"
+            [selectedUser]="selectedUser()"
+            [isNextMonthDisabled]="isNextMonthDisabled()"
+            (onSelectUser)="selectUser($event)"
+            (onAddMember)="openAddMemberModal()">
+          </app-member-list>
+
+          <!-- PERSONAL CARD SUB-COMPONENT -->
+          <app-personal-card *ngIf="totalAllTime() > 0"
+            [isLoadingExpenses]="isLoadingExpenses()"
+            [users]="users()"
+            [selectedUser]="selectedUser()"
+            (onSettle)="openSettleModal($event)">
+          </app-personal-card>
+
+        </div>
+      </div>
+
+      <!-- COLUMN 2: TRANSACTIONS RIGHT COLUMN -->
+      <div class="expense-right-column">
+        <div class="sticky-history-bar" [class.is-sticky]="isSticky()">
+          <div class="history-content">
+            <span>Transactions</span>
+            <div class="h-line"></div>
+          </div>
         </div>
 
-        <!-- STATS SUB-COMPONENT -->
-        <app-expense-stats *ngIf="totalAllTime() > 0"
-          [isLoadingExpenses]="isLoadingExpenses()"
-          [totalAllTime]="totalAllTime()"
-          [averageAmount]="averageAmount()">
-        </app-expense-stats>
-
-        <!-- MEMBERS SUB-COMPONENT -->
-        <app-member-list
-          [isLoading]="isLoading()"
-          [users]="users()"
-          [selectedUser]="selectedUser()"
-          [isNextMonthDisabled]="isNextMonthDisabled()"
-          (onSelectUser)="selectUser($event)"
-          (onAddMember)="openAddMemberModal()">
-        </app-member-list>
-
-        <!-- PERSONAL CARD SUB-COMPONENT -->
-        <app-personal-card *ngIf="totalAllTime() > 0"
+        <app-transaction-ledger
           [isLoadingExpenses]="isLoadingExpenses()"
           [users]="users()"
           [selectedUser]="selectedUser()"
-          (onSettle)="openSettleModal($event)">
-        </app-personal-card>
-
+          [currentUserId]="currentUserId()"
+          [groupedExpensesMap]="groupedExpensesMap()"
+          (onEditExpense)="openEditExpenseModal($event)"
+          (onDeleteExpense)="deleteExpense($event.expense, $event.slidingItem)">
+        </app-transaction-ledger>
       </div>
-    </div>
 
-    <!-- ============== TRANSACTION HISTORY ================= -->
-    <div class="sticky-history-bar" [class.is-sticky]="isSticky()">
-      <div class="history-content">
-        <span>Transactions</span>
-        <div class="h-line"></div>
-      </div>
     </div>
-
-    <app-transaction-ledger
-      [isLoadingExpenses]="isLoadingExpenses()"
-      [users]="users()"
-      [selectedUser]="selectedUser()"
-      [currentUserId]="currentUserId()"
-      [groupedExpensesMap]="groupedExpensesMap()"
-      (onEditExpense)="openEditExpenseModal($event)"
-      (onDeleteExpense)="deleteExpense($event.expense, $event.slidingItem)">
-    </app-transaction-ledger>
 
   </div>
 </ion-content>

@@ -105,7 +105,9 @@ export class ProfilePage implements OnInit, OnDestroy {
       await toast.present();
 
       // replaceUrl: true prevents the user from clicking "back" into the app
-      this.router.navigate(['/login'], { replaceUrl: true });
+      this.router.navigate(['/login'], { replaceUrl: true }).then(() => {
+        window.location.reload();
+      });
     }
   }
 

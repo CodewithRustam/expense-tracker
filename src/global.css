@@ -16,6 +16,20 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/palettes/dark.system.css";
 
+/* Global Cursor Pointer for Anchor Tags & Interactive Elements */
+a,
+a:hover,
+a:focus,
+a:active,
+button,
+[role="button"],
+.clickable,
+ion-item[button],
+ion-button,
+ion-tab-button {
+  cursor: pointer !important;
+}
+
 /* 2. Design System Tokens & Color Themes */
 :root {
   --ion-background-color: #ffffff;
@@ -709,19 +723,12 @@ ion-skeleton-text {
   z-index: 900;
 }
 
-.responsive-logo {
-  width: clamp(50px, 18vw, 90px);
-  height: auto;
-  border-radius: 18px;
-}
-
-.logo-section {
-  margin-bottom: 28px;
-  margin-top: 3rem;
-}
-
+.responsive-logo,
 .logo-section img {
-  max-width: 22%;
+  width: 76px !important;
+  height: 76px !important;
+  max-width: none !important;
+  object-fit: contain;
   border-radius: 18px;
 }
 
@@ -752,6 +759,7 @@ ion-skeleton-text {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0 auto;
 }
 
 .auth-card {
@@ -763,11 +771,24 @@ ion-skeleton-text {
   max-width: 400px;
   padding: 20px 18px;
   box-sizing: border-box;
+  margin: 0 auto;
 }
 
 ion-card.auth-card {
-  margin: 20px;
+  margin: 0 auto;
 }
+
+ion-content.login-page::part(scroll),
+ion-content.register-page::part(scroll),
+ion-content.forgot-page::part(scroll),
+ion-content.reset-page::part(scroll) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
 
 .input-item ion-icon {
   margin-right: 12px;
@@ -2506,7 +2527,7 @@ ion-header.is-stuck {
   border: none;
   color: var(--ink-2);
   padding: 8px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
@@ -4059,7 +4080,13 @@ ion-item-options {
 .animate-header {
   animation: headerFadeIn 0.35s ease-out forwards !important;
 }
+
 @keyframes headerFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

@@ -2,14 +2,14 @@
 
   <div class="modal-icon-wrapper">
     <div class="modal-icon">
-      <i class="fa-solid" [class.fa-triangle-exclamation]="danger" [class.fa-circle-question]="!danger"></i>
+      <i class="fa-solid" [class.fa-triangle-exclamation]="danger" [class.fa-circle-check]="!danger"></i>
     </div>
   </div>
 
   <p class="modal-message" [innerHTML]="message"></p>
 
   <div class="modal-buttons">
-    <button class="btn-cancel" (click)="dismiss(false)">
+    <button class="btn-cancel" *ngIf="cancelText" (click)="dismiss(false)">
       {{ cancelText }}
     </button>
     <button class="btn-confirm" (click)="dismiss(true)">

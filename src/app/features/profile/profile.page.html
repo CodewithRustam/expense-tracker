@@ -1,4 +1,5 @@
-<ion-header class="ion-no-border" [translucent]="true">
+<!-- Mobile Header (<768px) -->
+<ion-header class="ion-no-border mobile-only-header">
   <ion-toolbar [class.animate-header]="playHeaderAnim">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="tabs/home" icon="arrow-back-outline"></ion-back-button>
@@ -8,7 +9,7 @@
 </ion-header>
 
 <ion-content>
-  <div class="content-wrapper">
+  <div class="page-container content-wrapper">
     
     <!-- PROFILE HERO CARD -->
     <div class="profile-hero">

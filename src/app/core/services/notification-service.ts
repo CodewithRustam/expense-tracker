@@ -20,7 +20,11 @@ export class NotificationService {
   constructor(
     private apiService: ApiService,
     private authService: AuthService
-  ) { }
+  ) {
+    this.authService.logout$.subscribe(() => {
+      this.unreadCount.set(0);
+    });
+  }
 
   // ================================
   // Helper Methods
