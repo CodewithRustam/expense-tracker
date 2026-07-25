@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { GroupService } from '../../../core/services/group';
+import { Toastservice } from '../../../core/services/toastservice';
 
 @Component({
   selector: 'app-add-group-modal',
@@ -17,7 +18,7 @@ export class AddGroupModalComponent implements OnInit {
     private modalCtrl: ModalController,
     private fb: FormBuilder,
     private groupService: GroupService,
-    private toastCtrl: ToastController
+    private toastService: Toastservice
   ) { }
 
   ngOnInit() {
@@ -82,13 +83,7 @@ export class AddGroupModalComponent implements OnInit {
       next: async (res) => {
         this.isSubmitting = false;
         if (res.success || res.roomId) {
-          const toast = await this.toastCtrl.create({
-            message: 'Group created successfully!',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+          this.toastService.success('Group created successfully!');
           this.modalCtrl.dismiss({ added: true });
         } else {
           this.serverErrorMsg = res.message || 'Failed to create group.';

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { ToastController } from '@ionic/angular';
 import { AuthService } from '../../core/services/auth-service';
 import { ExpenseService } from '../../core/services/expense';
+import { Toastservice } from '../../core/services/toastservice';
 import { Subscription } from 'rxjs';
 import { UserExpenseResponse } from '../../core/models/Expense/UserExpenseResponse';
 
@@ -23,7 +23,7 @@ interface Expense {
 export class HistoryPage implements OnInit, OnDestroy {
   private expenseService = inject(ExpenseService);
   private authService = inject(AuthService);
-  private toastController = inject(ToastController);
+  private toastService = inject(Toastservice);
 
   months = signal<string[]>([]);
   expenses = signal<Expense[]>([]);
@@ -180,14 +180,14 @@ export class HistoryPage implements OnInit, OnDestroy {
     return `${year}-${monthNumber.toString().padStart(2, '0')}`;
   }
 
-  async presentToast(message: string, color: string) {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      color,
-      position: 'bottom'
-    });
-    await toast.present();
+  presentToast(message: string, color: string) {
+    if (color === 'danger') {
+      this.toastService.error(message);
+    } else if (color === 'warning') {
+      this.toastService.warning(message);
+    } else {
+      this.toastService.success(message);
+    }
   }
 
   onScroll(event: any) {

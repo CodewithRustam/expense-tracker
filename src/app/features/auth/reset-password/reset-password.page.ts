@@ -1,8 +1,9 @@
 // reset-password.page.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController, LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular';
 import { AuthService, ApiResponse } from '../../../core/services/auth-service';
+import { Toastservice } from '../../../core/services/toastservice';
 
 @Component({
   selector: 'app-reset-password',
@@ -22,7 +23,7 @@ export class ResetPasswordPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private toastCtrl: ToastController,
+    private toastService: Toastservice,
     private loadingCtrl: LoadingController
   ) {}
 
@@ -59,14 +60,14 @@ export class ResetPasswordPage implements OnInit {
     });
   }
 
-  async showToast(message: string, color: string = 'medium') {
-    const t = await this.toastCtrl.create({
-      message,
-      duration: 3000,
-      color,
-      position: 'bottom'
-    });
-    await t.present();
+  showToast(message: string, color: string = 'medium') {
+    if (color === 'danger') {
+      this.toastService.error(message);
+    } else if (color === 'warning') {
+      this.toastService.warning(message);
+    } else {
+      this.toastService.success(message);
+    }
   }
 
   async resetPassword() {

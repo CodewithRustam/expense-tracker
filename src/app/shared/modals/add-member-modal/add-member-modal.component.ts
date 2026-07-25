@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GroupService, AddMemberPayload } from '../../../core/services/group';
+import { Toastservice } from '../../../core/services/toastservice';
 
 @Component({
   selector: 'app-add-member-modal',
@@ -18,7 +19,7 @@ export class AddMemberModalComponent implements OnInit {
 
   constructor(
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController,
+    private toastService: Toastservice,
     private fb: FormBuilder,
     private groupService: GroupService
   ) { }
@@ -69,13 +70,7 @@ export class AddMemberModalComponent implements OnInit {
       next: async (res) => {
         this.isSubmitting = false;
         if (res.success || res.roomId) {
-          const toast = await this.toastCtrl.create({
-            message: 'Member added successfully',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+          this.toastService.success('Member added successfully');
           this.modalCtrl.dismiss({ added: true });
         } else {
           this.serverErrorMsg = res.message || 'Failed to add member.';

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { SettlementDetail } from 'src/app/core/models/Settlement/SettlementDetail';
 import { ExpenseService } from 'src/app/core/services/expense';
 import { Toastservice } from 'src/app/core/services/toastservice';

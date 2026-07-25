@@ -54,8 +54,20 @@
   } @else {
   <div class="page-container" style="padding-top: 0;">
 
+    @if (!hasData()) {
+    <!-- ================= NO EXPENSES STATE (group exists but no data) ================= -->
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
+      <div class="onboarding-card" style="margin-top: 0;">
+        <div class="onboarding-icon">
+          <ion-icon name="pie-chart-outline"></ion-icon>
+        </div>
+        <h2 class="onboarding-title">No expenses yet</h2>
+        <p class="onboarding-message">Add your first expense to <strong>{{ selectedGroup()?.name }}</strong> to see your spending analytics here.</p>
+      </div>
+    </div>
+
+    } @else {
     <!-- ================= CATEGORIES / TOP SPENDS SEGMENT (Sticky Pinned on Top) ================= -->
-    @if (hasData()) {
     <div
       style="position: sticky; top: -1px; z-index: 100; background: var(--background, #12131a); padding: 12px 20px 14px; margin-bottom: 12px;">
       <div class="neon-segment">
@@ -67,7 +79,6 @@
         </button>
       </div>
     </div>
-    }
 
     <!-- ================= CHART CARD ================= -->
     <div class="chart-card">
@@ -97,7 +108,6 @@
         </div>
       </div>
 
-      @if (hasData()) {
       <div class="chart-wrapper">
         @if (renderChart()) {
         <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart"
@@ -107,18 +117,9 @@
         </apx-chart>
         }
       </div>
-      } @else if (!hasData()) {
-      <div class="empty-chart-placeholder">
-        <div class="empty-icon-circle">
-          <ion-icon name="stats-chart-outline"></ion-icon>
-        </div>
-        <p class="empty-text">No expenses recorded for<br>{{ currentMonthLabel() }}</p>
-      </div>
-      }
     </div>
 
     <!-- ================= LIST ================= -->
-    @if (hasData()) {
     <div class="list-wrapper">
 
       @if (activeTab() === 'categories') {
@@ -167,7 +168,7 @@
       }
 
     </div>
-    }
+    } <!-- end hasData else -->
 
   </div>
   }

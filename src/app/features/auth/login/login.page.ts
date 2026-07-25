@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth-service';
-import { Platform, ToastController } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import { AppComponent } from '../../../app.component';
+import { Toastservice } from '../../../core/services/toastservice';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
@@ -25,7 +26,7 @@ export class LoginPage implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastCtrl: ToastController,
+    private toastService: Toastservice,
     private appComponent: AppComponent,
     private platform: Platform
   ) {
@@ -78,14 +79,8 @@ export class LoginPage implements OnInit {
       });
   }
 
-  async showToast(message: string) {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 2500,
-      color: 'danger',
-      position: 'bottom'
-    });
-    await toast.present();
+  showToast(message: string) {
+    this.toastService.error(message);
   }
 
   goToRegistration() {

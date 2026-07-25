@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
+import { Toastservice } from '../../../core/services/toastservice';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,7 +17,7 @@ export class ForgotPasswordComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastCtrl: ToastController
+    private toastService: Toastservice
   ) { }
 
   async onResetPassword() {
@@ -39,14 +39,11 @@ export class ForgotPasswordComponent {
     this.router.navigate(['/login']);
   }
 
-  private async showToast(message: string, color: 'success' | 'danger') {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 2500,
-      color,
-      position: 'bottom',
-      cssClass: 'custom-toast'
-    });
-    await toast.present();
+  private showToast(message: string, color: 'success' | 'danger') {
+    if (color === 'danger') {
+      this.toastService.error(message);
+    } else {
+      this.toastService.success(message);
+    }
   }
 }

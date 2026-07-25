@@ -42,6 +42,7 @@ export class HomePage implements OnInit, OnDestroy {
   });
   public hasInitiallyLoaded = signal<boolean>(false);
   public renderChart = signal<boolean>(false);
+  public hasChartData = signal<boolean>(false);
   public playHeaderAnim = signal<boolean>(false);
 
   public isPageLoaded = computed(() => {
@@ -175,14 +176,34 @@ export class HomePage implements OnInit, OnDestroy {
                              JSON.stringify(currentCachedSeries[0]?.data) === JSON.stringify(seriesData) && 
                              JSON.stringify(currentCachedCategories) === JSON.stringify(categories);
 
+          const hasAnyExpense = seriesData.some((v: number) => v > 0);
+          this.hasChartData.set(hasAnyExpense);
+
+          let displayCategories = categories;
+          let displaySeriesData = seriesData;
+
+          if (hasAnyExpense) {
+            const firstNonZeroIndex = seriesData.findIndex((v: number) => v > 0);
+            // Slice the array starting from first non-zero, but keep one previous month (if available) 
+            // to draw an upward trend line instead of a single dot.
+            const sliceIndex = Math.max(0, firstNonZeroIndex - 1);
+            displayCategories = categories.slice(sliceIndex);
+            displaySeriesData = seriesData.slice(sliceIndex);
+          }
+
           if (!isSameData) {
-            this.cachedCategories.set(categories);
+            this.cachedCategories.set(displayCategories);
             this.cachedSeries.set([{
               name: this.selectedGroup()?.name || 'Expenses',
-              data: seriesData
+              data: displaySeriesData
             }]);
 
-            this.applyChartData();
+            if (hasAnyExpense) {
+              this.applyChartData();
+            } else {
+              this.hasInitiallyLoaded.set(true);
+              this.renderChart.set(false);
+            }
           }
         }
       },

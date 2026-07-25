@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth-service';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { GlobalModalComponent } from '../../shared/modals/global-modal/global-modal.component';
+import { Toastservice } from '../../core/services/toastservice';
 import { GroupService } from '../../core/services/group';
 import { ExpenseService } from '../../core/services/expense';
 import { Subscription, merge } from 'rxjs';
@@ -30,7 +31,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private toastController: ToastController,
+    private toastService: Toastservice,
     private modalCtrl: ModalController,
     private groupService: GroupService,
     private expenseService: ExpenseService
@@ -95,14 +96,7 @@ export class ProfilePage implements OnInit, OnDestroy {
     if (exit) {
       this.authService.logout();
 
-      const toast = await this.toastController.create({
-        message: 'You have been logged out.',
-        duration: 1500,
-        color: 'danger',
-        position: 'bottom'
-      });
-
-      await toast.present();
+      this.toastService.error('You have been logged out.');
 
       // replaceUrl: true prevents the user from clicking "back" into the app
       this.router.navigate(['/login'], { replaceUrl: true }).then(() => {
