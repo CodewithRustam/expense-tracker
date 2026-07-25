@@ -24,6 +24,17 @@
         </div>
         <app-skeleton-list [count]="4"></app-skeleton-list>
       </div>
+    } @else if (months().length === 0) {
+      <!-- NO HISTORY ONBOARDING STATE -->
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh;">
+        <div class="onboarding-card" style="margin-top: 0;">
+          <div class="onboarding-icon">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <h2 class="onboarding-title">No history yet</h2>
+          <p class="onboarding-message">Your transaction history will appear here once you start adding expenses to a group.</p>
+        </div>
+      </div>
     } @else {
       <!-- SUMMARY & FILTERS -->
       <div class="summary-toolbar-inner" style="margin-bottom: 20px; padding: 0 20px;">

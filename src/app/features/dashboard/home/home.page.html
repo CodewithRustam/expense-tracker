@@ -33,7 +33,8 @@
 
   <div class="page-container">
 
-    <!-- ================= CHART / SPEND CARD ================= -->
+    <!-- ================= CHART / SPEND CARD (only when user has groups) ================= -->
+    @if (!isPageLoaded() || groupService.groups().length > 0) {
     <div class="chart-card">
       @if (isPageLoaded()) {
       <div class="chart-header">
@@ -100,19 +101,20 @@
       </div>
       }
     </div>
+    } <!-- end chart-card guard -->
 
     <!-- ================= MAIN CONTENT ================= -->
     <div class="main-content">
 
-      @if (isPageLoaded()) {
-      <div class="total-summary-row">
-        <span class="summary-label">Total portfolio</span>
-        <span class="summary-value">₹{{ totalBalance() | number:'1.0-0' }}</span>
-      </div>
-      } @else {
+      @if (!isPageLoaded()) {
       <div class="total-summary-row" style="align-items: center;">
         <ion-skeleton-text animated style="width:110px; height:12px; border-radius:4px; margin:0;"></ion-skeleton-text>
         <ion-skeleton-text animated style="width:60px; height:20px; border-radius:4px; margin:0;"></ion-skeleton-text>
+      </div>
+      } @else if (groupService.groups().length > 0) {
+      <div class="total-summary-row">
+        <span class="summary-label">Total portfolio</span>
+        <span class="summary-value">₹{{ totalBalance() | number:'1.0-0' }}</span>
       </div>
       }
 
@@ -153,9 +155,18 @@
         }
       </div>
       } @else {
-      <app-empty-state iconName="wallet-outline" title="No groups yet"
-        message="Create your first group to start tracking expenses">
-      </app-empty-state>
+      <!-- Onboarding Welcome Card for new users -->
+      <div class="onboarding-card">
+        <div class="onboarding-icon">
+          <ion-icon name="people-circle-outline"></ion-icon>
+        </div>
+        <h2 class="onboarding-title">Welcome to SplitX! 👋</h2>
+        <p class="onboarding-message">You're all set! Create your first group to start splitting expenses with your friends, family or roommates.</p>
+        <button class="onboarding-cta" (click)="openAddGroupModal()">
+          <ion-icon name="add-circle-outline"></ion-icon>
+          Create your first group
+        </button>
+      </div>
       }
       }
 
@@ -163,11 +174,13 @@
 
   </div>
 
-  <!-- FAB — must be a direct child of ion-content for slot="fixed" to work -->
+  <!-- FAB — only show when user has groups -->
+  @if (isPageLoaded() && groupService.groups().length > 0) {
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="openAddExpense()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+  }
 
 </ion-content>

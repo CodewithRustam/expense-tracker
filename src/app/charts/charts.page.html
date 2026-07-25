@@ -40,6 +40,17 @@
       }
     </div>
   </div>
+  } @else if (groups().length === 0) {
+  <!-- ================= NO GROUPS ONBOARDING STATE ================= -->
+  <div class="page-container" style="padding-top: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
+    <div class="onboarding-card" style="margin-top: 0;">
+      <div class="onboarding-icon">
+        <ion-icon name="pie-chart-outline"></ion-icon>
+      </div>
+      <h2 class="onboarding-title">No analytics yet</h2>
+      <p class="onboarding-message">Your spending insights will appear here once you create a group and add some expenses.</p>
+    </div>
+  </div>
   } @else {
   <div class="page-container" style="padding-top: 0;">
 

@@ -1150,9 +1150,84 @@ app-groups .chart-card .apexcharts-legend {
   opacity: .65;
 }
 
+/* Onboarding card for new users with no groups */
+.onboarding-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  margin-top: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.onboarding-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.onboarding-icon ion-icon {
+  font-size: 40px;
+  color: var(--accent);
+}
+
+.onboarding-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink-1);
+  margin: 0 0 10px;
+  letter-spacing: -0.3px;
+}
+
+.onboarding-message {
+  font-size: 0.88rem;
+  color: var(--ink-3);
+  line-height: 1.6;
+  margin: 0 0 28px;
+  max-width: 280px;
+}
+
+.onboarding-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.onboarding-cta ion-icon {
+  font-size: 18px;
+}
+
+.onboarding-cta:hover {
+  opacity: 0.88;
+}
+
+.onboarding-cta:active {
+  transform: scale(0.97);
+}
+
 .main-content {
   padding: 22px 20px 0;
 }
+
 
 .total-summary-row {
   display: flex;
@@ -2754,6 +2829,25 @@ apx-chart {
   letter-spacing: 0.8px;
   font-weight: 600;
   margin-top: 2px;
+}
+
+.profile-new-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  margin: 12px 0 0;
+  padding: 10px 16px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.profile-new-hint ion-icon {
+  font-size: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .settings-card-wrapper {

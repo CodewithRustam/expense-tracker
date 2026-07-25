@@ -53,7 +53,7 @@ export class RegistrationPage {
         this.isLoading = false;
         if (success) {
           this.errorMessage = null;
-          await this.showSuccessGlobalModal();
+          await this.showSuccessModal();
         } else {
           this.errorMessage = 'Registration failed. Please try again.';
         }
@@ -65,24 +65,27 @@ export class RegistrationPage {
     });
   }
 
-  async showSuccessGlobalModal() {
+  async showSuccessModal() {
     const modal = await this.modalCtrl.create({
       component: GlobalModalComponent,
       backdropDismiss: false,
       cssClass: 'global-modal',
       mode: 'ios',
       componentProps: {
-        message: '<strong>Registration Successful! 🎉</strong><br><br>Your account has been created successfully. Click OK to log in.',
-        confirmText: 'OK',
-        cancelText: '',
+        message: 'Registration Successful! 🎉 Your account has been created.',
+        confirmText: 'Go to Login',
+        cancelText: 'Stay',
         danger: false
       }
     });
 
     await modal.present();
 
-    await modal.onDidDismiss();
-    this.router.navigate(['/login']);
+    // Redirect to login regardless of which button is pressed (both are fine after success)
+    const { data } = await modal.onDidDismiss();
+    if (data === true) {
+      this.router.navigate(['/login']);
+    }
   }
 
   goToLogin() {

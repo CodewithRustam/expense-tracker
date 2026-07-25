@@ -27,6 +27,7 @@
       <h2 class="user-name">{{ user?.name || 'User Name' }}</h2>
       <p class="user-email">{{ user?.email || 'user@example.com' }}</p>
 
+      @if (totalGroups > 0) {
       <div class="stats-row">
         <div class="stat-item">
           <span class="stat-val">{{ totalGroups }}</span>
@@ -38,6 +39,12 @@
           <span class="stat-label">Spent</span>
         </div>
       </div>
+      } @else {
+      <p class="profile-new-hint">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        You're new here — create a group to get started!
+      </p>
+      }
     </div>
 
     <!-- GENERAL SECTION -->
