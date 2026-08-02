@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://financetracker.runasp.net/api'
+  apiUrl: 'https://roomexpense-tracker-api.onrender.com/api'
 };
