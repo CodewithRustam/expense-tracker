@@ -14,8 +14,10 @@
 
     <!-- Skeleton Loader -->
     <div *ngIf="isLoading" class="skeleton-container" style="padding: 20px;">
-      <ion-skeleton-text animated style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated
+        style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated
+        style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
       <ion-skeleton-text animated style="width: 100%; height: 40px; border-radius: 12px;"></ion-skeleton-text>
     </div>
 
@@ -40,47 +42,58 @@
         </div>
         <div class="input-body">
           <ion-label>Total Balance</ion-label>
-          <div class="date-display" [style.color]="user.netBalance < 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
-            {{ user.netBalance < 0 ? 'Pay ₹' + (-user.netBalance).toFixed(2) : 'No balance due' }}
+          <div class="date-display"
+            [style.color]="user.netBalance < 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
+            {{ user.netBalance < 0 ? 'Pay ₹' + (-user.netBalance).toFixed(2) : 'No balance due' }} </div>
           </div>
         </div>
-      </div>
 
-      <div class="divider"></div>
+        <div class="divider"></div>
 
-      <div class="sheet-section-label">Select Member to Settle</div>
+        <div class="sheet-section-label">Select Member to Settle</div>
 
-      <div class="room-container-inline">
-        <div class="room-inline-scroll">
-          <div class="room-inline-track">
-            <div *ngFor="let detail of filteredMembers" class="room-chip" 
-              [class.active]="selectedMember?.toMemberId === detail.toMemberId"
-              (click)="selectedMember = detail; onMemberChange()">
-              <div class="chip-avatar">{{ detail.toMemberName.substring(0,1) }}</div>
-              <span class="chip-name">{{ detail.toMemberName }}</span>
-              <span class="chip-name" style="margin-left: 4px; font-weight: 700; color: var(--ion-color-danger)">
-                ₹{{ detail.amount.toFixed(2) }}
-              </span>
-              <div class="active-indicator"></div>
+        <div class="room-container-inline">
+          <div class="room-inline-scroll">
+            <div class="room-inline-track">
+              <div *ngFor="let detail of filteredMembers" class="room-chip"
+                [class.active]="selectedMember?.toMemberId === detail.toMemberId"
+                (click)="selectedMember = detail; onMemberChange()">
+                <div class="chip-avatar">{{ detail.toMemberName.substring(0,1) }}</div>
+                <span class="chip-name">{{ detail.toMemberName }}</span>
+                <span class="chip-name" style="margin-left: 4px; font-weight: 700; color: var(--ion-color-danger)">
+                  ₹{{ detail.amount.toFixed(2) }}
+                </span>
+                <div class="active-indicator"></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Footer Buttons -->
+        <div class="footer-pad">
+          <!-- Pay via UPI — only shown on native Android -->
+          <ion-button *ngIf="isUpiAvailable" expand="block" class="upi-btn"
+            [disabled]="!selectedMember || isProcessingUpi" (click)="payViaUpi()"
+            style="--background: linear-gradient(135deg, #5f2dab 0%, #8b5cf6 100%); --border-radius: 14px; margin-bottom: 10px; font-weight: 600;">
+            <ion-spinner *ngIf="isProcessingUpi" name="crescent" slot="start" style="margin-right: 8px;"></ion-spinner>
+            <ion-icon *ngIf="!isProcessingUpi" name="phone-portrait-outline" slot="start"></ion-icon>
+            {{ isProcessingUpi ? 'Processing...' : 'Pay via UPI' }}
+          </ion-button>
+
+          <!-- Manual settlement fallback -->
+          <ion-button expand="block" class="main-btn" [disabled]="!selectedMember" (click)="confirmSettlement()">
+            Confirm Settlement
+          </ion-button>
+        </div>
+
       </div>
 
-      <!-- Confirm Button -->
-      <div class="footer-pad">
-        <ion-button expand="block" class="main-btn" [disabled]="!selectedMember" (click)="confirmSettlement()">
-          Confirm Settlement
-        </ion-button>
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && settlementDetails.length === 0" class="empty-state fade-in"
+        style="padding: 40px 20px; text-align: center;">
+        <ion-icon name="receipt-outline" style="font-size: 48px; color: var(--ion-color-medium);"></ion-icon>
+        <p style="color: var(--ion-color-medium); margin-top: 12px;">No settlements available.</p>
       </div>
 
     </div>
-
-    <!-- Empty State -->
-    <div *ngIf="!isLoading && settlementDetails.length === 0" class="empty-state fade-in" style="padding: 40px 20px; text-align: center;">
-      <ion-icon name="receipt-outline" style="font-size: 48px; color: var(--ion-color-medium);"></ion-icon>
-      <p style="color: var(--ion-color-medium); margin-top: 12px;">No settlements available.</p>
-    </div>
-
-  </div>
 </ion-content>
