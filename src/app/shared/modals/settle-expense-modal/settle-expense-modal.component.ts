@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { SettlementDetail } from 'src/app/core/models/Settlement/SettlementDetail';
 import { ExpenseService } from 'src/app/core/services/expense';
 import { Toastservice } from 'src/app/core/services/toastservice';
 import { UpiService } from 'src/app/core/services/upi.service';
 import { UpiSettlementRequest } from 'src/app/core/models/Settlement/UpiSettlementRequest';
+import { QrScannerModalComponent, QrScanResult } from '../qr-scanner-modal/qr-scanner-modal.component';
 
 export interface SettlementResponse {
   success: boolean;
@@ -38,6 +39,7 @@ export class SettleExpenseModalComponent implements OnInit {
 
   constructor(
     private modalCtrl: ModalController,
+    private alertCtrl: AlertController,
     private expenseService: ExpenseService,
     private toast: Toastservice,
     private upiService: UpiService
@@ -106,13 +108,85 @@ export class SettleExpenseModalComponent implements OnInit {
 
   /**
    * Triggers the native UPI payment flow:
-   * 1. Opens the Android UPI app chooser (GPay, PhonePe, etc.)
-   * 2. User completes payment inside the UPI app
-   * 3. On return, auto-captures the UTR from the OS-level response
-   * 4. Silently sends the UTR to the backend for verification
+   * 1. Asks for receiver's UPI ID if not pre-filled (required by NPCI/GPay)
+   * 2. Opens the Android UPI app chooser (GPay, PhonePe, etc.) with payee & amount pre-filled
+   * 3. User completes payment inside the UPI app
+   * 4. On return, auto-captures the UTR from the OS-level response
+   * 5. Silently sends the UTR to the backend for verification
+   */
+  /**
+   * Opens the in-app Camera QR Scanner.
+   * User scans the receiver's Google Pay / PhonePe / Paytm QR code.
+   * The app decodes the receiver's UPI ID (pa) and launches the UPI payment intent.
+   */
+  async scanAndPay() {
+    if (!this.selectedMember || this.isProcessingUpi) return;
+
+    const modal = await this.modalCtrl.create({
+      component: QrScannerModalComponent,
+      cssClass: 'qr-scanner-modal-sheet'
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+
+    if (data?.success && data?.upiId) {
+      const payeeName = data.payeeName || this.selectedMember.toMemberName;
+      this.executeUpiPaymentFlow(data.upiId, payeeName);
+    } else if (data?.success && data?.rawText) {
+      // Fallback if raw text was scanned
+      this.executeUpiPaymentFlow(data.rawText, this.selectedMember.toMemberName);
+    }
+  }
+
+  /**
+   * Legacy / fallback method for direct UPI payment
    */
   async payViaUpi() {
     if (!this.selectedMember || this.isProcessingUpi) return;
+
+    let targetUpiId = this.selectedMember.upiId || '';
+
+    // Prompt for UPI ID if not pre-filled
+    if (!targetUpiId) {
+      const alert = await this.alertCtrl.create({
+        header: 'Enter Receiver UPI ID',
+        message: `Enter the UPI ID of ${this.selectedMember.toMemberName} (e.g. john@upi or 9876543210@ybl):`,
+        inputs: [
+          {
+            name: 'upiId',
+            type: 'text',
+            placeholder: 'e.g. username@okicici',
+            value: ''
+          }
+        ],
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
+          { text: 'Proceed', role: 'ok' }
+        ]
+      });
+
+      await alert.present();
+      const { data, role } = await alert.onDidDismiss();
+
+      if (role !== 'ok' || !data?.values?.upiId?.trim()) {
+        return; // User cancelled or entered blank
+      }
+
+      targetUpiId = data.values.upiId.trim();
+    }
+
+    if (!targetUpiId) return;
+
+    this.executeUpiPaymentFlow(targetUpiId, this.selectedMember.toMemberName);
+  }
+
+  /**
+   * Executes the full UPI intent + auto-UTR capture flow
+   */
+  private async executeUpiPaymentFlow(targetUpiId: string, payeeName: string) {
+    if (!this.selectedMember) return;
 
     this.isProcessingUpi = true;
 
@@ -121,8 +195,14 @@ export class SettleExpenseModalComponent implements OnInit {
       const note = `SplitX settlement to ${this.selectedMember.toMemberName}`;
       const internalRef = `SPLITX-${this.roomId}-${Date.now()}`;
 
-      // 1. Fire the native UPI intent and wait for the response
-      const result = await this.upiService.initiateUpiPayment(amount, note, internalRef);
+      // 1. Fire native UPI intent with payee VPA and payee name
+      const result = await this.upiService.initiateUpiPayment(
+        amount,
+        note,
+        internalRef,
+        targetUpiId,
+        payeeName
+      );
 
       // 2. Handle the response based on status
       switch (result.status?.toUpperCase()) {

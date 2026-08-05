@@ -16,6 +16,7 @@ import { SettleExpenseModalComponent } from './shared/modals/settle-expense-moda
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { AddMemberModalComponent } from './shared/modals/add-member-modal/add-member-modal.component';
 import { RemoveMemberModalComponent } from './shared/modals/remove-member-modal/remove-member-modal.component';
+import { QrScannerModalComponent } from './shared/modals/qr-scanner-modal/qr-scanner-modal.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { RemoveMemberModalComponent } from './shared/modals/remove-member-modal/
     NotificationListModal, 
     SettleExpenseModalComponent, 
     AddMemberModalComponent,
-    RemoveMemberModalComponent
+    RemoveMemberModalComponent,
+    QrScannerModalComponent
   ],
   imports: [
     BrowserModule,

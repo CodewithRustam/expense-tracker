@@ -71,13 +71,21 @@
 
         <!-- Footer Buttons -->
         <div class="footer-pad">
-          <!-- Pay via UPI — only shown on native Android -->
+          <!-- Scan & Pay via UPI — camera QR scanner -->
           <ion-button *ngIf="isUpiAvailable" expand="block" class="upi-btn"
-            [disabled]="!selectedMember || isProcessingUpi" (click)="payViaUpi()"
-            style="--background: linear-gradient(135deg, #5f2dab 0%, #8b5cf6 100%); --border-radius: 14px; margin-bottom: 10px; font-weight: 600;">
+            [disabled]="!selectedMember || isProcessingUpi" (click)="scanAndPay()"
+            style="--background: linear-gradient(135deg, #059669 0%, #10b981 100%); --border-radius: 14px; margin-bottom: 10px; font-weight: 600;">
             <ion-spinner *ngIf="isProcessingUpi" name="crescent" slot="start" style="margin-right: 8px;"></ion-spinner>
-            <ion-icon *ngIf="!isProcessingUpi" name="phone-portrait-outline" slot="start"></ion-icon>
-            {{ isProcessingUpi ? 'Processing...' : 'Pay via UPI' }}
+            <ion-icon *ngIf="!isProcessingUpi" name="qr-code-outline" slot="start"></ion-icon>
+            {{ isProcessingUpi ? 'Processing...' : 'Scan & Pay via UPI' }}
+          </ion-button>
+
+          <!-- Direct UPI Payment -->
+          <ion-button *ngIf="isUpiAvailable" expand="block" fill="outline" class="upi-outline-btn"
+            [disabled]="!selectedMember || isProcessingUpi" (click)="payViaUpi()"
+            style="--border-radius: 14px; margin-bottom: 10px; font-weight: 600; --color: #8b5cf6; --border-color: #8b5cf6;">
+            <ion-icon name="paper-plane-outline" slot="start"></ion-icon>
+            Enter UPI ID Manually
           </ion-button>
 
           <!-- Manual settlement fallback -->

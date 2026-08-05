@@ -24,19 +24,19 @@ export class UpiService {
   /**
    * Triggers the native Android UPI payment intent.
    *
-   * The payee VPA (pa) is intentionally omitted — the user selects or enters
-   * the payee inside their UPI app (GPay, PhonePe, etc.).
-   * The OS-level response (including the UTR) is auto-captured when the UPI app closes.
-   *
-   * @param amount     - Payment amount as a string (e.g. "500.00")
-   * @param note       - Transaction note shown in the UPI app
+   * @param amount      - Payment amount as a string (e.g. "500.00")
+   * @param note        - Transaction note shown in the UPI app
    * @param internalRef - Your internal reference ID for tracking
+   * @param payeeVpa    - Payee UPI ID (e.g. "user@upi") - required by NPCI/GPay
+   * @param payeeName   - Payee display name
    * @returns Promise resolving to the parsed UPI response
    */
   async initiateUpiPayment(
     amount: string,
     note: string,
-    internalRef: string
+    internalRef: string,
+    payeeVpa?: string,
+    payeeName?: string
   ): Promise<UpiPaymentResult> {
     if (!this.isUpiAvailable()) {
       throw new Error('UPI payments are only available on Android devices.');
@@ -46,7 +46,9 @@ export class UpiService {
       am: amount,
       cu: 'INR',
       tn: note,
-      tr: internalRef
+      tr: internalRef,
+      pa: payeeVpa,
+      pn: payeeName
     });
   }
 
