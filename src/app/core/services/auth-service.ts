@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, catchError, map, of, tap, Subject } from 'rxjs';
+import { Observable, catchError, from, map, of, switchMap, tap, Subject } from 'rxjs';
 import { NavController } from '@ionic/angular';
+import { SecureTokenService } from './secure-token.service';
 
 export interface ApiResponse {
   success: boolean;
@@ -13,12 +14,14 @@ export interface ApiResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private tokenKey = 'jwtToken';
-
   private logoutSubject = new Subject<void>();
   public logout$ = this.logoutSubject.asObservable();
 
-  constructor(private apiService: ApiService, private navCtrl: NavController) { }
+  constructor(
+    private apiService: ApiService,
+    private navCtrl: NavController,
+    private secureTokenService: SecureTokenService
+  ) { }
 
   login(userName: string, password: string, rememberMe: boolean): Observable<boolean> {
     const payload = { userName, password };
@@ -27,16 +30,15 @@ export class AuthService {
       'account/login',
       payload
     ).pipe(
-      tap(res => {
+      switchMap(res => {
         if (res.success && res.token) {
-          if (rememberMe) {
-            localStorage.setItem(this.tokenKey, res.token); // persists after app close
-          } else {
-            sessionStorage.setItem(this.tokenKey, res.token); // cleared on app close
-          }
+          // Store token securely (encrypted + in-memory)
+          return from(this.secureTokenService.storeToken(res.token, rememberMe)).pipe(
+            map(() => true)
+          );
         }
-      }),
-      map(res => res.success)
+        return of(res.success);
+      })
     );
   }
 
@@ -79,8 +81,8 @@ export class AuthService {
   }
   // Logout
   logout() {
-    localStorage.removeItem(this.tokenKey);
-    sessionStorage.removeItem(this.tokenKey);
+    this.secureTokenService.clearToken();
+    localStorage.removeItem('rememberedUser');
     this.logoutSubject.next();
   }
 
@@ -89,11 +91,11 @@ export class AuthService {
     return !!token && !this.isTokenExpired();
   }
 
-  // Get JWT token
+  // Get JWT token (from secure in-memory storage)
   getToken(): string | null {
-    // Check both storages
-    return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
+    return this.secureTokenService.getToken();
   }
+
   getUserId(): string | null {
     const token = this.getToken();
     if (!token) return null;
@@ -132,8 +134,7 @@ export class AuthService {
 
   // Clear token and redirect to login page
   clearTokenAndRedirect(): void {
-    localStorage.removeItem(this.tokenKey);
-    sessionStorage.removeItem(this.tokenKey);
+    this.secureTokenService.clearToken();
     localStorage.removeItem('rememberedUser');
     this.logoutSubject.next();
     this.navCtrl.navigateRoot('/login').then(() => {

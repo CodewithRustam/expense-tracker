@@ -35,8 +35,7 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tabs/home';
-    const token = localStorage.getItem('authToken');
-    if (token) {
+    if (this.authService.isAuthenticated()) {
       this.router.navigate([this.returnUrl]);
     }
   }

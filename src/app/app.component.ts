@@ -8,6 +8,7 @@ import { AppUpdateService } from './core/services/app-update.service';
 import { StatusBarService } from './core/services/status-bar.service';
 import { SessionTimeoutService } from './core/services/session-timeout.service';
 import { BackButtonService } from './core/services/back-button.service';
+import { SecureTokenService } from './core/services/secure-token.service';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
@@ -28,7 +29,8 @@ export class AppComponent implements OnInit {
     private appUpdateService: AppUpdateService,
     private statusBarService: StatusBarService,
     private sessionTimeoutService: SessionTimeoutService,
-    private backButtonService: BackButtonService
+    private backButtonService: BackButtonService,
+    private secureTokenService: SecureTokenService
   ) {
     this.initializeApp();
     this.listenNetworkStatus();
@@ -42,6 +44,9 @@ export class AppComponent implements OnInit {
 
   private async initializeApp() {
     await this.platform.ready();
+
+    // 0. Initialize secure token storage (restore encrypted tokens into memory)
+    await this.secureTokenService.initialize();
 
     // 1. Initialize hardware back button handler
     this.backButtonService.initializeBackButton(this.routerOutlet);

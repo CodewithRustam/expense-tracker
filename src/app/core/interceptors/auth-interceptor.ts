@@ -10,10 +10,14 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth-service';
+import { DeviceFingerprintService } from '../services/device-fingerprint.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private deviceFingerprintService: DeviceFingerprintService
+  ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const publicEndpoints = [
@@ -40,7 +44,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
     if (token) {
       authReq = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` }
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+          'X-Device-Fingerprint': this.deviceFingerprintService.getFingerprintSync()
+        }
       });
     }
 
