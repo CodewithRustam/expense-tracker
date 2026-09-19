@@ -1,0 +1,6 @@
+/ngsw.json
+  Cache-Control: no-cache, no-store, must-revalidate
+/ngsw-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/safety-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate

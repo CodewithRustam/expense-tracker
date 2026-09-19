@@ -41,6 +41,11 @@
                 "output": "./"
               },
               {
+                "glob": "_headers",
+                "input": "src",
+                "output": "./"
+              },
+              {
                 "glob": "**/*",
                 "input": "src/assets/.well-known",
                 "output": ".well-known"
@@ -136,6 +141,11 @@
               },
               {
                 "glob": "_redirects",
+                "input": "src",
+                "output": "./"
+              },
+              {
+                "glob": "_headers",
                 "input": "src",
                 "output": "./"
               },
