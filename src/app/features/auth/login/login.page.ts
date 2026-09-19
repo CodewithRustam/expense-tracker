@@ -57,6 +57,16 @@ export class LoginPage implements OnInit {
           if (res) {
             this.errorMessage = null;
 
+            // ⚠️ TEMPORARY DEBUG — Remove after testing
+            const oldToken = localStorage.getItem('jwtToken');
+            const newToken = localStorage.getItem('et_secure_token');
+            if (newToken && !oldToken) {
+              alert('✅ NEW Secure Auth System Active!\n\nToken is ENCRYPTED in storage.');
+            } else if (oldToken) {
+              alert('❌ OLD Auth System — token is plain text!');
+            }
+            // ⚠️ END TEMPORARY DEBUG
+
             console.log('[PushDebug]', 'initPush called AFTER login');
             if (this.platform.is('capacitor')) {
               await this.appComponent.initPush();
