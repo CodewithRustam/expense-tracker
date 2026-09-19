@@ -15,7 +15,7 @@ export class CryptoService {
 
   // App-level secret used as part of key derivation.
   // This is NOT a standalone secret — it's combined with the device fingerprint.
-  private readonly APP_SECRET = 'expense-tracker-v1-secure-key';
+  private readonly APP_SECRET = '534547b7246ab0a42795d368685309340cf785c4169520b95263d2059120fe60';
 
   /**
    * Encrypt a plaintext string using AES-GCM.
