@@ -37,6 +37,15 @@ export class AppUpdateService {
           console.error('[PWA Update] Error activating update:', e);
         }
         setTimeout(() => window.location.reload(), 1500);
+      } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
+        console.warn('⚠️ [PWA Update] Version installation failed. Unregistering broken SW state...');
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (const registration of registrations) {
+              registration.unregister();
+            }
+          });
+        }
       }
     });
 
