@@ -44,7 +44,8 @@ export class AppUpdateService {
         setTimeout(() => window.location.reload(), 2500);
       } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
         this.updateActivated = true;
-        console.warn('⚠️ [PWA Update] Version installation failed (file mismatch or network issue). Will retry next session.');
+        console.error('❌ [PWA Update] VERSION_INSTALLATION_FAILED — Full event:', JSON.stringify(event, null, 2));
+        console.error('❌ [PWA Update] Error:', (event as any).error);
       }
     });
 
