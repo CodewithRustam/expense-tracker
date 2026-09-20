@@ -1,4 +1,6 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, signal, computed, inject, effect, untracked } from '@angular/core';
+import { Router } from '@angular/router';
+import { ModalController } from '@ionic/angular';
 import { ExpenseService } from '../core/services/expense';
 import { MonthlyExpensesTrendResponse } from '../core/models/Expense/MonthlyExpensesTrendResponse';
 import { CategoryExpenses } from '../core/models/Expense/CategoryExpenses';
@@ -7,6 +9,7 @@ import { GroupService } from '../core/services/group';
 import { Subject, Subscription, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DonutChartOptions, getDonutChartOptions } from '../core/utils/chart.config';
+import { AddExpenseModalComponent } from '../add-expense/add-expense.component';
 
 @Component({
   selector: 'app-charts',
@@ -17,6 +20,8 @@ import { DonutChartOptions, getDonutChartOptions } from '../core/utils/chart.con
 export class ChartsPage implements OnInit, OnDestroy {
   private expenseService = inject(ExpenseService);
   private groupService = inject(GroupService);
+  private router = inject(Router);
+  private modalCtrl = inject(ModalController);
 
   trendData = signal<MonthlyExpensesTrendResponse>({
     months: [],
@@ -234,5 +239,21 @@ export class ChartsPage implements OnInit, OnDestroy {
       },
       legend: { ...opts.legend, labels: { colors: color } }
     }));
+  }
+
+  goToHome() {
+    this.router.navigate(['/tabs/home']);
+  }
+
+  async openAddExpense() {
+    if (this.groupService.isLoading()) return;
+    const modal = await this.modalCtrl.create({
+      component: AddExpenseModalComponent,
+      componentProps: { groups: this.groups() },
+      breakpoints: [0, 0.77],
+      initialBreakpoint: 0.77
+    });
+
+    await modal.present();
   }
 }
