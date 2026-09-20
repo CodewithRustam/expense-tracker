@@ -22,6 +22,11 @@ export class AppUpdateService {
 
     console.log('✅ [PWA Update] Service Worker is active and monitoring for updates.');
 
+    // Expose debug test helper in browser console: window.testUpdateToast()
+    (window as any).testUpdateToast = () => {
+      this.toast.show('A new version is available. Reloading...', 'success');
+    };
+
     // 1. Listen for version updates
     this.swUpdate.versionUpdates.subscribe(async (event) => {
       console.log('🔄 [PWA Update] Event received:', event.type);
