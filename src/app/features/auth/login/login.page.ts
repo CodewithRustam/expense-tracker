@@ -5,6 +5,7 @@ import { Platform } from '@ionic/angular';
 import { AppComponent } from '../../../app.component';
 import { Toastservice } from '../../../core/services/toastservice';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { SecureTokenService } from '../../../core/services/secure-token.service';
 
 @Component({
   selector: 'app-login',
@@ -28,13 +29,18 @@ export class LoginPage implements OnInit {
     private route: ActivatedRoute,
     private toastService: Toastservice,
     private appComponent: AppComponent,
-    private platform: Platform
+    private platform: Platform,
+    private secureTokenService: SecureTokenService
   ) {
     this.initializeApp();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tabs/home';
+
+    // Ensure token is restored from encrypted storage before checking auth
+    await this.secureTokenService.initialize();
+
     if (this.authService.isAuthenticated()) {
       this.router.navigate([this.returnUrl]);
     }
