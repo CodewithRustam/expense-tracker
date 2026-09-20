@@ -17,10 +17,13 @@ export class Toastservice {
   constructor() { }
 
   private createContainer() {
-    if (document.querySelector('.custom-toast-container')) return;
-    this.container = document.createElement('div');
-    this.container.classList.add('custom-toast-container');
-    document.body.appendChild(this.container);
+    let container = document.querySelector('.custom-toast-container') as HTMLElement;
+    if (!container) {
+      container = document.createElement('div');
+      container.classList.add('custom-toast-container');
+      document.body.appendChild(container);
+    }
+    this.container = container;
   }
 
   show(message: string, type: 'success' | 'error' | 'warning' = 'success') {

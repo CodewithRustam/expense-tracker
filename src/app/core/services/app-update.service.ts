@@ -35,13 +35,13 @@ export class AppUpdateService {
       if (event.type === 'VERSION_READY') {
         this.updateActivated = true;
         console.log('✨ [PWA Update] New version ready! Triggering toast...');
-        this.toast.show('A new version is available. Reloading...', 'success');
+        this.toast.show('A new version is available. Updating...', 'success');
         try {
           await this.swUpdate.activateUpdate();
         } catch (e) {
           console.error('[PWA Update] Error activating update:', e);
         }
-        setTimeout(() => window.location.reload(), 1500);
+        setTimeout(() => window.location.reload(), 2500);
       } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
         this.updateActivated = true;
         console.warn('⚠️ [PWA Update] Version installation failed (file mismatch or network issue). Will retry next session.');
