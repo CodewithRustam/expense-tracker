@@ -54,19 +54,6 @@
   } @else {
   <div class="page-container" style="padding-top: 0;">
 
-    @if (!hasData()) {
-    <!-- ================= NO EXPENSES STATE (group exists but no data) ================= -->
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
-      <div class="onboarding-card" style="margin-top: 0;">
-        <div class="onboarding-icon">
-          <ion-icon name="pie-chart-outline"></ion-icon>
-        </div>
-        <h2 class="onboarding-title">No expenses yet</h2>
-        <p class="onboarding-message">Add your first expense to <strong>{{ selectedGroup()?.name }}</strong> to see your spending analytics here.</p>
-      </div>
-    </div>
-
-    } @else {
     <!-- ================= CATEGORIES / TOP SPENDS SEGMENT (Sticky Pinned on Top) ================= -->
     <div
       style="position: sticky; top: -1px; z-index: 100; background: var(--background, #12131a); padding: 12px 20px 14px; margin-bottom: 12px;">
@@ -109,17 +96,33 @@
       </div>
 
       <div class="chart-wrapper">
-        @if (renderChart()) {
-        <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart"
-          [labels]="chartOptions().labels" [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
-          [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
-          [responsive]="chartOptions().responsive">
-        </apx-chart>
+        @if (hasData()) {
+          @if (renderChart()) {
+          <apx-chart width="100%" [series]="chartOptions().series" [chart]="chartOptions().chart"
+            [labels]="chartOptions().labels" [colors]="chartOptions().colors" [dataLabels]="chartOptions().dataLabels"
+            [plotOptions]="chartOptions().plotOptions" [legend]="chartOptions().legend"
+            [responsive]="chartOptions().responsive">
+          </apx-chart>
+          }
+        } @else {
+          <div class="empty-chart-placeholder" style="margin: 20px 0 10px;">
+            <div class="empty-icon-circle">
+              <ion-icon name="pie-chart-outline"></ion-icon>
+            </div>
+            <p class="empty-text">
+              @if (!hasEverHadExpenses()) {
+                No expenses recorded yet<br>for <strong>{{ selectedGroup()?.name }}</strong>
+              } @else {
+                No expenses recorded for<br><strong>{{ currentMonthLabel() }}</strong>
+              }
+            </p>
+          </div>
         }
       </div>
     </div>
 
     <!-- ================= LIST ================= -->
+    @if (hasData()) {
     <div class="list-wrapper">
 
       @if (activeTab() === 'categories') {
@@ -168,7 +171,7 @@
       }
 
     </div>
-    } <!-- end hasData else -->
+    }
 
   </div>
   }

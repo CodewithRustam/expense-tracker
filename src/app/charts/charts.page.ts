@@ -34,7 +34,11 @@ export class ChartsPage implements OnInit, OnDestroy {
   chartOptions = signal<DonutChartOptions>(getDonutChartOptions(window.matchMedia('(prefers-color-scheme: dark)').matches));
 
   currentMonthLabel = computed(() => this.formatMonthLabel(this.currentMonth()));
-  hasData = computed(() => this.trendData().members?.some(m => (m.monthlyExpenses[0] || 0) > 0));
+  hasData = computed(() => 
+    this.trendData().members?.some(m => (m.monthlyExpenses[0] || 0) > 0) ||
+    this.trendData().categoryExpenses?.some(c => (c.monthlyTotals[0] || 0) > 0)
+  );
+  hasEverHadExpenses = computed(() => (this.selectedGroup()?.totalAmount || 0) > 0);
 
   private destroy$ = new Subject<void>();
   private refreshSub: Subscription | undefined;
@@ -65,10 +69,7 @@ export class ChartsPage implements OnInit, OnDestroy {
   }
 
   ionViewDidEnter() {
-    if (this.hasData()) {
-      // Delay slightly to ensure transition is fully done before drawing
-      setTimeout(() => this.renderChart.set(true), 50);
-    }
+    setTimeout(() => this.renderChart.set(true), 50);
   }
 
   ionViewWillLeave() {
