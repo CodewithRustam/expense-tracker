@@ -1,0 +1,41 @@
+[build]
+  publish = "www"
+
+# Disable ALL post-processing that modifies files after build.
+# This is critical for Angular Service Worker (ngsw) because it
+# generates file hashes at build time. If Netlify modifies files
+# after build, the hashes won't match and SW updates will fail
+# with VERSION_INSTALLATION_FAILED.
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.html]
+  pretty_urls = false
+
+[build.processing.css]
+  bundle = false
+  minify = false
+
+[build.processing.js]
+  bundle = false
+  minify = false
+
+[build.processing.images]
+  compress = false
+
+# Ensure ngsw files are never cached by CDN
+[[headers]]
+  for = "/ngsw.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/ngsw-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
