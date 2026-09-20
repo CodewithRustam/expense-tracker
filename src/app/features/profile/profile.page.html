@@ -64,7 +64,7 @@
     <!-- SETTINGS CARD LIST -->
     <div class="chart-card settings-card-wrapper">
       <div class="row-list">
-        <div class="row-item ion-activatable" *ngFor="let item of settings">
+        <div class="row-item ion-activatable" *ngFor="let item of settings" (click)="onSettingClick(item)">
           <div class="icon-box">
             <ion-icon [name]="item.icon"></ion-icon>
           </div>

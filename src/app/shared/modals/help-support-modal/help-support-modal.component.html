@@ -1,0 +1,129 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Help Center & Support</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="support-container">
+
+    <!-- Support Banner & SLA -->
+    <div class="support-banner">
+      <div class="banner-icon">
+        <ion-icon name="headset-outline"></ion-icon>
+      </div>
+      <div class="banner-text">
+        <h3>How can we help you today?</h3>
+        <p>Browse FAQs below or send feedback directly to our team.</p>
+        <div class="sla-chip">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Avg. Response Time: &lt; 24 Hours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="section-title">Knowledge Base Topics</div>
+
+    <div class="topic-chips">
+      <button [class.active]="selectedCategory === 'all'" (click)="filterFaq('all')">All</button>
+      <button [class.active]="selectedCategory === 'splits'" (click)="filterFaq('splits')">Splits</button>
+      <button [class.active]="selectedCategory === 'settlement'" (click)="filterFaq('settlement')">Settlement</button>
+      <button [class.active]="selectedCategory === 'security'" (click)="filterFaq('security')">Security</button>
+      <button [class.active]="selectedCategory === 'pwa'" (click)="filterFaq('pwa')">Offline PWA</button>
+    </div>
+
+    <!-- FAQ Accordion List -->
+    <div class="faq-list">
+      <div 
+        class="faq-item" 
+        *ngFor="let faq of filteredFaqs; let i = index" 
+        [class.expanded]="expandedFaqIndex === i"
+        (click)="toggleFaq(i)">
+        
+        <div class="faq-header">
+          <span class="faq-question">{{ faq.question }}</span>
+          <ion-icon 
+            [name]="expandedFaqIndex === i ? 'chevron-up-outline' : 'chevron-down-outline'" 
+            class="faq-chevron">
+          </ion-icon>
+        </div>
+
+        <div class="faq-body" *ngIf="expandedFaqIndex === i">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direct Support Contacts -->
+    <div class="section-title">Direct Support Channel</div>
+
+    <div class="contact-card" (click)="copySupportEmail()">
+      <div class="contact-icon">
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+      <div class="contact-text">
+        <h4>Official Email Support</h4>
+        <p>{{ supportEmail }}</p>
+      </div>
+      <ion-icon name="copy-outline" class="action-icon"></ion-icon>
+    </div>
+
+    <!-- Feedback & Bug Report Form -->
+    <div class="section-title">Send Feedback or Report Issue</div>
+
+    <div class="feedback-card">
+      <div class="category-selector">
+        <button 
+          class="cat-chip" 
+          [class.active]="feedbackCategory === 'general'" 
+          (click)="feedbackCategory = 'general'">
+          General
+        </button>
+        <button 
+          class="cat-chip" 
+          [class.active]="feedbackCategory === 'bug'" 
+          (click)="feedbackCategory = 'bug'">
+          Bug Report
+        </button>
+        <button 
+          class="cat-chip" 
+          [class.active]="feedbackCategory === 'feature'" 
+          (click)="feedbackCategory = 'feature'">
+          Feature Request
+        </button>
+        <button 
+          class="cat-chip" 
+          [class.active]="feedbackCategory === 'account'" 
+          (click)="feedbackCategory = 'account'">
+          Account Support
+        </button>
+      </div>
+
+      <ion-textarea 
+        placeholder="Describe your question, feature request, or issue here..." 
+        [(ngModel)]="feedbackText" 
+        [rows]="3" 
+        class="feedback-input">
+      </ion-textarea>
+
+      <button class="submit-btn" (click)="submitFeedback()" [disabled]="isSubmitting">
+        <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
+        <ion-icon name="paper-plane-outline" *ngIf="!isSubmitting"></ion-icon>
+        <span>{{ isSubmitting ? 'Sending Message...' : 'Submit Feedback' }}</span>
+      </button>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="app-info-footer">
+      <p>SplitX Help Center • Version 1.0.1</p>
+      <p class="sub">Need urgent assistance? Email splitx.app.help@gmail.com</p>
+    </div>
+
+  </div>
+</ion-content>

@@ -11,6 +11,7 @@ export class Toastservice {
     success: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
     error: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
     warning: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+    info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
     close: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
   };
 
@@ -26,7 +27,7 @@ export class Toastservice {
     this.container = container;
   }
 
-  show(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+  show(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success') {
     if (!this.container) this.createContainer();
 
     const toast = document.createElement('div');
@@ -34,7 +35,7 @@ export class Toastservice {
 
     // HTML Structure with Icon, Text, Close Button, and Progress Bar
     toast.innerHTML = `
-      <div class="toast-icon">${this.icons[type]}</div>
+      <div class="toast-icon">${this.icons[type] || this.icons.success}</div>
       <div class="toast-content">${message}</div>
       <div class="toast-close">${this.icons.close}</div>
       <div class="toast-progress"></div>
@@ -77,4 +78,5 @@ export class Toastservice {
   success(message: string) { this.show(message, 'success'); }
   error(message: string) { this.show(message, 'error'); }
   warning(message: string) { this.show(message, 'warning'); }
+  info(message: string) { this.show(message, 'info'); }
 }

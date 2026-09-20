@@ -7,6 +7,9 @@ import { Toastservice } from '../../core/services/toastservice';
 import { GroupService } from '../../core/services/group';
 import { ExpenseService } from '../../core/services/expense';
 import { SecureTokenService } from '../../core/services/secure-token.service';
+import { NotificationListModal } from '../../shared/modals/notification-list-modal/notification-list-modal.component';
+import { PrivacyModalComponent } from '../../shared/modals/privacy-modal/privacy-modal.component';
+import { HelpSupportModalComponent } from '../../shared/modals/help-support-modal/help-support-modal.component';
 import { Subscription, merge } from 'rxjs';
 
 @Component({
@@ -26,9 +29,9 @@ export class ProfilePage implements OnInit, OnDestroy {
   private refreshSub: Subscription | undefined;
 
   settings = [
-    { icon: 'notifications-outline', label: 'Notifications' },
-    { icon: 'lock-closed-outline', label: 'Privacy' },
-    { icon: 'help-circle-outline', label: 'Help & Support' }
+    { id: 'notifications', icon: 'notifications-outline', label: 'Notifications' },
+    { id: 'privacy', icon: 'lock-closed-outline', label: 'Privacy' },
+    { id: 'help', icon: 'help-circle-outline', label: 'Help & Support' }
   ];
 
   constructor(
@@ -95,6 +98,41 @@ export class ProfilePage implements OnInit, OnDestroy {
     });
   }
 
+  async onSettingClick(item: any) {
+    if (item.id === 'notifications' || item.label === 'Notifications') {
+      await this.openNotifications();
+    } else if (item.id === 'privacy' || item.label === 'Privacy') {
+      await this.openPrivacyModal();
+    } else if (item.id === 'help' || item.label === 'Help & Support') {
+      await this.openHelpSupportModal();
+    }
+  }
+
+  async openNotifications() {
+    const modal = await this.modalCtrl.create({
+      component: NotificationListModal,
+      mode: 'ios',
+      cssClass: 'notification-modal'
+    });
+    await modal.present();
+  }
+
+  async openPrivacyModal() {
+    const modal = await this.modalCtrl.create({
+      component: PrivacyModalComponent,
+      mode: 'ios'
+    });
+    await modal.present();
+  }
+
+  async openHelpSupportModal() {
+    const modal = await this.modalCtrl.create({
+      component: HelpSupportModalComponent,
+      mode: 'ios'
+    });
+    await modal.present();
+  }
+
   async logout() {
     const exit = await this.showLogoutConfirmationModal();
 
@@ -111,7 +149,6 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   editProfile() {
-    // Navigate to an edit profile page or open a modal
     console.log('Edit Profile clicked');
   }
 
@@ -125,7 +162,7 @@ export class ProfilePage implements OnInit, OnDestroy {
         message: 'Are you sure you want to logout?',
         confirmText: 'Logout',
         cancelText: 'Cancel',
-        danger: true // Use danger styling if your GlobalModal supports it
+        danger: true
       },
     });
 

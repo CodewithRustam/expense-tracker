@@ -20,6 +20,14 @@ export class AuthInterceptor implements HttpInterceptor {
   ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Skip interceptor for external third-party requests (e.g., Formspree, CDNs)
+    if (req.url.startsWith('http://') || req.url.startsWith('https://')) {
+      const isOurBackend = req.url.includes('/api/') || req.url.includes('localhost') || req.url.includes('netlify.app');
+      if (!isOurBackend) {
+        return next.handle(req);
+      }
+    }
+
     const publicEndpoints = [
       '/api/account/login',
       '/api/account/register',
