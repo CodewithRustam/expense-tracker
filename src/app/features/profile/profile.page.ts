@@ -6,6 +6,7 @@ import { GlobalModalComponent } from '../../shared/modals/global-modal/global-mo
 import { Toastservice } from '../../core/services/toastservice';
 import { GroupService } from '../../core/services/group';
 import { ExpenseService } from '../../core/services/expense';
+import { SecureTokenService } from '../../core/services/secure-token.service';
 import { Subscription, merge } from 'rxjs';
 
 @Component({
@@ -20,6 +21,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   totalSpent: number = 0;
   playHeaderAnim: boolean = false;
   appVersion: string = 'v1.0.1';
+  isNewAuthSystem: boolean = false;
 
   private refreshSub: Subscription | undefined;
 
@@ -35,10 +37,12 @@ export class ProfilePage implements OnInit, OnDestroy {
     private toastService: Toastservice,
     private modalCtrl: ModalController,
     private groupService: GroupService,
-    private expenseService: ExpenseService
+    private expenseService: ExpenseService,
+    private secureTokenService: SecureTokenService
   ) { }
 
   ngOnInit() {
+    this.isNewAuthSystem = this.secureTokenService.hasToken() || !!localStorage.getItem('et_secure_token');
     this.loadUserProfile();
 
     // ✅ Reactive Stats Update

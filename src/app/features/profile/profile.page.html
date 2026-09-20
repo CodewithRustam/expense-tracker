@@ -10,7 +10,7 @@
 
 <ion-content>
   <div class="page-container content-wrapper">
-    
+
     <!-- PROFILE HERO CARD -->
     <div class="profile-hero">
       <div class="avatar-container">
@@ -26,6 +26,15 @@
 
       <h2 class="user-name">{{ user?.name || 'User Name' }}</h2>
       <p class="user-email">{{ user?.email || 'user@example.com' }}</p>
+
+      <!-- AUTH SYSTEM STATUS BADGE -->
+      <div
+        style="margin: 10px 0; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"
+        [style.background]="isNewAuthSystem ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
+        [style.color]="isNewAuthSystem ? '#10b981' : '#ef4444'"
+        [style.border]="isNewAuthSystem ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'">
+        <span>{{ isNewAuthSystem ? '🔒 Secure Encrypted Auth Active' : '⚠️ OLD Unencrypted Auth Active' }}</span>
+      </div>
 
       @if (totalGroups > 0) {
       <div class="stats-row">
@@ -79,7 +88,8 @@
     </div>
 
     <!-- APP VERSION FOOTER -->
-    <div style="text-align: center; margin: 24px 0 12px 0; color: var(--ion-color-medium); font-size: 0.85rem; font-weight: 500;">
+    <div
+      style="text-align: center; margin: 24px 0 12px 0; color: var(--ion-color-medium); font-size: 0.85rem; font-weight: 500;">
       <span>App Version {{ appVersion }}</span>
     </div>
 
