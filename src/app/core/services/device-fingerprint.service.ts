@@ -58,17 +58,27 @@ export class DeviceFingerprintService {
 
   /**
    * Collect stable device/browser characteristics.
-   * These should be relatively stable across sessions for the same device.
+   * Uses a persistent installation seed + stable hardware/browser traits.
+   * Volatile attributes (screen dimensions, devicePixelRatio) are excluded
+   * to ensure resilience across window resizes, monitor swaps, and screen orientation changes.
    */
   private collectComponents(): string[] {
     const components: string[] = [];
 
+    // Persistent device seed stored in localStorage
+    let seed = localStorage.getItem('et_device_seed');
+    if (!seed) {
+      seed = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      try {
+        localStorage.setItem('et_device_seed', seed);
+      } catch (e) {
+        // Fallback if localStorage disabled
+      }
+    }
+    components.push(seed);
+
     // User agent string
     components.push(navigator.userAgent || 'unknown-ua');
-
-    // Screen characteristics
-    components.push(`${screen.width}x${screen.height}`);
-    components.push(`${screen.colorDepth}`);
 
     // Timezone
     components.push(Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown-tz');
@@ -81,9 +91,6 @@ export class DeviceFingerprintService {
 
     // Hardware concurrency (number of CPU cores)
     components.push(`${navigator.hardwareConcurrency || 0}`);
-
-    // Device pixel ratio
-    components.push(`${window.devicePixelRatio || 1}`);
 
     return components;
   }

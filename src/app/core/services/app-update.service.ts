@@ -38,14 +38,8 @@ export class AppUpdateService {
         }
         setTimeout(() => window.location.reload(), 1500);
       } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
-        console.warn('⚠️ [PWA Update] Version installation failed. Unregistering broken SW state...');
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(registrations => {
-            for (const registration of registrations) {
-              registration.unregister();
-            }
-          });
-        }
+        this.updateActivated = true;
+        console.warn('⚠️ [PWA Update] Version installation failed (file mismatch or network issue). Will retry next session.');
       }
     });
 
