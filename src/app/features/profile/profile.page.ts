@@ -19,6 +19,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   totalGroups: number = 0;
   totalSpent: number = 0;
   playHeaderAnim: boolean = false;
+  appVersion: string = 'v1.0.1';
 
   private refreshSub: Subscription | undefined;
 
