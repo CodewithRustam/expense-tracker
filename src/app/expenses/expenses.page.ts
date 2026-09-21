@@ -31,6 +31,8 @@ interface Expense {
 interface ExpenseDateGroup {
   date: string;
   expenses: any[];
+  totalDayAmount?: number;
+  expenseCount?: number;
 }
 
 @Component({
@@ -90,6 +92,18 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
   hasExpensesInSelectedMonth = computed(() => {
     return this.users().some(user => user.expenses?.length);
+  });
+
+  selectedUserExpensesCount = computed(() => {
+    const selId = this.selectedUser();
+    const user = this.users().find(u => u.memberId === selId);
+    return user?.expenses?.length || 0;
+  });
+
+  selectedUserTotalExpense = computed(() => {
+    const selId = this.selectedUser();
+    const user = this.users().find(u => u.memberId === selId);
+    return user?.totalMemberExpense || 0;
   });
 
   isRoomCreator = computed(() => {
@@ -383,7 +397,9 @@ export class ExpensesPage implements OnInit, OnDestroy {
       .sort((a, b) => this.getDatePriority(a) - this.getDatePriority(b))
       .map(date => ({
         date,
-        expenses: groups[date]
+        expenses: groups[date],
+        totalDayAmount: groups[date].reduce((sum: number, e: any) => sum + (Number(e.amount) || 0), 0),
+        expenseCount: groups[date].length
       }));
   }
 

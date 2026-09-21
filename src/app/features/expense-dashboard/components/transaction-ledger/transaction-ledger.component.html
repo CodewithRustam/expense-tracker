@@ -1,101 +1,207 @@
 <div class="ledger-container">
 
+  <!-- SEARCH & CATEGORY FILTER TOOLBAR -->
+  <div class="tl-toolbar" *ngIf="hasExpenses() || searchQuery || selectedCategoryFilter !== 'all'">
+    <!-- Search Bar -->
+    <div class="tl-search-box">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text"
+             [(ngModel)]="searchQuery"
+             placeholder="Search transactions, categories..."
+             class="tl-search-input"
+             autocomplete="off"
+             spellcheck="false" />
+      <button *ngIf="searchQuery"
+              type="button"
+              class="tl-clear-btn"
+              (click)="clearSearch()"
+              aria-label="Clear search">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Category Filter Horizontal Track -->
+    <div class="tl-filter-track" role="tablist">
+      <button *ngFor="let cat of categoryFilters"
+              type="button"
+              class="tl-filter-pill"
+              [class.is-active]="selectedCategoryFilter === cat.id"
+              (click)="setCategoryFilter(cat.id)">
+        <i [class]="cat.icon"></i>
+        <span>{{ cat.label }}</span>
+      </button>
+    </div>
+
+    <!-- Active Filter Summary Bar -->
+    <div class="tl-filter-summary" *ngIf="searchQuery || selectedCategoryFilter !== 'all'">
+      <span class="summary-text">
+        Showing <strong>{{ totalFilteredCount() }}</strong> result{{ totalFilteredCount() === 1 ? '' : 's' }}
+      </span>
+      <button type="button" class="tl-reset-link" (click)="clearSearch(); setCategoryFilter('all')">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SKELETON TOOLBAR (During loading) -->
+  <div class="tl-toolbar" *ngIf="isLoadingExpenses">
+    <div class="tl-search-box" style="border: 1px solid var(--border-hairline);">
+      <ion-skeleton-text animated style="width: 18px; height: 18px; border-radius: 50%; margin: 0 10px 0 0; flex-shrink: 0;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 170px; height: 14px; border-radius: 4px; margin: 0;"></ion-skeleton-text>
+    </div>
+
+    <div class="tl-filter-track" style="gap: 8px;">
+      <ion-skeleton-text animated style="width: 54px; height: 32px; border-radius: 999px; margin: 0; flex-shrink: 0;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 110px; height: 32px; border-radius: 999px; margin: 0; flex-shrink: 0;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 115px; height: 32px; border-radius: 999px; margin: 0; flex-shrink: 0;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100px; height: 32px; border-radius: 999px; margin: 0; flex-shrink: 0;"></ion-skeleton-text>
+    </div>
+  </div>
+
   <!-- LOADING SKELETONS -->
   <ng-container *ngIf="isLoadingExpenses">
     <div class="timeline-ledger-container">
-      <div class="timeline-group" *ngFor="let i of [1,2,3]">
-        <div class="timeline-date-header">
-          <ion-skeleton-text animated style="width:44px; height:10px; border-radius:4px;"></ion-skeleton-text>
+      <div class="timeline-group" *ngFor="let i of [1,2]">
+        <div class="timeline-date-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <ion-skeleton-text animated style="width:75px; height:13px; border-radius:4px; margin:0;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:90px; height:18px; border-radius:999px; margin:0;"></ion-skeleton-text>
         </div>
         <div class="timeline-row-content">
-          <div class="timeline-node-circle"></div>
-          <div class="timeline-card" style="flex:1; padding:10px 12px;">
-            <ion-skeleton-text animated style="width:60%; height:14px; margin-bottom:6px;"></ion-skeleton-text>
-            <ion-skeleton-text animated style="width:38%; height:10px;"></ion-skeleton-text>
+          <div class="timeline-node-dot">
+            <span class="timeline-dot-inner"></span>
+          </div>
+          <div class="timeline-card" style="flex:1; padding:12px 14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <ion-skeleton-text animated style="width:38px; height:38px; border-radius:12px; flex-shrink:0; margin:0;"></ion-skeleton-text>
+              <div style="flex:1;">
+                <ion-skeleton-text animated style="width:55%; height:14px; margin:0 0 6px 0; border-radius:4px;"></ion-skeleton-text>
+                <ion-skeleton-text animated style="width:35%; height:10px; margin:0; border-radius:4px;"></ion-skeleton-text>
+              </div>
+              <ion-skeleton-text animated style="width:55px; height:16px; border-radius:4px; margin:0;"></ion-skeleton-text>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; padding-top:10px; border-top: 1px solid var(--border-hairline);">
+              <ion-skeleton-text animated style="width:38px; height:38px; border-radius:12px; flex-shrink:0; margin:0;"></ion-skeleton-text>
+              <div style="flex:1;">
+                <ion-skeleton-text animated style="width:45%; height:14px; margin:0 0 6px 0; border-radius:4px;"></ion-skeleton-text>
+                <ion-skeleton-text animated style="width:30%; height:10px; margin:0; border-radius:4px;"></ion-skeleton-text>
+              </div>
+              <ion-skeleton-text animated style="width:50px; height:16px; border-radius:4px; margin:0;"></ion-skeleton-text>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </ng-container>
 
-  <!-- ACTUAL TRANSACTION LIST — TIMELINE LAYOUT -->
-  <ng-container *ngIf="!isLoadingExpenses && hasExpenses()">
+  <!-- ACTUAL TRANSACTION LIST — GROUPED & FILTERED -->
+  <ng-container *ngIf="!isLoadingExpenses && getFilteredGroups().length > 0">
     <div class="timeline-ledger-container">
-      <ng-container *ngFor="let user of users">
-        <ng-container *ngIf="selectedUser === user.memberId">
+      <div class="timeline-group" *ngFor="let group of getFilteredGroups()">
 
-          <div class="timeline-group" *ngFor="let group of groupedExpensesMap[user.memberId]">
+        <!-- Date Header with Day Spending Total -->
+        <div class="timeline-date-header">
+          <span class="timeline-date-label">{{ group.date }}</span>
+          <span class="day-total-chip" *ngIf="group.totalDayAmount !== undefined">
+            <span class="day-amt">₹{{ group.totalDayAmount | number:'1.0-0' }}</span>
+            <span class="day-dot">·</span>
+            <span class="day-items-count">{{ group.expenseCount || group.expenses?.length }} {{ (group.expenseCount || group.expenses?.length) === 1 ? 'item' : 'items' }}</span>
+          </span>
+        </div>
 
-            <!-- Date label -->
-            <div class="timeline-date-header">
-              <span class="timeline-date-label">{{ group.date }}</span>
-            </div>
-
-            <div class="timeline-row-content">
-              <!-- Category icon node -->
-              <div class="timeline-node-circle">
-                <i [class]="group.expenses[0]?.iconName"
-                   [style.color]="getIconColor(group.expenses[0]?.iconName)"></i>
-              </div>
-
-              <!-- Grouped card -->
-              <div class="timeline-card">
-                <ion-item-sliding #slidingItem
-                  *ngFor="let exp of group.expenses; let last = last"
-                  [disabled]="user?.badgeText === 'Settled up' || !exp.isEditShow"
-                  class="tl-slide-item">
-
-                  <!-- ion-item with zero padding — acts only as swipe wrapper -->
-                  <ion-item lines="none" class="tl-item-zero">
-                    <!-- All visual layout via plain div — complete CSS control -->
-                    <div class="tx-content-row" [class.no-border]="last">
-                      <div class="tx-left">
-                        <span class="tx-title">{{ exp.item }}</span>
-                        <div class="tx-badges">
-                          <span *ngIf="exp.userShareAmount" class="share-chip">
-                            ₹{{ exp.userShareAmount }}
-                          </span>
-                          <span class="category-badge"
-                                [ngClass]="getCategoryBadgeClass(exp.category)">
-                            {{ exp.category }}
-                          </span>
-                        </div>
-                      </div>
-                      <span class="tx-amt">₹{{ exp.amount | number:'1.0-0' }}</span>
-                    </div>
-                  </ion-item>
-
-                  <ion-item-options side="end">
-                    <ion-item-option class="swipe-btn swipe-edit" *ngIf="exp.isEditShow" (click)="editExpense(exp, slidingItem)">
-                      <div class="swipe-content">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </div>
-                    </ion-item-option>
-                    <ion-item-option class="swipe-btn swipe-delete" (click)="deleteExpense(exp, slidingItem)">
-                      <div class="swipe-content">
-                        <i class="fa-solid fa-trash-can"></i>
-                      </div>
-                    </ion-item-option>
-                  </ion-item-options>
-
-                </ion-item-sliding>
-              </div>
-
-            </div>
-
+        <div class="timeline-row-content">
+          <!-- Timeline Node Milestone Dot -->
+          <div class="timeline-node-dot">
+            <span class="timeline-dot-inner"></span>
           </div>
 
-        </ng-container>
-      </ng-container>
+          <!-- Grouped Card containing transactions -->
+          <div class="timeline-card">
+            <ion-item-sliding #slidingItem
+              *ngFor="let exp of group.expenses; let last = last"
+              [disabled]="isCurrentSelectedUserSettled || !exp.isEditShow"
+              class="tl-slide-item">
+
+              <!-- ion-item zero-padding wrapper -->
+              <ion-item lines="none" class="tl-item-zero">
+                <div class="tx-content-row" [class.no-border]="last">
+
+                  <!-- Duotone Glowing Category Icon Box -->
+                  <div class="tx-item-icon-box" [ngClass]="getCategoryGradientClass(exp.category)">
+                    <i [class]="getCategoryIcon(exp.category, exp.iconName)"></i>
+                  </div>
+
+                  <!-- Transaction Details (Left) -->
+                  <div class="tx-left">
+                    <span class="tx-title" [title]="exp.item">{{ exp.item }}</span>
+                    <div class="tx-badges">
+                      <span class="category-badge" [ngClass]="getCategoryBadgeClass(exp.category)">
+                        {{ exp.category }}
+                      </span>
+                      <span *ngIf="exp.userShareAmount" class="share-chip">
+                        Your share: ₹{{ exp.userShareAmount }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Formatted Amount (Right) -->
+                  <div class="tx-right">
+                    <span class="tx-amt">₹{{ exp.amount | number:'1.0-0' }}</span>
+                  </div>
+
+                </div>
+              </ion-item>
+
+              <!-- Sleek iOS/Fintech Swipe Actions -->
+              <ion-item-options side="end">
+                <ion-item-option class="swipe-btn swipe-edit"
+                                 *ngIf="exp.isEditShow"
+                                 (click)="editExpense(exp, slidingItem)">
+                  <div class="swipe-content">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit</span>
+                  </div>
+                </ion-item-option>
+                <ion-item-option class="swipe-btn swipe-delete"
+                                 (click)="deleteExpense(exp, slidingItem)">
+                  <div class="swipe-content">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Delete</span>
+                  </div>
+                </ion-item-option>
+              </ion-item-options>
+
+            </ion-item-sliding>
+          </div>
+        </div>
+
+      </div>
     </div>
   </ng-container>
 
-  <!-- EMPTY STATE -->
+  <!-- FILTERED EMPTY STATE (Search or category returns no items) -->
+  <ng-container *ngIf="!isLoadingExpenses && hasExpenses() && getFilteredGroups().length === 0">
+    <div class="empty-ledger filtered-empty">
+      <div class="empty-icon-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <p>No matching transactions</p>
+      <span class="sub-msg">We couldn't find any expenses matching your criteria</span>
+      <button type="button" class="empty-action-btn" (click)="clearSearch(); setCategoryFilter('all')">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Clear filters</span>
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- DEFAULT EMPTY STATE (No expenses for this month) -->
   <ng-container *ngIf="!isLoadingExpenses && !hasExpenses()">
     <div class="empty-ledger">
-      <ion-icon name="receipt-outline"></ion-icon>
+      <div class="empty-icon-wrap">
+        <ion-icon name="receipt-outline"></ion-icon>
+      </div>
       <p>You're all caught up!</p>
-      <span class="sub-msg">No transactions to show for this month</span>
+      <span class="sub-msg">No transactions recorded for this month</span>
     </div>
   </ng-container>
 

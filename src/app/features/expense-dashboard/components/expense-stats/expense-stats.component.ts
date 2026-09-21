@@ -9,4 +9,5 @@ export class ExpenseStatsComponent {
   @Input() isLoadingExpenses = false;
   @Input() totalAllTime = 0;
   @Input() averageAmount = 0;
+  @Input() memberCount = 0;
 }

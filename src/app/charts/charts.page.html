@@ -71,7 +71,7 @@
     <!-- ================= CATEGORIES / TOP SPENDS SEGMENT (Sticky Pinned on Top) ================= -->
     @if (hasData()) {
     <div
-      style="position: sticky; top: -1px; z-index: 100; background: var(--background, #12131a); padding: 12px 20px 14px; margin-bottom: 12px;">
+      style="position: sticky; top: -1px; z-index: 100; background: var(--surface-sunken); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 20px 14px; margin-bottom: 12px;">
       <div class="neon-segment">
         <button class="seg-btn" [class.active]="activeTab() === 'categories'" (click)="switchTab('categories')">
           Categories

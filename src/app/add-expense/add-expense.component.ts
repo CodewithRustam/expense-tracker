@@ -56,14 +56,27 @@ export class AddExpenseModalComponent implements OnInit {
     this.validateForm();
   }
 
+  isRoomDisabled(roomId: number): boolean {
+    return roomId === 1;
+  }
+
   private initializeRooms() {
     this.filteredGroups = [...this.groups];
-    if (this.groups.length > 0) {
-      const defaultRoom = this.groups.find(
+    const activeRooms = this.groups.filter(g => !this.isRoomDisabled(g.roomId));
+    if (activeRooms.length > 0) {
+      const defaultRoom = activeRooms.find(
         g => g.name.toLowerCase() === this.DEFAULT_ROOM_NAME.toLowerCase()
       );
-      this.newExpense.roomId = defaultRoom ? defaultRoom.roomId : this.groups[0].roomId;
+      this.newExpense.roomId = defaultRoom ? defaultRoom.roomId : activeRooms[0].roomId;
+    } else {
+      this.newExpense.roomId = 0;
     }
+  }
+
+  selectRoom(g: Group) {
+    if (this.isRoomDisabled(g.roomId)) return;
+    this.newExpense.roomId = g.roomId;
+    this.validateForm();
   }
 
   dismiss(data?: any) {
@@ -72,7 +85,12 @@ export class AddExpenseModalComponent implements OnInit {
 
   async addExpense() {
 
-    if (!this.isFormValid || this.isSubmitting) return;
+    if (!this.isFormValid || this.isSubmitting || this.isRoomDisabled(this.newExpense.roomId)) {
+      if (this.isRoomDisabled(this.newExpense.roomId)) {
+        this.toast.error('This room is currently disabled.');
+      }
+      return;
+    }
 
     this.isSubmitting = true;
 
@@ -221,7 +239,8 @@ export class AddExpenseModalComponent implements OnInit {
     this.isFormValid =
       this.itemValid &&
       this.amountValid &&
-      !!this.newExpense.roomId;
+      !!this.newExpense.roomId &&
+      !this.isRoomDisabled(this.newExpense.roomId);
   }
   private looksRandom(word: string): boolean {
 

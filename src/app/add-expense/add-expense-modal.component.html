@@ -60,11 +60,15 @@
     <div class="room-container-inline">
       <div class="room-inline-scroll">
         <div class="room-inline-track">
-          <div *ngFor="let g of filteredGroups" class="room-chip" [class.active]="newExpense.roomId === g.roomId"
-            (click)="newExpense.roomId = g.roomId">
+          <div *ngFor="let g of filteredGroups" class="room-chip"
+            [class.active]="newExpense.roomId === g.roomId && !isRoomDisabled(g.roomId)"
+            [class.disabled]="isRoomDisabled(g.roomId)"
+            [attr.aria-disabled]="isRoomDisabled(g.roomId)"
+            (click)="selectRoom(g)">
             <div class="chip-avatar">{{ g.name.substring(0,1) }}</div>
             <span class="chip-name">{{ g.name }}</span>
-            <div class="active-indicator"></div>
+            <span class="chip-disabled-tag" *ngIf="isRoomDisabled(g.roomId)">Disabled</span>
+            <div class="active-indicator" *ngIf="!isRoomDisabled(g.roomId)"></div>
           </div>
         </div>
       </div>
