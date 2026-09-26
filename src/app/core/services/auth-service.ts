@@ -71,8 +71,8 @@ export class AuthService {
   verifyResetPasswordLink(code: string): Observable<ApiResponse> {
     return this.apiService.post<ApiResponse>('account/verify-resetpassword-link', { code });
   }
-  resetPassword(code: string, password: string): Observable<ApiResponse> {
-    const payload = { code, password };
+  resetPassword(code: string, password: string, confirmPassword: string): Observable<ApiResponse> {
+    const payload = { code, password, confirmPassword };
 
     return this.apiService.post<ApiResponse>(
       'account/reset-password',

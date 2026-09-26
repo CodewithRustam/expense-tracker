@@ -38,6 +38,13 @@ export class ResetPasswordPage implements OnInit {
       return;
     }
 
+    // Immediately remove `code` query parameter from the browser URL address bar so it is not exposed
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
+
     const loading = await this.loadingCtrl.create({
       message: 'Checking link…',
       spinner: 'crescent'
@@ -88,7 +95,7 @@ export class ResetPasswordPage implements OnInit {
     const loading = await this.loadingCtrl.create({ message: 'Updating…' });
     await loading.present();
 
-    this.authService.resetPassword(this.code, this.password).subscribe({
+    this.authService.resetPassword(this.code, this.password, this.confirmPassword).subscribe({
       next: (res) => {
         loading.dismiss();
         if (res.success) {
