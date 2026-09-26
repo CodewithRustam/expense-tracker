@@ -55,7 +55,7 @@ export class ForgotPasswordComponent implements OnDestroy {
       },
       error: (err) => {
         loading.dismiss();
-        const msg = err?.originalError?.error?.message ?? err?.message ?? 'Something went wrong. Please try again.';
+        const msg = err?.error?.message ?? err?.originalError?.error?.message ?? err?.message ?? 'Something went wrong. Please try again.';
         this.showToast(msg, 'danger');
       }
     });
@@ -82,7 +82,7 @@ export class ForgotPasswordComponent implements OnDestroy {
       },
       error: (err) => {
         loading.dismiss();
-        const msg = err?.originalError?.error?.message ?? err?.message ?? 'Failed to resend link. Please try again.';
+        const msg = err?.error?.message ?? err?.originalError?.error?.message ?? err?.message ?? 'Failed to resend link. Please try again.';
         this.showToast(msg, 'danger');
       }
     });

@@ -64,7 +64,8 @@ export class AuthService {
     ).pipe(
       catchError(err => {
         console.error('Forgot Password API error:', err);
-        return of({ success: false, message: 'Something went wrong. Please try again later.' });
+        const serverMessage = err?.message || err?.error?.message || 'Something went wrong. Please try again later.';
+        return of({ success: false, message: serverMessage });
       })
     );
   }
