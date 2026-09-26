@@ -45,17 +45,29 @@ export class ResetPasswordPage implements OnInit {
       replaceUrl: true
     });
 
+    const startTime = Date.now();
+
     this.authService.verifyResetPasswordLink(this.code).subscribe({
       next: (res: ApiResponse) => {
-        this.checkingToken = false;
-        this.tokenValid = res.success;
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 400 - elapsed);
 
-        if (!res.success) this.showToast(res.message, 'danger');
+        setTimeout(() => {
+          this.checkingToken = false;
+          this.tokenValid = res.success;
+
+          if (!res.success) this.showToast(res.message, 'danger');
+        }, remainingDelay);
       },
       error: (err) => {
-        this.checkingToken = false;
-        this.tokenValid = false;
-        this.showToast(err?.error?.message ?? 'Failed to verify link.', 'danger');
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 400 - elapsed);
+
+        setTimeout(() => {
+          this.checkingToken = false;
+          this.tokenValid = false;
+          this.showToast(err?.error?.message ?? 'Failed to verify link.', 'danger');
+        }, remainingDelay);
       }
     });
   }
