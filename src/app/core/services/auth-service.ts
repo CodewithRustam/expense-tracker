@@ -68,11 +68,11 @@ export class AuthService {
       })
     );
   }
-  verifyResetPasswordLink(token: string): Observable<ApiResponse> {
-    return this.apiService.post<ApiResponse>('account/verify-resetpassword-link', { shortCode: token });
+  verifyResetPasswordLink(code: string): Observable<ApiResponse> {
+    return this.apiService.post<ApiResponse>('account/verify-resetpassword-link', { code });
   }
-  resetPassword(token: string, password: string): Observable<ApiResponse> {
-    const payload = { token, password };
+  resetPassword(code: string, password: string): Observable<ApiResponse> {
+    const payload = { code, password };
 
     return this.apiService.post<ApiResponse>(
       'account/reset-password',

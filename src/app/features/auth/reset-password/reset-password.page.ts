@@ -18,6 +18,7 @@ export class ResetPasswordPage implements OnInit {
 
   tokenValid = false;          
   checkingToken = true;       
+  passwordResetSuccess = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -70,6 +71,10 @@ export class ResetPasswordPage implements OnInit {
     }
   }
 
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
+
   async resetPassword() {
     if (!this.password || !this.confirmPassword) {
       this.showToast('Please fill all fields', 'warning');
@@ -87,8 +92,8 @@ export class ResetPasswordPage implements OnInit {
       next: (res) => {
         loading.dismiss();
         if (res.success) {
+          this.passwordResetSuccess = true;
           this.showToast(res.message, 'success');
-          this.router.navigate(['/login']);
         } else {
           this.showToast(res.message, 'danger');
         }
