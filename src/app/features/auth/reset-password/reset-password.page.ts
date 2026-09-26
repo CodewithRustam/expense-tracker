@@ -45,22 +45,14 @@ export class ResetPasswordPage implements OnInit {
       replaceUrl: true
     });
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Checking link…',
-      spinner: 'crescent'
-    });
-    await loading.present();
-
     this.authService.verifyResetPasswordLink(this.code).subscribe({
       next: (res: ApiResponse) => {
-        loading.dismiss();
         this.checkingToken = false;
         this.tokenValid = res.success;
 
         if (!res.success) this.showToast(res.message, 'danger');
       },
       error: (err) => {
-        loading.dismiss();
         this.checkingToken = false;
         this.tokenValid = false;
         this.showToast(err?.error?.message ?? 'Failed to verify link.', 'danger');
