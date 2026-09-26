@@ -36,13 +36,11 @@ const routes: Routes = [
   },
   {
     path: 'reset/reset-password',
-    redirectTo: 'reset-password',
-    pathMatch: 'full'
+    loadChildren: () => import('./features/auth/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule)
   },
   {
     path: 'reset-password',
-    loadChildren: () => import('./features/auth/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule),
-    canActivate: [RedirectGuard]   // 👈 Optional: depends on your flow
+    loadChildren: () => import('./features/auth/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule)
   }
 ];
 

@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonRouterOutlet, Platform } from '@ionic/angular';
+import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
+import { IonRouterOutlet, Platform, NavController } from '@ionic/angular';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { NetworkService } from './core/services/network-service';
 import { PushNotificationService } from './core/services/push-notification.service';
@@ -10,6 +11,7 @@ import { SessionTimeoutService } from './core/services/session-timeout.service';
 import { BackButtonService } from './core/services/back-button.service';
 import { SecureTokenService } from './core/services/secure-token.service';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { App, URLOpenListenerEvent } from '@capacitor/app';
 
 @Component({
   selector: 'app-root',
@@ -30,7 +32,10 @@ export class AppComponent implements OnInit {
     private statusBarService: StatusBarService,
     private sessionTimeoutService: SessionTimeoutService,
     private backButtonService: BackButtonService,
-    private secureTokenService: SecureTokenService
+    private secureTokenService: SecureTokenService,
+    private router: Router,
+    private navCtrl: NavController,
+    private zone: NgZone
   ) {
     this.initializeApp();
     this.listenNetworkStatus();
@@ -66,9 +71,52 @@ export class AppComponent implements OnInit {
     // 5. Initialize push notifications
     await this.pushNotificationService.initPush();
 
-    // 6. Hide splash screen
+    // 6. Setup mobile app deep link URL listener
+    this.setupDeepLinkListener();
+
+    // 7. Hide splash screen
     SplashScreen.hide({ fadeOutDuration: 1200 });
     document.body.classList.add('app-loaded');
+  }
+
+  private setupDeepLinkListener() {
+    // A. Listen for deep link events while the app is already open / running in background
+    App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+      this.handleDeepLink(event.url);
+    });
+
+    // B. Check launch URL when app starts fresh from closed state
+    App.getLaunchUrl().then(launchUrl => {
+      if (launchUrl && launchUrl.url) {
+        this.handleDeepLink(launchUrl.url);
+      }
+    }).catch(err => {
+      console.log('Error checking launch URL:', err);
+    });
+  }
+
+  private handleDeepLink(rawUrl: string) {
+    if (!rawUrl) return;
+    console.log('App URL opened:', rawUrl);
+
+    if (rawUrl.includes('reset-password')) {
+      let code = '';
+      try {
+        const parsedUrl = new URL(rawUrl);
+        code = parsedUrl.searchParams.get('code') ?? '';
+      } catch {
+        const match = rawUrl.match(/[?&]code=([^&]+)/);
+        if (match) {
+          code = decodeURIComponent(match[1]);
+        }
+      }
+
+      this.zone.run(() => {
+        const targetPath = code ? `/reset-password?code=${encodeURIComponent(code)}` : '/reset-password';
+        console.log('Navigating root to deep link target:', targetPath);
+        this.navCtrl.navigateRoot(targetPath);
+      });
+    }
   }
 
   private listenNetworkStatus() {
