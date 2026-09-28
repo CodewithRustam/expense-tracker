@@ -250,8 +250,7 @@ export class ChartsPage implements OnInit, OnDestroy {
     const modal = await this.modalCtrl.create({
       component: AddExpenseModalComponent,
       componentProps: { groups: this.groups() },
-      breakpoints: [0, 0.77],
-      initialBreakpoint: 0.77
+      cssClass: 'dynamic-height-modal'
     });
 
     await modal.present();

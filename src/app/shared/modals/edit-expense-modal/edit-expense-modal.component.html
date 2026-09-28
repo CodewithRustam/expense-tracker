@@ -1,86 +1,128 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>Edit Expense</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" class="close-btn">
-        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="rev-modal-sheet">
+  <!-- Top Handle -->
+  <div class="rev-sheet-handle"></div>
 
-<ion-content class="edit-expense-content">
-  <div class="modal-sheet-content">
-    <!-- FIELDS -->
+  <!-- Header -->
+  <div class="rev-sheet-header rev-stagger-1">
+    <span class="rev-sheet-title">Edit Expense</span>
+    <button type="button" class="rev-sheet-close" (click)="dismiss()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+  </div>
 
-      <div class="input-row">
-        <div class="icon-square primary-tint">
-          <ion-icon name="home"></ion-icon>
-        </div>
-        <div class="input-body">
-          <ion-label>Group</ion-label>
-          <ion-input [value]="roomName" readonly></ion-input>
-        </div>
+  <!-- Scrollable Sheet Content -->
+  <div class="rev-sheet-scroll">
+
+    <!-- 1. Clean Hero Amount -->
+    <div class="rev-hero-amount-clean rev-stagger-2">
+      <div class="rev-currency-amount-wrap">
+        <span class="rev-currency-sym">₹</span>
+        <input type="number" [(ngModel)]="expense.amount" (input)="onInputChange()"
+               placeholder="0.00" class="rev-amount-clean-input" />
       </div>
 
-      <div class="divider"></div>
-
-      <div class="input-row">
-        <div class="icon-square primary-tint">
-          <ion-icon name="bag-handle"></ion-icon>
-        </div>
-        <div class="input-body">
-          <ion-label>Item Name</ion-label>
-          <ion-input [(ngModel)]="expense.item" placeholder="What did you buy?" (ionInput)="onInputChange()">
-          </ion-input>
-        </div>
+      <!-- Live Split / Group Badge -->
+      <div class="rev-split-pill-badge" *ngIf="roomMembers.length > 0 && expense.amount">
+        <ion-icon name="people-outline"></ion-icon>
+        <span>{{ roomName }}</span>
       </div>
-
-      <div class="divider"></div>
-
-      <div class="input-row">
-        <div class="icon-square success-tint">
-          <span class="currency-symbol">₹</span>
-        </div>
-        <div class="input-body">
-          <ion-label>Amount</ion-label>
-          <ion-input type="number" [(ngModel)]="expense.amount" placeholder="0.00" class="amount-input"
-            (ionInput)="onInputChange()">
-          </ion-input>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="input-row clickable" (click)="showDatePicker = true">
-        <div class="icon-square warning-tint">
-          <ion-icon name="calendar"></ion-icon>
-        </div>
-        <div class="input-body">
-          <ion-label>Date</ion-label>
-          <div class="date-display">{{ formatDate(expense.originalDate) }}</div>
-        </div>
-        <ion-icon name="chevron-forward" color="medium" size="small"></ion-icon>
-      </div>
-
-    <!-- DATE PICKER MODAL -->
-    <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
-      [breakpoints]="[0, 0.42]">
-      <ng-template>
-        <div class="datetime-wrapper">
-          <ion-datetime [(ngModel)]="expense.originalDate" presentation="date" [max]="today" [min]="'2000-01-01'"
-            size="cover" (ionChange)="showDatePicker = false; onInputChange()">
-          </ion-datetime>
-        </div>
-      </ng-template>
-    </ion-modal>
-
-    <!-- SUBMIT BUTTON -->
-    <div class="footer-pad">
-      <ion-button expand="block" class="main-btn" (click)="saveExpense()" [disabled]="!hasChanges">
-        Update Expense
-      </ion-button>
     </div>
 
+    <!-- 2. Unified Details Card -->
+    <div class="rev-unified-card rev-stagger-3">
+      <div class="rev-card-row">
+        <ion-icon name="receipt-outline" class="rev-row-icon"></ion-icon>
+        <input type="text" [(ngModel)]="expense.item" (input)="onInputChange()"
+               placeholder="What was this for?" class="rev-row-input" />
+      </div>
+
+      <div class="rev-card-divider"></div>
+
+      <div class="rev-card-row" (click)="showDatePicker = true" style="cursor: pointer;">
+        <ion-icon name="calendar-outline" class="rev-row-icon"></ion-icon>
+        <span class="rev-row-text">{{ formatDate(expense.originalDate) }}</span>
+        <ion-icon name="chevron-forward" class="rev-row-arrow"></ion-icon>
+      </div>
+    </div>
+
+    <!-- 3. Split Mode -->
+    <div class="rev-split-wrap rev-stagger-4" *ngIf="expense.roomId">
+      <div class="rev-section-label">Split</div>
+      <div class="rev-split-segment">
+        <button type="button" class="rev-segment-btn" [class.active]="selectedSplitType === SplitType.Equal"
+                (click)="setSplitType(SplitType.Equal)">
+          <span>Equally</span>
+        </button>
+        <button type="button" class="rev-segment-btn" [class.active]="selectedSplitType === SplitType.Exact"
+                (click)="openUnequalModal()">
+          <span>Unequally</span>
+        </button>
+      </div>
+
+      <!-- Unequal trigger link if unequal is selected -->
+      <button type="button" class="rev-custom-split-link" *ngIf="selectedSplitType === SplitType.Exact"
+              (click)="openUnequalModal()">
+        <span>Custom amounts configured</span>
+        <span class="rev-edit-tag">Edit</span>
+      </button>
+    </div>
+
+    <!-- 4. Submit Action Button -->
+    <button type="button" class="rev-primary-btn rev-stagger-5" [disabled]="!hasChanges || isSubmitting" (click)="saveExpense()">
+      <span *ngIf="!isSubmitting">Update Expense</span>
+      <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
+    </button>
+
   </div>
-</ion-content>
+</div>
+
+<!-- Date Picker Modal -->
+<ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false" [initialBreakpoint]="0.42"
+           [breakpoints]="[0, 0.42]">
+  <ng-template>
+    <div class="datetime-wrapper">
+      <ion-datetime [(ngModel)]="expense.originalDate" presentation="date" [max]="today" [min]="'2000-01-01'"
+                    size="cover" (ionChange)="showDatePicker = false; onInputChange()"></ion-datetime>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Unequal Split Floating Dialog -->
+<ion-modal [isOpen]="showUnequalModal" (didDismiss)="closeUnequalModal()" class="unequal-split-modal">
+  <ng-template>
+    <div class="rev-modal-popup">
+      <div class="rev-modal-header">
+        <span class="rev-modal-title">Split Amounts</span>
+        <button class="rev-modal-close" (click)="closeUnequalModal()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+
+      <div class="rev-split-status-bar" [class.ok]="isSplitValid" [class.err]="!isSplitValid"
+           *ngIf="splitStatusMessage">
+        <span>{{ splitStatusMessage }}</span>
+        <button class="rev-autofill-btn" *ngIf="!isSplitValid" (click)="autoFillRemaining()">Auto-fill</button>
+      </div>
+
+      <div class="rev-member-list">
+        <div *ngFor="let member of roomMembers" class="rev-member-item" [class.off]="!member.isSelected">
+          <div class="rev-member-left" (click)="toggleMemberSelection(member)">
+            <div class="rev-avatar" [class.dim]="!member.isSelected">
+              {{ member.name.substring(0,1).toUpperCase() }}
+            </div>
+            <span class="rev-member-name">{{ member.name }}</span>
+          </div>
+          <div class="rev-member-right" *ngIf="member.isSelected">
+            <span class="rev-input-prefix">₹</span>
+            <input type="number" min="0" step="0.01" inputmode="decimal"
+                   [(ngModel)]="member.value" (input)="onSplitValueChange()"
+                   placeholder="0" class="rev-num-input" />
+          </div>
+          <span class="rev-excluded-label" *ngIf="!member.isSelected">Excluded</span>
+        </div>
+      </div>
+
+      <button class="rev-primary-btn" style="margin-top: 16px;" (click)="closeUnequalModal()">Apply Split</button>
+    </div>
+  </ng-template>
+</ion-modal>

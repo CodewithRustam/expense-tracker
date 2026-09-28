@@ -1630,7 +1630,7 @@ ion-fab-button ion-icon {
 }
 
 /* ==========================================================================
-   Expenses Page — Command Center Redesign
+   Expenses Page - Command Center Redesign
    ========================================================================== */
 .hub-container {
   padding: 10px 16px 0;
@@ -2108,14 +2108,14 @@ ion-fab-button ion-icon {
 }
 
 /* ==========================================================================
-   Fintech Skeletons — Zero Layout Shift
+   Fintech Skeletons - Zero Layout Shift
    ========================================================================== */
 ion-skeleton-text {
   --border-radius: 4px;
 }
 
 /* ==========================================================================
-   Sticky History Bar — Glass Fintech Header
+   Sticky History Bar - Glass Fintech Header
    ========================================================================== */
 .sticky-history-bar {
   position: sticky;
@@ -2366,7 +2366,7 @@ ion-skeleton-text {
 }
 
 /* ==========================================================================
-   Timeline Ledger Layout — World-Class Fintech Aesthetic
+   Timeline Ledger Layout - World-Class Fintech Aesthetic
    ========================================================================== */
 .timeline-ledger-container {
   position: relative;
@@ -4381,7 +4381,7 @@ ion-item-options {
   gap: 0;
 }
 
-/* Edit action — solid sleek indigo */
+/* Edit action - solid sleek indigo */
 .swipe-btn.swipe-edit,
 .swipe-btn.swipe-edit::part(native) {
   background: #5468ff !important;
@@ -4390,7 +4390,7 @@ ion-item-options {
   height: 100%;
 }
 
-/* Delete action — solid sleek crimson */
+/* Delete action Ã¢â‚¬â€ solid sleek crimson */
 .swipe-btn.swipe-delete,
 .swipe-btn.swipe-delete::part(native) {
   background: #ff3b30 !important;
@@ -4931,3 +4931,865 @@ ion-item-options {
     opacity: 0.85;
   }
 }
+
+/* ============================================================================
+ * FLEXIBLE SPLIT MODES & MEMBER SPLIT UI STYLES
+ * ============================================================================ */
+
+.split-mode-segment {
+  display: flex;
+  gap: 6px;
+  background: var(--surface-sunken, rgba(15, 23, 42, 0.04));
+  padding: 4px;
+  border-radius: 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-hairline);
+}
+
+.split-mode-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.split-mode-pill ion-icon,
+.split-mode-pill .pill-symbol {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.split-mode-pill.active {
+  background: var(--surface-raised, #ffffff);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.split-members-container {
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.split-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.split-status-bar.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.split-status-bar.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.member-split-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.member-split-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--surface-raised, #ffffff);
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.member-split-row.unselected {
+  opacity: 0.5;
+  background: transparent;
+}
+
+.member-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.checkbox-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border-hairline-strong, #cbd5e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.checkbox-box.checked {
+  background: var(--accent, #6366f1);
+  border-color: var(--accent, #6366f1);
+  color: #ffffff;
+}
+
+.checkbox-box ion-icon {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.member-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.member-share-preview {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.member-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.split-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline-strong);
+  border-radius: 8px;
+  padding: 4px 8px;
+  width: 90px;
+}
+
+.split-input-wrap .input-prefix,
+.split-input-wrap .input-suffix {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.split-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+  outline: none;
+}
+
+/* ============================================================================
+ * REVOLUT FINTECH BOTTOM-SHEET DESIGN SYSTEM
+ * Prefix: rev-
+ * ============================================================================ */
+
+/* Modal Root Sheet Wrapper */
+.rev-modal-sheet {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface, #121622);
+  border-radius: 28px 28px 0 0;
+  padding: 8px 20px 24px;
+  width: 100%;
+  box-sizing: border-box;
+  animation: revSheetSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes revSheetSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Staggered entrance cascade for inner sections */
+.rev-stagger-1 { animation: revFadeSlideUp 0.36s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.rev-stagger-2 { animation: revFadeSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.09s both; }
+.rev-stagger-3 { animation: revFadeSlideUp 0.40s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both; }
+.rev-stagger-4 { animation: revFadeSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.20s both; }
+.rev-stagger-5 { animation: revFadeSlideUp 0.44s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both; }
+.rev-stagger-6 { animation: revFadeSlideUp 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both; }
+
+@keyframes revFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle Top Drag Handle */
+.rev-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ink-3, #475569);
+  opacity: 0.35;
+  margin: 6px auto 14px;
+}
+
+/* Sheet Header */
+.rev-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.rev-sheet-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink-1);
+  letter-spacing: -0.3px;
+}
+
+.rev-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-sunken, #090b11);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.15s ease;
+}
+
+.rev-sheet-close:active {
+  transform: scale(0.86);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Sheet Scroll Container */
+.rev-sheet-scroll {
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.rev-sheet-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* 1. Clean Hero Amount (No heavy card box) */
+.rev-hero-amount-clean {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0 18px;
+}
+
+.rev-currency-amount-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rev-currency-sym {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--accent, #6366f1);
+  line-height: 1;
+}
+
+.rev-amount-clean-input {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: var(--ink-1);
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 190px;
+  text-align: left;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  font-family: inherit;
+  caret-color: var(--accent, #6366f1);
+}
+
+.rev-amount-clean-input::placeholder {
+  color: var(--ink-3);
+  opacity: 0.5;
+}
+
+.rev-split-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft, rgba(99, 102, 241, 0.12));
+  color: var(--accent, #6366f1);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+
+.rev-input-error {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--debit, #ef4444);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* 2. Unified Inset Details Card */
+.rev-unified-card {
+  background: var(--surface-sunken, #090b11);
+  border: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.rev-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.rev-card-row:active {
+  background: rgba(255, 255, 255, 0.04);
+  transform: scale(0.99);
+}
+
+.rev-row-icon {
+  font-size: 20px;
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.rev-row-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-1);
+  outline: none;
+}
+
+.rev-row-input::placeholder {
+  color: var(--ink-3);
+  opacity: 0.6;
+}
+
+.rev-row-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.rev-row-arrow {
+  font-size: 16px;
+  color: var(--ink-3);
+}
+
+.rev-card-divider {
+  height: 1px;
+  background: var(--border-hairline, rgba(255, 255, 255, 0.06));
+  margin-left: 48px;
+}
+
+/* 3. Section Labels & Group Pills */
+.rev-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+.rev-group-pills-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  scrollbar-width: none;
+}
+
+.rev-group-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.rev-pill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--surface-sunken, #090b11);
+  color: var(--ink-2);
+  border: 1px solid var(--border-hairline, rgba(255, 255, 255, 0.08));
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.rev-pill-chip:active:not(.disabled) {
+  transform: scale(0.92);
+}
+
+.rev-pill-chip.active {
+  background: var(--accent-soft, rgba(99, 102, 241, 0.15));
+  color: var(--accent, #6366f1);
+  border-color: var(--accent, #6366f1);
+  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.25);
+}
+
+.rev-pill-chip.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 4. Split Segment */
+.rev-split-segment {
+  display: flex;
+  background: var(--surface-sunken, #090b11);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.rev-segment-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-3);
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 0.18s ease,
+              box-shadow 0.22s ease;
+}
+
+.rev-segment-btn:active {
+  transform: scale(0.94);
+}
+
+.rev-segment-btn.active {
+  background: var(--surface, #121622);
+  color: var(--accent, #6366f1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rev-custom-split-link {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--accent-soft, rgba(99, 102, 241, 0.08));
+  border: none;
+  color: var(--accent, #6366f1);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 14px;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.15s ease;
+}
+
+.rev-custom-split-link:active {
+  transform: scale(0.97);
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.rev-edit-tag {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: var(--accent, #6366f1);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* 5. Primary Action Button */
+.rev-primary-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 16px;
+  background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #4f46e5));
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--glow-primary, 0 6px 20px -2px rgba(99, 102, 241, 0.4));
+  margin-top: 10px;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease,
+              filter 0.15s ease;
+}
+
+.rev-primary-btn:active:not([disabled]) {
+  transform: scale(0.96);
+  box-shadow: 0 2px 10px -2px rgba(99, 102, 241, 0.5);
+  filter: brightness(1.08);
+}
+
+.rev-primary-btn[disabled] {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Centered Floating Unequal Split Modal */
+ion-modal.unequal-split-modal,
+.unequal-split-modal {
+  --width: 90%;
+  --max-width: 400px;
+  --height: fit-content;
+  --border-radius: 24px;
+  --box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --background: var(--surface);
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+ion-modal.unequal-split-modal::part(content),
+.unequal-split-modal::part(content) {
+  position: relative !important;
+  border-radius: 24px !important;
+  border-top-left-radius: 24px !important;
+  border-top-right-radius: 24px !important;
+  border-bottom-left-radius: 24px !important;
+  border-bottom-right-radius: 24px !important;
+  overflow: hidden !important;
+  bottom: auto !important;
+  top: auto !important;
+  margin: auto !important;
+  max-height: 85vh !important;
+}
+
+ion-modal.unequal-split-modal .modal-wrapper,
+.unequal-split-modal .modal-wrapper {
+  position: relative !important;
+  border-radius: 24px !important;
+  border-top-left-radius: 24px !important;
+  border-top-right-radius: 24px !important;
+  border-bottom-left-radius: 24px !important;
+  border-bottom-right-radius: 24px !important;
+  overflow: hidden !important;
+  bottom: auto !important;
+  top: auto !important;
+  margin: auto !important;
+}
+
+.rev-modal-popup {
+  background: var(--surface);
+  padding: 20px 20px 24px;
+  border-radius: 24px;
+  overflow: hidden;
+  animation: revPopupScaleIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes revPopupScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.rev-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.rev-modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink-1);
+}
+
+.rev-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.rev-split-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface-sunken);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.rev-split-status-bar.ok {
+  color: var(--credit, #10b981);
+  background: var(--credit-soft, rgba(16, 185, 129, 0.1));
+}
+
+.rev-split-status-bar.err {
+  color: var(--debit, #ef4444);
+  background: var(--debit-soft, rgba(239, 68, 68, 0.1));
+}
+
+.rev-autofill-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.rev-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.rev-member-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  transition: opacity 0.15s ease;
+}
+
+.rev-member-item.off {
+  opacity: 0.35;
+  background: transparent;
+}
+
+.rev-member-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.rev-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #3b82f6));
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rev-avatar.dim {
+  background: var(--surface-sunken);
+  color: var(--ink-3);
+}
+
+.rev-member-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rev-member-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rev-input-prefix {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.rev-num-input {
+  width: 84px;
+  border: 1.5px solid var(--border-hairline-strong);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-1);
+  text-align: right;
+  outline: none;
+}
+
+.rev-num-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft, rgba(99, 102, 241, 0.12));
+}
+
+.rev-excluded-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+/* ============================================================================
+ * DYNAMIC HEIGHT BOTTOM-SHEET MODAL (ADD / EDIT / SETTLE)
+ * Wraps content dynamically without fixed height or dead space below button
+ * ============================================================================ */
+
+ion-modal.dynamic-height-modal,
+.dynamic-height-modal {
+  --height: auto;
+  --max-height: 90vh;
+  --border-radius: 28px 28px 0 0;
+  align-items: flex-end !important;
+  justify-content: center !important;
+}
+
+ion-modal.dynamic-height-modal::part(content),
+.dynamic-height-modal .modal-wrapper {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  border-radius: 28px 28px 0 0 !important;
+  border-top-left-radius: 28px !important;
+  border-top-right-radius: 28px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+  background: var(--surface, #121622) !important;
+}
+
+ion-modal.dynamic-height-modal .ion-page,
+.dynamic-height-modal .ion-page {
+  position: relative !important;
+  display: block !important;
+  contain: content !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  background: transparent !important;
+}
+

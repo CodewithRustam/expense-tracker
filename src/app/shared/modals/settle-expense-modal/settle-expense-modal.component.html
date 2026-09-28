@@ -1,86 +1,76 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>Settle Balance</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="closeModal()" class="close-btn">
-        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="rev-modal-sheet">
+  <!-- Top Handle -->
+  <div class="rev-sheet-handle"></div>
 
-<ion-content class="edit-expense-content">
-  <div class="modal-sheet-content scroll-fix-wrapper">
+  <!-- Header -->
+  <div class="rev-sheet-header">
+    <span class="rev-sheet-title">Settle Balance</span>
+    <button type="button" class="rev-sheet-close" (click)="closeModal()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="rev-sheet-scroll">
 
     <!-- Skeleton Loader -->
-    <div *ngIf="isLoading" class="skeleton-container" style="padding: 20px;">
-      <ion-skeleton-text animated style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 100%; height: 40px; margin-bottom: 20px; border-radius: 12px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 100%; height: 40px; border-radius: 12px;"></ion-skeleton-text>
+    <div *ngIf="isLoading" style="padding: 16px 0;">
+      <ion-skeleton-text animated style="width: 100%; height: 44px; margin-bottom: 12px; border-radius: 14px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100%; height: 44px; margin-bottom: 12px; border-radius: 14px;"></ion-skeleton-text>
     </div>
 
     <!-- Actual Content -->
-    <div *ngIf="!isLoading && user && settlementDetails.length > 0" class="fade-in">
+    <div *ngIf="!isLoading && user && settlementDetails.length > 0">
 
-      <div class="input-row">
-        <div class="icon-square primary-tint">
-          <ion-icon name="person-outline"></ion-icon>
-        </div>
-        <div class="input-body">
-          <ion-label>Payer</ion-label>
-          <div class="date-display">{{ user.memberName }}</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="input-row">
-        <div class="icon-square warning-tint">
-          <ion-icon name="wallet-outline"></ion-icon>
-        </div>
-        <div class="input-body">
-          <ion-label>Total Balance</ion-label>
-          <div class="date-display" [style.color]="user.netBalance < 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)'">
-            {{ user.netBalance < 0 ? 'Pay ₹' + (-user.netBalance).toFixed(2) : 'No balance due' }}
+      <!-- Payer & Total Balance Info Card -->
+      <div class="rev-unified-card" style="margin-bottom: 16px;">
+        <div class="rev-card-row">
+          <ion-icon name="person-outline" class="rev-row-icon"></ion-icon>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase;">Payer</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--ink-1);">{{ user.memberName }}</div>
           </div>
         </div>
-      </div>
 
-      <div class="divider"></div>
+        <div class="rev-card-divider"></div>
 
-      <div class="sheet-section-label">Select Member to Settle</div>
-
-      <div class="room-container-inline">
-        <div class="room-inline-scroll">
-          <div class="room-inline-track">
-            <div *ngFor="let detail of filteredMembers" class="room-chip" 
-              [class.active]="selectedMember?.toMemberId === detail.toMemberId"
-              (click)="selectedMember = detail; onMemberChange()">
-              <div class="chip-avatar">{{ detail.toMemberName.substring(0,1) }}</div>
-              <span class="chip-name">{{ detail.toMemberName }}</span>
-              <span class="chip-name" style="margin-left: 4px; font-weight: 700; color: var(--ion-color-danger)">
-                ₹{{ detail.amount.toFixed(2) }}
-              </span>
-              <div class="active-indicator"></div>
+        <div class="rev-card-row">
+          <ion-icon name="wallet-outline" class="rev-row-icon"></ion-icon>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase;">Total Balance</div>
+            <div style="font-size: 15px; font-weight: 700;" [style.color]="user.netBalance < 0 ? 'var(--debit, #ef4444)' : 'var(--credit, #10b981)'">
+              {{ user.netBalance < 0 ? 'Pay ₹' + (-user.netBalance).toFixed(2) : 'No balance due' }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Confirm Button -->
-      <div class="footer-pad">
-        <ion-button expand="block" class="main-btn" [disabled]="!selectedMember" (click)="confirmSettlement()">
-          Confirm Settlement
-        </ion-button>
+      <!-- Select Member to Settle -->
+      <div class="rev-section-label">Select Member to Settle</div>
+      <div class="rev-group-pills-row" style="padding-bottom: 20px;">
+        <button type="button" *ngFor="let detail of filteredMembers" class="rev-pill-chip"
+                [class.active]="selectedMember?.toMemberId === detail.toMemberId"
+                (click)="selectedMember = detail; onMemberChange()">
+          <span>{{ detail.toMemberName }}</span>
+          <span style="font-weight: 800; color: var(--debit, #ef4444); margin-left: 2px;">
+            ₹{{ detail.amount.toFixed(2) }}
+          </span>
+          <ion-icon name="checkmark" *ngIf="selectedMember?.toMemberId === detail.toMemberId"></ion-icon>
+        </button>
       </div>
+
+      <!-- Confirm Button -->
+      <button type="button" class="rev-primary-btn" [disabled]="!selectedMember" (click)="confirmSettlement()">
+        Confirm Settlement
+      </button>
 
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoading && settlementDetails.length === 0" class="empty-state fade-in" style="padding: 40px 20px; text-align: center;">
-      <ion-icon name="receipt-outline" style="font-size: 48px; color: var(--ion-color-medium);"></ion-icon>
-      <p style="color: var(--ion-color-medium); margin-top: 12px;">No settlements available.</p>
+    <div *ngIf="!isLoading && settlementDetails.length === 0" style="padding: 32px 16px; text-align: center;">
+      <ion-icon name="receipt-outline" style="font-size: 44px; color: var(--ink-3);"></ion-icon>
+      <p style="color: var(--ink-3); font-weight: 600; margin-top: 10px; font-size: 14px;">No settlements available.</p>
     </div>
 
   </div>
-</ion-content>
+</div>

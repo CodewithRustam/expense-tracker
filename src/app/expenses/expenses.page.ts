@@ -286,9 +286,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
     const modal = await this.modalCtrl.create({
       component: EditExpenseModal,
       componentProps: { expense, groups: this.groups() },
-      breakpoints: [0, 0.75],
-      initialBreakpoint: 0.75,
-      cssClass: 'edit-modal'
+      cssClass: 'dynamic-height-modal'
     });
 
     await modal.present();
@@ -354,8 +352,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
         preloadedSettlements,
         isPreloaded: preloadedSettlements.length > 0
       },
-      breakpoints: [0, 0.65],
-      initialBreakpoint: 0.65,
+      cssClass: 'dynamic-height-modal'
     });
 
     await modal.present();
