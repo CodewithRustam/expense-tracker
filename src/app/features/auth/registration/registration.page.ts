@@ -18,6 +18,7 @@ export class RegistrationPage {
   };
   errorMessage: string | null = null;
   isLoading = false;
+  focusedField = '';
 
   constructor(
     private authService: AuthService,

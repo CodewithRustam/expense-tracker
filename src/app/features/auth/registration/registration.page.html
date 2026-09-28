@@ -1,4 +1,13 @@
-<ion-content class="register-page" fullscreen>
+<ion-content class="ion-padding register-page" [ngClass]="{'loading-active': isLoading}" fullscreen>
+  <div class="status-header"></div>
+
+  <!-- Modern Loader -->
+  <div class="modern-loader" *ngIf="isLoading">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
   <div class="auth-page-container" style="max-width: 420px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
     
     <!-- Logo / Branding -->
@@ -8,37 +17,38 @@
       <p class="sub-text">Sign up to continue</p>
     </div>
 
+    <!-- Centered Card Wrapper -->
     <div class="card-wrapper" style="margin: 0 auto; width: 100%;">
       <ion-card class="auth-card" style="margin: 0 auto; width: 100%;">
         <ion-card-content>
           <form #registerForm="ngForm" (ngSubmit)="onRegister()">
 
             <!-- Username Field -->
-            <ion-item class="input-item" lines="none">
+            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'username'">
               <ion-icon name="person-outline" slot="start"></ion-icon>
               <ion-input type="text" placeholder="Username" [(ngModel)]="registerData.username" name="username" required
-                minlength="3" class="glowing-input"></ion-input>
+                minlength="3" (ionFocus)="focusedField = 'username'" (ionBlur)="focusedField = ''"></ion-input>
             </ion-item>
 
             <!-- Email Field -->
-            <ion-item class="input-item" lines="none">
+            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'email'">
               <ion-icon name="mail-outline" slot="start"></ion-icon>
               <ion-input type="email" placeholder="Email" [(ngModel)]="registerData.email" name="email" required email
-                class="glowing-input"></ion-input>
+                (ionFocus)="focusedField = 'email'" (ionBlur)="focusedField = ''"></ion-input>
             </ion-item>
 
             <!-- Password Field -->
-            <ion-item class="input-item" lines="none">
+            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'password'">
               <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
               <ion-input type="password" placeholder="Password" [(ngModel)]="registerData.password" name="password"
-                required minlength="6" class="glowing-input"></ion-input>
+                required minlength="6" (ionFocus)="focusedField = 'password'" (ionBlur)="focusedField = ''"></ion-input>
             </ion-item>
 
             <!-- Confirm Password Field -->
-            <ion-item class="input-item" lines="none">
+            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'confirmPassword'">
               <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
               <ion-input type="password" placeholder="Confirm Password" [(ngModel)]="registerData.confirmPassword"
-                name="confirmPassword" required minlength="6" class="glowing-input"></ion-input>
+                name="confirmPassword" required minlength="6" (ionFocus)="focusedField = 'confirmPassword'" (ionBlur)="focusedField = ''"></ion-input>
             </ion-item>
 
             <!-- Error Message -->
@@ -51,13 +61,14 @@
               <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
             </ion-button>
           </form>
-
-          <!-- Login Link -->
-          <p class="login-link" style="margin-top: 20px; text-align: center;">
-            Already have an account? <a (click)="goToLogin()">Login</a>
-          </p>
         </ion-card-content>
       </ion-card>
+    </div>
+
+    <!-- Login Footer -->
+    <div class="login-link" style="margin-top: 24px; text-align: center;">
+      Already have an account?
+      <a (click)="goToLogin()"> Login</a>
     </div>
 
   </div>

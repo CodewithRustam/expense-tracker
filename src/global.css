@@ -766,7 +766,8 @@ ion-skeleton-text {
   position: relative;
 }
 
-.login-page.loading-active::before {
+.login-page.loading-active::before,
+.register-page.loading-active::before {
   content: '';
   position: absolute;
   top: 0;
