@@ -26,6 +26,8 @@ interface Expense {
   iconName: string;
   isEditShow: boolean;
   originalDate: string;
+  splitType?: number;
+  splits?: any[];
 }
 
 interface ExpenseDateGroup {

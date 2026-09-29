@@ -10,6 +10,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 export interface RoomMemberSplit {
   memberId: number;
   name: string;
+  joinedDate?: string;
+  leftDate?: string;
   isSelected: boolean;
   value: number; // exact amount, percentage %, or share count
   computedAmount: number;
@@ -153,12 +155,13 @@ export class AddExpenseModalComponent implements OnInit {
           this.roomMembers = res.data.membersSummary.map((m: any) => ({
             memberId: m.memberId,
             name: m.memberName,
+            joinedDate: m.joinedDate,
+            leftDate: m.leftDate,
             isSelected: true,
             value: 0,
             computedAmount: 0
           }));
-          this.setDefaultSplitValues();
-          this.recalculateSplits();
+          this.syncMembersWithExpenseDate();
         } else {
           this.roomMembers = [];
           this.recalculateSplits();
@@ -172,6 +175,54 @@ export class AddExpenseModalComponent implements OnInit {
     });
   }
 
+  isMemberEligible(member: RoomMemberSplit): boolean {
+    if (!this.newExpense.date) return true;
+    const expDate = new Date(this.newExpense.date);
+    expDate.setHours(23, 59, 59, 999);
+
+    if (member.joinedDate) {
+      const joinDate = new Date(member.joinedDate);
+      if (joinDate > expDate) return false;
+    }
+
+    if (member.leftDate) {
+      const leftDate = new Date(member.leftDate);
+      leftDate.setHours(0, 0, 0, 0);
+      const expDateStart = new Date(this.newExpense.date);
+      expDateStart.setHours(0, 0, 0, 0);
+      if (leftDate < expDateStart) return false;
+    }
+
+    return true;
+  }
+
+  getMemberStatusReason(member: RoomMemberSplit): string {
+    if (!this.isMemberEligible(member)) {
+      if (member.leftDate) {
+        const leftDate = new Date(member.leftDate);
+        const expDate = new Date(this.newExpense.date);
+        leftDate.setHours(0, 0, 0, 0);
+        expDate.setHours(0, 0, 0, 0);
+        if (leftDate < expDate) return 'Left Room';
+      }
+      return 'Joined Later';
+    }
+    return 'Excluded';
+  }
+
+  syncMembersWithExpenseDate() {
+    this.roomMembers.forEach(m => {
+      if (!this.isMemberEligible(m)) {
+        m.isSelected = false;
+        m.value = 0;
+        m.computedAmount = 0;
+      }
+    });
+
+    this.setDefaultSplitValues();
+    this.recalculateSplits();
+  }
+
   setSplitType(type: SplitType) {
     this.hapticFeedback(ImpactStyle.Light);
     this.selectedSplitType = type;
@@ -180,6 +231,11 @@ export class AddExpenseModalComponent implements OnInit {
   }
 
   toggleMemberSelection(member: RoomMemberSplit) {
+    if (!this.isMemberEligible(member)) {
+      const reason = this.getMemberStatusReason(member);
+      this.toast.error(`${member.name} was not in the room on this date (${reason})`);
+      return;
+    }
     this.hapticFeedback(ImpactStyle.Light);
     member.isSelected = !member.isSelected;
     if (!member.isSelected) {
@@ -436,7 +492,10 @@ export class AddExpenseModalComponent implements OnInit {
   }
 
   confirmDate() {
-    setTimeout(() => { this.showDatePicker = false; }, 150);
+    setTimeout(() => {
+      this.showDatePicker = false;
+      this.syncMembersWithExpenseDate();
+    }, 150);
   }
 
   onItemInput(event: any) {

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 @Component({
   selector: 'app-transaction-ledger',
@@ -150,5 +151,124 @@ export class TransactionLedgerComponent {
 
   deleteExpense(expense: any, slidingItem: any) {
     this.onDeleteExpense.emit({ expense, slidingItem });
+  }
+
+  // --- Shared With & Breakdown Helpers ---
+  expandedExpenseIds = new Set<number>();
+
+  getMemberName(memberId: number): string {
+    const u = this.users?.find(user => user.memberId === memberId);
+    return u?.memberName || u?.name || `Member ${memberId}`;
+  }
+
+  get currentMember(): any | undefined {
+    if (!this.users || !this.users.length) return undefined;
+    const bySettle = this.users.find(u => u.isSettleShow);
+    if (bySettle) return bySettle;
+    if (this.currentUserId) {
+      return this.users.find(u => u.applicationUserId === this.currentUserId || u.memberId === this.currentUserId);
+    }
+    return undefined;
+  }
+
+  get isUserInRoom(): boolean {
+    return !!this.currentMember;
+  }
+
+  isCurrentUser(memberId: number): boolean {
+    const current = this.currentMember;
+    return current ? current.memberId === memberId : false;
+  }
+
+  getExpenseParticipants(exp: any): { memberId: number; name: string; owedAmount: number }[] {
+    if (exp?.splits && exp.splits.length > 0) {
+      const validSplits = exp.splits.filter((s: any) => s.owedAmount > 0);
+      const list = validSplits.length > 0 ? validSplits : exp.splits;
+      return list.map((s: any) => ({
+        memberId: s.memberId,
+        name: s.memberName || this.getMemberName(s.memberId),
+        owedAmount: s.owedAmount ?? (exp.amount / list.length)
+      }));
+    }
+
+    if (this.users && this.users.length > 0) {
+      const splitAmount = Math.round((exp.amount / this.users.length) * 100) / 100;
+      return this.users.map(u => ({
+        memberId: u.memberId,
+        name: u.memberName || u.name,
+        owedAmount: splitAmount
+      }));
+    }
+
+    return [];
+  }
+
+  isSharedWithAll(exp: any): boolean {
+    const participants = this.getExpenseParticipants(exp);
+    const totalRoomMembers = this.users?.length || 0;
+    return totalRoomMembers > 0 && participants.length >= totalRoomMembers;
+  }
+
+  isSharedWithMultiple(exp: any): boolean {
+    return this.getExpenseParticipants(exp).length > 1;
+  }
+
+  getSharedWithSummary(exp: any): string {
+    const participants = this.getExpenseParticipants(exp);
+    if (!participants.length) return 'Everyone';
+
+    const totalRoomMembers = this.users?.length || 0;
+    if (totalRoomMembers > 0 && participants.length >= totalRoomMembers) {
+      return `All (${participants.length})`;
+    }
+
+    if (participants.length === 1) {
+      return `${participants[0].name.split(' ')[0]} (Solo)`;
+    }
+
+    if (participants.length === 2) {
+      return `${participants[0].name.split(' ')[0]}, ${participants[1].name.split(' ')[0]}`;
+    }
+
+    const firstTwo = participants.slice(0, 2).map(p => p.name.split(' ')[0]).join(', ');
+    const remaining = participants.length - 2;
+    return `${firstTwo} +${remaining}`;
+  }
+
+  getFullSharedNames(exp: any): string {
+    const participants = this.getExpenseParticipants(exp);
+    return participants.map(p => p.name).join(', ');
+  }
+
+  getUserShare(exp: any): number | null {
+    const current = this.currentMember;
+    if (!current) return null;
+    const participants = this.getExpenseParticipants(exp);
+    const mySplit = participants.find(p => p.memberId === current.memberId);
+    return mySplit ? mySplit.owedAmount : null;
+  }
+
+  getMemberInitial(name: string | undefined): string {
+    if (!name || !name.trim()) return '?';
+    return name.trim().charAt(0).toUpperCase();
+  }
+
+  isExpanded(exp: any): boolean {
+    return exp?.expenseId !== undefined && this.expandedExpenseIds.has(exp.expenseId);
+  }
+
+  toggleExpenseDetails(exp: any, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (!exp || exp.expenseId === undefined) return;
+
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+
+    if (this.expandedExpenseIds.has(exp.expenseId)) {
+      this.expandedExpenseIds.delete(exp.expenseId);
+    } else {
+      this.expandedExpenseIds.add(exp.expenseId);
+    }
   }
 }

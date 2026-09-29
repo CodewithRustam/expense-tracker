@@ -136,7 +136,8 @@
                    [(ngModel)]="member.value" (input)="onSplitValueChange()"
                    placeholder="0" class="rev-num-input" />
           </div>
-          <span class="rev-excluded-label" *ngIf="!member.isSelected">Excluded</span>
+          <span class="rev-excluded-label" *ngIf="!member.isSelected && isMemberEligible(member)">Excluded</span>
+          <span class="rev-excluded-label" *ngIf="!isMemberEligible(member)" style="color: #f59e0b;">{{ getMemberStatusReason(member) }}</span>
         </div>
       </div>
 

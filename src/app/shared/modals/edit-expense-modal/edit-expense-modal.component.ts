@@ -9,6 +9,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 export interface RoomMemberSplit {
   memberId: number;
   name: string;
+  joinedDate?: string;
+  leftDate?: string;
   isSelected: boolean;
   value: number;
   computedAmount: number;
@@ -135,12 +137,15 @@ export class EditExpenseModal implements OnInit {
             return {
               memberId: m.memberId,
               name: m.memberName,
+              joinedDate: m.joinedDate,
+              leftDate: m.leftDate,
               isSelected: existingSplits.length === 0 ? true : !!match,
               value: val,
               computedAmount: match ? match.owedAmount : 0
             };
           });
 
+          this.syncMembersWithExpenseDate();
           if (existingSplits.length === 0) {
             this.setDefaultSplitValues();
           }
@@ -154,6 +159,56 @@ export class EditExpenseModal implements OnInit {
     });
   }
 
+  isMemberEligible(member: RoomMemberSplit): boolean {
+    const expenseDateStr = this.expense?.originalDate || this.expense?.date;
+    if (!expenseDateStr) return true;
+    const expDate = new Date(expenseDateStr);
+    expDate.setHours(23, 59, 59, 999);
+
+    if (member.joinedDate) {
+      const joinDate = new Date(member.joinedDate);
+      if (joinDate > expDate) return false;
+    }
+
+    if (member.leftDate) {
+      const leftDate = new Date(member.leftDate);
+      leftDate.setHours(0, 0, 0, 0);
+      const expDateStart = new Date(expenseDateStr);
+      expDateStart.setHours(0, 0, 0, 0);
+      if (leftDate < expDateStart) return false;
+    }
+
+    return true;
+  }
+
+  getMemberStatusReason(member: RoomMemberSplit): string {
+    if (!this.isMemberEligible(member)) {
+      const expenseDateStr = this.expense?.originalDate || this.expense?.date;
+      if (member.leftDate && expenseDateStr) {
+        const leftDate = new Date(member.leftDate);
+        const expDate = new Date(expenseDateStr);
+        leftDate.setHours(0, 0, 0, 0);
+        expDate.setHours(0, 0, 0, 0);
+        if (leftDate < expDate) return 'Left Room';
+      }
+      return 'Joined Later';
+    }
+    return 'Excluded';
+  }
+
+  syncMembersWithExpenseDate() {
+    this.roomMembers.forEach(m => {
+      if (!this.isMemberEligible(m)) {
+        m.isSelected = false;
+        m.value = 0;
+        m.computedAmount = 0;
+      }
+    });
+
+    this.setDefaultSplitValues();
+    this.recalculateSplits();
+  }
+
   setSplitType(type: SplitType) {
     this.hapticFeedback(ImpactStyle.Light);
     this.selectedSplitType = type;
@@ -162,6 +217,11 @@ export class EditExpenseModal implements OnInit {
   }
 
   toggleMemberSelection(member: RoomMemberSplit) {
+    if (!this.isMemberEligible(member)) {
+      const reason = this.getMemberStatusReason(member);
+      this.toast.error(`${member.name} was not in the room on this date (${reason})`);
+      return;
+    }
     this.hapticFeedback(ImpactStyle.Light);
     member.isSelected = !member.isSelected;
     if (!member.isSelected) {
@@ -359,6 +419,7 @@ export class EditExpenseModal implements OnInit {
 
   onDateChange() {
     this.showDatePicker = false;
+    this.syncMembersWithExpenseDate();
     this.checkForChanges();
   }
 

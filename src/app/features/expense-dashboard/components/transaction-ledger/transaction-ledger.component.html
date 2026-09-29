@@ -124,31 +124,76 @@
 
               <!-- ion-item zero-padding wrapper -->
               <ion-item lines="none" class="tl-item-zero">
-                <div class="tx-content-row" [class.no-border]="last">
+                <div class="tx-item-wrapper" style="width: 100%; display: flex; flex-direction: column;">
+                  <div class="tx-content-row" [class.no-border]="last && !isExpanded(exp)" (click)="toggleExpenseDetails(exp, $event)">
 
-                  <!-- Duotone Glowing Category Icon Box -->
-                  <div class="tx-item-icon-box" [ngClass]="getCategoryGradientClass(exp.category)">
-                    <i [class]="getCategoryIcon(exp.category, exp.iconName)"></i>
+                    <!-- Duotone Glowing Category Icon Box -->
+                    <div class="tx-item-icon-box" [ngClass]="getCategoryGradientClass(exp.category)">
+                      <i [class]="getCategoryIcon(exp.category, exp.iconName)"></i>
+                    </div>
+
+                    <!-- Transaction Details (Left) -->
+                    <div class="tx-left">
+                      <span class="tx-title" [title]="exp.item">{{ exp.item }}</span>
+                      <div class="tx-badges">
+                        <span class="category-badge" [ngClass]="getCategoryBadgeClass(exp.category)">
+                          {{ exp.category }}
+                        </span>
+
+                        <!-- Shared with Badge -->
+                        <span class="shared-with-chip"
+                              [class.is-all]="isSharedWithAll(exp)"
+                              [title]="'Shared with: ' + getFullSharedNames(exp)">
+                          <i class="fa-solid fa-users" *ngIf="isSharedWithMultiple(exp)"></i>
+                          <i class="fa-solid fa-user" *ngIf="!isSharedWithMultiple(exp)"></i>
+                          <span class="shared-names">{{ getSharedWithSummary(exp) }}</span>
+                          <i class="fa-solid fa-chevron-down chevron-indicator" [class.rotated]="isExpanded(exp)"></i>
+                        </span>
+
+                        <!-- User share if in split -->
+                        <span *ngIf="getUserShare(exp) !== null" class="share-chip your-share">
+                          Your share: ₹{{ getUserShare(exp) | number:'1.0-2' }}
+                        </span>
+                        <span *ngIf="getUserShare(exp) === null && isUserInRoom" class="share-chip not-involved">
+                          Not in split
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Formatted Amount (Right) -->
+                    <div class="tx-right">
+                      <span class="tx-amt">₹{{ exp.amount | number:'1.0-0' }}</span>
+                    </div>
+
                   </div>
 
-                  <!-- Transaction Details (Left) -->
-                  <div class="tx-left">
-                    <span class="tx-title" [title]="exp.item">{{ exp.item }}</span>
-                    <div class="tx-badges">
-                      <span class="category-badge" [ngClass]="getCategoryBadgeClass(exp.category)">
-                        {{ exp.category }}
+                  <!-- Expanded Split Breakdown Details -->
+                  <div class="tx-split-breakdown" *ngIf="isExpanded(exp)" (click)="$event.stopPropagation()">
+                    <div class="breakdown-header">
+                      <span class="breakdown-tag">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        Split between {{ getExpenseParticipants(exp).length }} {{ getExpenseParticipants(exp).length === 1 ? 'member' : 'members' }}
                       </span>
-                      <span *ngIf="exp.userShareAmount" class="share-chip">
-                        Your share: ₹{{ exp.userShareAmount }}
+                      <span class="breakdown-payer" *ngIf="exp.payerName">
+                        Paid by <strong class="payer-highlight">{{ exp.payerName }}</strong>
                       </span>
                     </div>
-                  </div>
 
-                  <!-- Formatted Amount (Right) -->
-                  <div class="tx-right">
-                    <span class="tx-amt">₹{{ exp.amount | number:'1.0-0' }}</span>
+                    <div class="breakdown-members-grid">
+                      <div *ngFor="let member of getExpenseParticipants(exp)"
+                           class="breakdown-member-pill"
+                           [class.is-current-user]="isCurrentUser(member.memberId)">
+                        <div class="member-pill-left">
+                          <span class="member-mini-avatar">{{ getMemberInitial(member.name) }}</span>
+                          <span class="member-pill-name" [title]="member.name">
+                            {{ member.name }}
+                            <span class="you-indicator" *ngIf="isCurrentUser(member.memberId)">(You)</span>
+                          </span>
+                        </div>
+                        <span class="member-pill-amount">₹{{ member.owedAmount | number:'1.2-2' }}</span>
+                      </div>
+                    </div>
                   </div>
-
                 </div>
               </ion-item>
 

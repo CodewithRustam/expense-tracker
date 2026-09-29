@@ -2517,6 +2517,7 @@ ion-skeleton-text {
   box-sizing: border-box;
   background: transparent;
   transition: background 0.15s ease;
+  cursor: pointer;
 }
 
 .tx-content-row:hover {
@@ -2665,6 +2666,181 @@ ion-skeleton-text {
   border: 1px solid var(--border-hairline);
   border-radius: 999px;
   padding: 1px 8px;
+  white-space: nowrap;
+}
+
+.share-chip.your-share {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.share-chip.not-involved {
+  color: var(--ink-3);
+  background: var(--surface-sunken);
+  border-color: var(--border-hairline);
+  opacity: 0.75;
+}
+
+/* Shared With Chip & Indicator */
+.shared-with-chip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 999px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shared-with-chip:hover {
+  background: rgba(139, 92, 246, 0.22);
+}
+
+.shared-with-chip.is-all {
+  color: var(--credit, #10b981);
+  background: var(--credit-soft, rgba(16, 185, 129, 0.12));
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.shared-with-chip.is-all:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.shared-with-chip .chevron-indicator {
+  font-size: 0.58rem;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+  margin-left: 2px;
+}
+
+.shared-with-chip .chevron-indicator.rotated {
+  transform: rotate(180deg);
+}
+
+/* Inline Expandable Split Breakdown */
+.tx-split-breakdown {
+  width: 100%;
+  padding: 10px 16px 14px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px dashed var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+  animation: slideDownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.breakdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+}
+
+.breakdown-tag {
+  color: var(--ink-2);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breakdown-tag i {
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.breakdown-payer {
+  color: var(--ink-3);
+  font-size: 0.74rem;
+}
+
+.payer-highlight {
+  color: var(--ink-1);
+}
+
+.breakdown-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 6px;
+}
+
+.breakdown-member-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.76rem;
+  transition: all 0.15s ease;
+}
+
+.breakdown-member-pill.is-current-user {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.member-pill-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.member-mini-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.member-pill-name {
+  color: var(--ink-1);
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.you-indicator {
+  color: #38bdf8;
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.member-pill-amount {
+  color: var(--ink-2);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
   white-space: nowrap;
 }
 
