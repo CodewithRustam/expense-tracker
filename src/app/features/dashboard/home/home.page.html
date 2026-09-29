@@ -135,6 +135,36 @@
       </div>
       }
 
+      <!-- FEATURE DISCOVERY BANNER -->
+      @if (isPageLoaded() && showFeatureBanner() && groupService.groups().length > 0) {
+      <div class="feature-tip-banner">
+        <div class="tip-icon-box">
+          <ion-icon name="sparkles"></ion-icon>
+        </div>
+        <div class="tip-body">
+          <div class="tip-header-row">
+            <span class="tip-badge">NEW FEATURE</span>
+            <button class="tip-close-btn" (click)="dismissFeatureBanner($event)" aria-label="Dismiss banner">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+          </div>
+          <h4 class="tip-title">All Splits in {{ firstGroupName() }}! 💡</h4>
+          <p class="tip-desc">
+            No need to create separate groups for pairs! You can now choose who shares each expense (or divide unequally) right inside <strong>{{ firstGroupName() }}</strong>.
+          </p>
+          <div class="tip-action-row">
+            <button class="tip-btn-primary" (click)="openAddExpense()">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>Try it out</span>
+            </button>
+            <button class="tip-btn-text" (click)="dismissFeatureBanner($event)">
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+
       <div class="section-header">
         <span class="section-title">Your groups</span>
         @if (isPageLoaded()) {

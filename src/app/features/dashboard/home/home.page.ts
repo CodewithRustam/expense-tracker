@@ -12,6 +12,7 @@ import { AppComponent } from '../../../app.component';
 import { ExpenseService } from '../../../core/services/expense';
 import { Subscription, merge } from 'rxjs';
 import { getBaseTrendChartOptions, ChartOptions } from '../../../core/utils/chart.config';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 @Component({
   selector: 'app-groups',
@@ -44,6 +45,23 @@ export class HomePage implements OnInit, OnDestroy {
   public renderChart = signal<boolean>(false);
   public hasChartData = signal<boolean>(false);
   public playHeaderAnim = signal<boolean>(false);
+  public showFeatureBanner = signal<boolean>(localStorage.getItem('splitx_single_room_split_tip_dismissed') !== 'true');
+
+  public firstGroupName = computed(() => {
+    const groups = this.groupService.groups();
+    return groups.length > 0 ? groups[0].name : 'your main room';
+  });
+
+  async dismissFeatureBanner(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    try {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    } catch {}
+    localStorage.setItem('splitx_single_room_split_tip_dismissed', 'true');
+    this.showFeatureBanner.set(false);
+  }
 
   public isPageLoaded = computed(() => {
     if (this.hasInitiallyLoaded()) return true;

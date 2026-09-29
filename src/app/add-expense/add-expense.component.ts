@@ -112,9 +112,8 @@ export class AddExpenseModalComponent implements OnInit {
   }
 
   isRoomDisabled(roomId: number): boolean {
-    if (roomId === 1) return true;
     const g = this.groups.find(group => group.roomId === roomId);
-    return g?.status?.toLowerCase() === 'disabled';
+    return g?.status?.toLowerCase() === 'disabled' || g?.status?.toLowerCase() === 'deleted';
   }
 
   private initializeRooms() {
