@@ -1,7 +1,7 @@
 <ion-content class="ion-padding register-page" [ngClass]="{'loading-active': isLoading}" fullscreen>
   <div class="status-header"></div>
 
-  <!-- Modern Loader -->
+  <!-- Modern Fullscreen Loader Overlay -->
   <div class="modern-loader" *ngIf="isLoading">
     <span></span>
     <span></span>
@@ -11,55 +11,215 @@
   <div class="auth-page-container" style="max-width: 420px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
     
     <!-- Logo / Branding -->
-    <div class="logo-section" style="text-align: center;">
+    <div class="logo-section" style="text-align: center; margin-bottom: 20px;">
       <img src="/assets/donut-chart.png" class="responsive-logo" alt="SplitX Logo" />
-      <h2 class="welcome-text">SplitX</h2>
-      <p class="sub-text">Sign up to continue</p>
+      <h2 class="welcome-text">Create Account</h2>
+      <p class="sub-text">Sign up to manage group expenses effortlessly</p>
     </div>
 
     <!-- Centered Card Wrapper -->
     <div class="card-wrapper" style="margin: 0 auto; width: 100%;">
       <ion-card class="auth-card" style="margin: 0 auto; width: 100%;">
         <ion-card-content>
-          <form #registerForm="ngForm" (ngSubmit)="onRegister()">
 
-            <!-- Username Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'username'">
-              <ion-icon name="person-outline" slot="start"></ion-icon>
-              <ion-input type="text" placeholder="Username" [(ngModel)]="registerData.username" name="username" required
-                minlength="3" (ionFocus)="focusedField = 'username'" (ionBlur)="focusedField = ''"></ion-input>
-            </ion-item>
+          <!-- Server Error Alert Banner -->
+          <div class="server-error-banner" *ngIf="serverErrorMessage">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <div>
+              <strong>{{ serverErrorMessage }}</strong>
+              <ul *ngIf="serverErrorList.length > 0">
+                <li *ngFor="let err of serverErrorList">{{ err }}</li>
+              </ul>
+            </div>
+          </div>
 
-            <!-- Email Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'email'">
-              <ion-icon name="mail-outline" slot="start"></ion-icon>
-              <ion-input type="email" placeholder="Email" [(ngModel)]="registerData.email" name="email" required email
-                (ionFocus)="focusedField = 'email'" (ionBlur)="focusedField = ''"></ion-input>
-            </ion-item>
+          <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate>
 
-            <!-- Password Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'password'">
-              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-              <ion-input type="password" placeholder="Password" [(ngModel)]="registerData.password" name="password"
-                required minlength="6" (ionFocus)="focusedField = 'password'" (ionBlur)="focusedField = ''"></ion-input>
-            </ion-item>
+            <!-- 1. Username Field -->
+            <div class="input-wrapper-custom">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'username'"
+                [class.has-error]="isFieldInvalid('username')"
+                [class.is-valid]="isFieldValid('username')">
+                <ion-icon name="person-outline" slot="start"></ion-icon>
+                <ion-input 
+                  type="text" 
+                  placeholder="Username" 
+                  formControlName="username"
+                  autocomplete="username"
+                  (ionFocus)="onFocus('username')" 
+                  (ionBlur)="onBlur('username')">
+                </ion-input>
+                <ion-icon 
+                  *ngIf="isFieldValid('username')" 
+                  name="checkmark-circle" 
+                  slot="end" 
+                  class="valid-check-icon">
+                </ion-icon>
+              </ion-item>
+              <div class="field-error-msg" *ngIf="isFieldInvalid('username')">
+                <ion-icon name="warning-outline"></ion-icon>
+                <span>{{ getFieldError('username') }}</span>
+              </div>
+            </div>
 
-            <!-- Confirm Password Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'confirmPassword'">
-              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-              <ion-input type="password" placeholder="Confirm Password" [(ngModel)]="registerData.confirmPassword"
-                name="confirmPassword" required minlength="6" (ionFocus)="focusedField = 'confirmPassword'" (ionBlur)="focusedField = ''"></ion-input>
-            </ion-item>
+            <!-- 2. Email Field -->
+            <div class="input-wrapper-custom">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'email'"
+                [class.has-error]="isFieldInvalid('email')"
+                [class.is-valid]="isFieldValid('email')">
+                <ion-icon name="mail-outline" slot="start"></ion-icon>
+                <ion-input 
+                  type="email" 
+                  placeholder="Email address" 
+                  formControlName="email"
+                  inputmode="email"
+                  autocomplete="email"
+                  (ionFocus)="onFocus('email')" 
+                  (ionBlur)="onBlur('email')">
+                </ion-input>
+                <ion-icon 
+                  *ngIf="isFieldValid('email')" 
+                  name="checkmark-circle" 
+                  slot="end" 
+                  class="valid-check-icon">
+                </ion-icon>
+              </ion-item>
+              <div class="field-error-msg" *ngIf="isFieldInvalid('email')">
+                <ion-icon name="warning-outline"></ion-icon>
+                <span>{{ getFieldError('email') }}</span>
+              </div>
+            </div>
 
-            <!-- Error Message -->
-            <p class="error-message" *ngIf="errorMessage" style="color: #ff5252; font-size: 0.85rem; margin-top: 10px; text-align: center;">{{ errorMessage }}</p>
+            <!-- 3. Password Field -->
+            <div class="input-wrapper-custom">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'password'"
+                [class.has-error]="isFieldInvalid('password')"
+                [class.is-valid]="isFieldValid('password')">
+                <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+                <ion-input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  placeholder="Password" 
+                  formControlName="password"
+                  autocomplete="new-password"
+                  (ionFocus)="onFocus('password')" 
+                  (ionBlur)="onBlur('password')">
+                </ion-input>
+                <ion-button 
+                  fill="clear" 
+                  slot="end" 
+                  class="toggle-visibility-btn"
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  tabindex="-1">
+                  <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <div class="field-error-msg" *ngIf="isFieldInvalid('password')">
+                <ion-icon name="warning-outline"></ion-icon>
+                <span>{{ getFieldError('password') }}</span>
+              </div>
+            </div>
+
+            <!-- Password Strength Bar (Visible when user has typed anything in password) -->
+            <div class="password-meter-container" *ngIf="passwordValue.length > 0">
+              <div class="meter-bar-track">
+                <div 
+                  class="meter-bar-fill" 
+                  [style.width]="passwordStrength.width" 
+                  [style.background-color]="passwordStrength.color">
+                </div>
+              </div>
+              <div class="meter-meta">
+                <span class="meter-label">Password Strength:</span>
+                <span class="strength-status" [style.color]="passwordStrength.color">
+                  {{ passwordStrength.label }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Password Security Criteria Checklist -->
+            <div class="password-criteria-list" *ngIf="showPasswordChecklist || passwordValue.length > 0">
+              <div class="criteria-title">Password Requirements</div>
+              
+              <div class="criteria-item" [class.met]="hasMinLength">
+                <ion-icon [name]="hasMinLength ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>At least 6 characters</span>
+              </div>
+
+              <div class="criteria-item" [class.met]="hasUppercase">
+                <ion-icon [name]="hasUppercase ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>At least 1 uppercase letter (A-Z)</span>
+              </div>
+
+              <div class="criteria-item" [class.met]="hasLowercase">
+                <ion-icon [name]="hasLowercase ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>At least 1 lowercase letter (a-z)</span>
+              </div>
+
+              <div class="criteria-item" [class.met]="hasNumber">
+                <ion-icon [name]="hasNumber ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>At least 1 number (0-9)</span>
+              </div>
+
+              <div class="criteria-item" [class.met]="hasSpecialChar">
+                <ion-icon [name]="hasSpecialChar ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>At least 1 special symbol (!@#$%^&*...)</span>
+              </div>
+            </div>
+
+            <!-- 4. Confirm Password Field -->
+            <div class="input-wrapper-custom">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'confirmPassword'"
+                [class.has-error]="isFieldInvalid('confirmPassword')"
+                [class.is-valid]="isFieldValid('confirmPassword')">
+                <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+                <ion-input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  placeholder="Confirm password" 
+                  formControlName="confirmPassword"
+                  autocomplete="new-password"
+                  (ionFocus)="onFocus('confirmPassword')" 
+                  (ionBlur)="onBlur('confirmPassword')">
+                </ion-input>
+                <ion-button 
+                  fill="clear" 
+                  slot="end" 
+                  class="toggle-visibility-btn"
+                  type="button"
+                  (click)="toggleConfirmPasswordVisibility()"
+                  tabindex="-1">
+                  <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <div class="field-error-msg" *ngIf="isFieldInvalid('confirmPassword')">
+                <ion-icon name="warning-outline"></ion-icon>
+                <span>{{ getFieldError('confirmPassword') }}</span>
+              </div>
+            </div>
 
             <!-- Submit Button -->
-            <ion-button type="submit" expand="block" class="register-btn" style="margin-top: 16px;"
-              [disabled]="!registerForm.valid || registerData.password !== registerData.confirmPassword || isLoading">
-              <span *ngIf="!isLoading">Register</span>
+            <ion-button 
+              type="submit" 
+              expand="block" 
+              class="register-btn" 
+              style="margin-top: 16px;"
+              [disabled]="registerForm.invalid || isLoading">
+              <span *ngIf="!isLoading">Create Account</span>
               <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
             </ion-button>
+
           </form>
         </ion-card-content>
       </ion-card>
