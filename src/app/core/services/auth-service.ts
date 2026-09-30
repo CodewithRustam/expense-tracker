@@ -3,6 +3,8 @@ import { ApiService } from './api.service';
 import { Observable, catchError, from, map, of, switchMap, tap, Subject } from 'rxjs';
 import { NavController } from '@ionic/angular';
 import { SecureTokenService } from './secure-token.service';
+import { CryptoService } from './crypto.service';
+import { DeviceFingerprintService } from './device-fingerprint.service';
 
 export interface ApiResponse {
   success: boolean;
@@ -20,26 +22,35 @@ export class AuthService {
   constructor(
     private apiService: ApiService,
     private navCtrl: NavController,
-    private secureTokenService: SecureTokenService
+    private secureTokenService: SecureTokenService,
+    private cryptoService: CryptoService,
+    private deviceFingerprintService: DeviceFingerprintService
   ) { }
 
   login(userName: string, password: string, rememberMe: boolean): Observable<boolean> {
     const payload = { userName, password };
 
-    return this.apiService.post<{ success: boolean; message: string; token?: string }>(
+    return this.apiService.post<{ success: boolean; message: string; token?: string; encrypted?: boolean }>(
       'account/login',
       payload
     ).pipe(
       switchMap(res => {
         if (res.success && res.token) {
-          // Store token securely (encrypted + in-memory)
-          return from(this.secureTokenService.storeToken(res.token, rememberMe)).pipe(
-            map(() => true)
-          );
+          return from(this.handleLoginToken(res.token, !!res.encrypted, rememberMe));
         }
-        return of(res.success);
+        return of(false);
       })
     );
+  }
+
+  private async handleLoginToken(token: string, isEncrypted: boolean, rememberMe: boolean): Promise<boolean> {
+    let finalToken = token;
+    if (isEncrypted) {
+      const fingerprint = await this.deviceFingerprintService.getFingerprint();
+      finalToken = await this.cryptoService.decrypt(token, fingerprint);
+    }
+    await this.secureTokenService.storeToken(finalToken, rememberMe);
+    return true;
   }
 
   // Registration API

@@ -36,9 +36,15 @@ export class AuthInterceptor implements HttpInterceptor {
       '/api/account/verify-resetpassword-link'
     ];
 
-    // Skip auth for public endpoints
+    // Skip auth token check for public endpoints, but attach device fingerprint for device binding
     if (publicEndpoints.some(endpoint => req.url.includes(endpoint))) {
-      return next.handle(req);
+      const fingerprint = this.deviceFingerprintService.getFingerprintSync();
+      const publicReq = req.clone({
+        setHeaders: {
+          'X-Device-Fingerprint': fingerprint
+        }
+      });
+      return next.handle(publicReq);
     }
 
     // Existing logic (only runs for protected routes)

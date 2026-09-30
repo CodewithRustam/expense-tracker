@@ -78,7 +78,7 @@ export class LoginPage implements OnInit {
           if (err.status === 401) {
             this.showToast('Invalid username or password');
           } else {
-            this.showToast('Unable to login. Please try again later.');
+            this.showToast(err.error?.message || 'Unable to login. Please try again later.');
           }
         }
       });
