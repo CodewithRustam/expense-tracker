@@ -103,13 +103,16 @@ export class LoginPage implements OnInit {
         },
         error: (err) => {
           this.isLoading = false; // Hide loader
-          if (err.status === 429) {
+          const status = err?.status ?? err?.originalError?.status;
+          const msg = err?.message || err?.error?.message || err?.originalError?.error?.message;
+
+          if (status === 429) {
             this.startCooldown(60);
-            this.showToast(err.error?.message || 'Too many attempts. Account locked for 60 seconds.');
-          } else if (err.status === 401) {
-            this.showToast('Invalid username or password');
+            this.showToast(msg || 'Too many attempts. Account locked for 60 seconds.');
+          } else if (status === 401) {
+            this.showToast(msg || 'Invalid username or password');
           } else {
-            this.showToast(err.error?.message || 'Unable to login. Please try again later.');
+            this.showToast(msg || 'Unable to login. Please try again later.');
           }
         }
       });

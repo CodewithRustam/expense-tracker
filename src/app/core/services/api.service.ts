@@ -81,6 +81,8 @@ export class ApiService {
       return throwError(() => ({
         success: false,
         message: errorMessage,
+        status: error?.status,
+        error: error?.error,
         originalError: error
       }));
     };
