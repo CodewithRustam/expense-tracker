@@ -4,7 +4,7 @@
 
   <!-- Header -->
   <div class="rev-sheet-header rev-stagger-1">
-    <span class="rev-sheet-title">Create Room</span>
+    <span class="rev-sheet-title">Create Group</span>
     <button type="button" class="rev-sheet-close" (click)="dismiss()">
       <ion-icon name="close"></ion-icon>
     </button>
@@ -13,21 +13,21 @@
   <!-- Scrollable Sheet Content -->
   <div class="rev-sheet-scroll">
 
-    <div class="rev-modal-subtitle rev-stagger-2">Set up your room and optionally invite members</div>
+    <div class="rev-modal-subtitle rev-stagger-2">Set up your group and optionally invite members</div>
 
     <form [formGroup]="groupForm" (ngSubmit)="onCreateGroup()">
 
-      <!-- Room Details Section -->
-      <div class="rev-section-label rev-stagger-2">Room Details</div>
+      <!-- Group Details Section -->
+      <div class="rev-section-label rev-stagger-2">Group Details</div>
       <div class="rev-unified-card rev-stagger-3">
         <div class="rev-card-row">
-          <ion-icon name="home-outline" class="rev-row-icon"></ion-icon>
-          <input type="text" placeholder="Room Name (e.g. Flat 301, Goa Trip)" formControlName="name" class="rev-row-input" />
+          <ion-icon name="people-outline" class="rev-row-icon"></ion-icon>
+          <input type="text" placeholder="Group Name (e.g. Flat 301, Goa Trip)" formControlName="name" class="rev-row-input" />
         </div>
         <div class="rev-input-error" *ngIf="f['name'].invalid && f['name'].touched" style="padding: 0 16px 8px; text-align: left;">
-          <span *ngIf="f['name'].errors?.['required']">Room name is required.</span>
+          <span *ngIf="f['name'].errors?.['required']">Group name is required.</span>
           <span *ngIf="f['name'].errors?.['minlength']">Minimum 3 characters required.</span>
-          <span *ngIf="f['name'].errors?.['maxlength']">Room name cannot exceed 50 characters.</span>
+          <span *ngIf="f['name'].errors?.['maxlength']">Group name cannot exceed 50 characters.</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@
 
       <!-- Primary Action Button -->
       <button type="submit" class="rev-primary-btn rev-stagger-4" [disabled]="isAddDisabled">
-        <span *ngIf="!isSubmitting">Add Room</span>
+        <span *ngIf="!isSubmitting">Add Group</span>
         <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
       </button>
 

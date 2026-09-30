@@ -138,7 +138,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
       )
       .subscribe(id => {
         if (!id) {
-          this.toast.error('No room selected');
+          this.toast.error('No group selected');
           return;
         }
         if (this.authService.isTokenExpired()) {
@@ -198,7 +198,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
       }));
     }
 
-    this.groups.set([{ roomId: this.roomId(), name: this.roomName() || 'Unnamed Room' }]);
+    this.groups.set([{ roomId: this.roomId(), name: this.roomName() || 'Unnamed Group' }]);
 
     const newUsers = data.membersSummary.map((member: any) => ({
       ...member,
@@ -529,7 +529,7 @@ export class ExpensesPage implements OnInit, OnDestroy {
       cssClass: 'global-modal',
       mode: 'ios',
       componentProps: {
-        message: 'Are you sure you want to completely delete this room? This action cannot be undone.',
+        message: 'Are you sure you want to completely delete this group? This action cannot be undone.',
         confirmText: 'Delete',
         danger: true
       }

@@ -49,7 +49,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   public firstGroupName = computed(() => {
     const groups = this.groupService.groups();
-    return groups.length > 0 ? groups[0].name : 'your main room';
+    return groups.length > 0 ? groups[0].name : 'your main group';
   });
 
   async dismissFeatureBanner(event?: Event) {

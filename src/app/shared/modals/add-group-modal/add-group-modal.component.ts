@@ -42,7 +42,7 @@ export class AddGroupModalComponent implements OnInit {
   get isAddMemberDisabled(): boolean {
     if (!this.groupForm) return true;
     const name = (this.groupForm.get('name')?.value || '').trim();
-    if (!name) return true; // Room name input is empty
+    if (!name) return true; // Group name input is empty
     for (const m of this.members.controls) {
       const mName = (m.get('name')?.value || '').trim();
       const mEmail = (m.get('email')?.value || '').trim();

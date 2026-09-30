@@ -202,7 +202,7 @@ export class AddExpenseModalComponent implements OnInit {
         const expDate = new Date(this.newExpense.date);
         leftDate.setHours(0, 0, 0, 0);
         expDate.setHours(0, 0, 0, 0);
-        if (leftDate < expDate) return 'Left Room';
+        if (leftDate < expDate) return 'Left Group';
       }
       return 'Joined Later';
     }
@@ -232,7 +232,7 @@ export class AddExpenseModalComponent implements OnInit {
   toggleMemberSelection(member: RoomMemberSplit) {
     if (!this.isMemberEligible(member)) {
       const reason = this.getMemberStatusReason(member);
-      this.toast.error(`${member.name} was not in the room on this date (${reason})`);
+      this.toast.error(`${member.name} was not in the group on this date (${reason})`);
       return;
     }
     this.hapticFeedback(ImpactStyle.Light);
@@ -429,7 +429,7 @@ export class AddExpenseModalComponent implements OnInit {
     }
 
     if (this.isRoomDisabled(this.newExpense.roomId)) {
-      this.toast.error('This room is currently disabled.');
+      this.toast.error('This group is currently disabled.');
       return;
     }
 

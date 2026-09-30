@@ -7,7 +7,7 @@
     <ion-title>Expenses</ion-title>
     <ion-buttons slot="end">
       @if (isRoomCreator()) {
-        <ion-button id="expenses-menu-btn" aria-label="Room options" class="header-settings-btn">
+        <ion-button id="expenses-menu-btn" aria-label="Group options" class="header-settings-btn">
           <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
         </ion-button>
         <ion-popover trigger="expenses-menu-btn" dismissOnSelect="true" alignment="end" side="bottom">
@@ -39,7 +39,7 @@
       
       @if (isRoomCreator()) {
         <div style="position: absolute; right: 0;">
-          <ion-button id="expenses-menu-btn-desktop" aria-label="Room options" fill="clear" style="--padding-start: 4px; --padding-end: 4px;">
+          <ion-button id="expenses-menu-btn-desktop" aria-label="Group options" fill="clear" style="--padding-start: 4px; --padding-end: 4px;">
             <ion-icon name="ellipsis-vertical" slot="icon-only" style="color: #94a3b8; font-size: 20px;"></ion-icon>
           </ion-button>
           <ion-popover trigger="expenses-menu-btn-desktop" dismissOnSelect="true" alignment="end" side="bottom">

@@ -189,7 +189,7 @@ export class EditExpenseModal implements OnInit {
         const expDate = new Date(expenseDateStr);
         leftDate.setHours(0, 0, 0, 0);
         expDate.setHours(0, 0, 0, 0);
-        if (leftDate < expDate) return 'Left Room';
+        if (leftDate < expDate) return 'Left Group';
       }
       return 'Joined Later';
     }
@@ -219,7 +219,7 @@ export class EditExpenseModal implements OnInit {
   toggleMemberSelection(member: RoomMemberSplit) {
     if (!this.isMemberEligible(member)) {
       const reason = this.getMemberStatusReason(member);
-      this.toast.error(`${member.name} was not in the room on this date (${reason})`);
+      this.toast.error(`${member.name} was not in the group on this date (${reason})`);
       return;
     }
     this.hapticFeedback(ImpactStyle.Light);
@@ -475,7 +475,7 @@ export class EditExpenseModal implements OnInit {
     }
 
     if (!this.expense.roomId) {
-      this.toast.error('Please select a room');
+      this.toast.error('Please select a group');
       return;
     }
 

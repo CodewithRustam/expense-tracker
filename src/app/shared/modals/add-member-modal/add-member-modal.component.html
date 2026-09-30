@@ -13,13 +13,13 @@
   <!-- Scrollable Sheet Content -->
   <div class="rev-sheet-scroll">
 
-    <!-- Room Context Tag (if room name available) -->
+    <!-- Group Context Tag (if group name available) -->
     <div class="rev-split-pill-badge rev-stagger-2" *ngIf="roomName" style="margin: 4px 0 12px; align-self: flex-start;">
-      <ion-icon name="business-outline"></ion-icon>
+      <ion-icon name="people-outline"></ion-icon>
       <span>{{ roomName }}</span>
     </div>
 
-    <div class="rev-modal-subtitle rev-stagger-2">Invite someone to this room by name and email</div>
+    <div class="rev-modal-subtitle rev-stagger-2">Invite someone to this group by name and email</div>
 
     <form [formGroup]="memberForm" (ngSubmit)="onAddMember()">
 
