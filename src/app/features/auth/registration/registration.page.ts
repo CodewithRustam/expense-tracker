@@ -72,7 +72,6 @@ export class RegistrationPage implements OnInit {
   submitted: boolean = false;
   isLoading: boolean = false;
   focusedField: string = '';
-  showPasswordChecklist: boolean = false;
 
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -129,7 +128,7 @@ export class RegistrationPage implements OnInit {
       ]
     });
 
-    // Re-validate confirmPassword when password changes
+    // Re-evaluate confirmPassword validity when password changes
     this.registerForm.get('password')?.valueChanges.subscribe(() => {
       const confirmCtrl = this.registerForm.get('confirmPassword');
       if (confirmCtrl?.value) {
@@ -138,7 +137,7 @@ export class RegistrationPage implements OnInit {
     });
   }
 
-  // --- Form Controls Getters ---
+  // --- Form Controls Getter ---
   get f() {
     return this.registerForm.controls;
   }
@@ -168,24 +167,39 @@ export class RegistrationPage implements OnInit {
     return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.passwordValue);
   }
 
-  // --- Password Strength Meter ---
-  get passwordStrength(): { score: number; label: string; color: string; width: string } {
-    const p = this.passwordValue;
-    if (!p) return { score: 0, label: '', color: '', width: '0%' };
+  get isPasswordAllValid(): boolean {
+    return this.hasMinLength && this.hasUppercase && this.hasLowercase && this.hasNumber && this.hasSpecialChar;
+  }
 
+  // --- 4-Segment Password Strength Meter ---
+  get strengthScore(): number {
+    const p = this.passwordValue;
+    if (!p) return 0;
     let score = 0;
-    if (p.length >= 6) score++;
-    if (p.length >= 10) score++;
+    if (this.hasMinLength) score++;
     if (this.hasUppercase && this.hasLowercase) score++;
     if (this.hasNumber) score++;
     if (this.hasSpecialChar) score++;
+    return score;
+  }
 
-    if (score <= 2) {
-      return { score, label: 'Weak', color: '#ef4444', width: '30%' };
-    } else if (score <= 4) {
-      return { score, label: 'Medium', color: '#f59e0b', width: '65%' };
-    } else {
-      return { score, label: 'Strong', color: '#10b981', width: '100%' };
+  get strengthLabel(): string {
+    switch (this.strengthScore) {
+      case 1: return 'Weak';
+      case 2: return 'Fair';
+      case 3: return 'Good';
+      case 4: return 'Strong';
+      default: return '';
+    }
+  }
+
+  get strengthColor(): string {
+    switch (this.strengthScore) {
+      case 1: return '#ef4444';
+      case 2: return '#f59e0b';
+      case 3: return '#06b6d4';
+      case 4: return '#10b981';
+      default: return '#94a3b8';
     }
   }
 
@@ -207,33 +221,32 @@ export class RegistrationPage implements OnInit {
     }
 
     if (fieldName === 'username') {
-      if (control.hasError('required')) return 'Username is required.';
-      if (control.hasError('minlength')) return 'Username must be at least 3 characters.';
-      if (control.hasError('maxlength')) return 'Username cannot exceed 30 characters.';
-      if (control.hasError('pattern')) return 'Only letters, numbers, dots, hyphens, and underscores are allowed.';
-      if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number.';
-      if (control.hasError('consecutiveSpecial')) return 'Username cannot have consecutive dots or underscores.';
+      if (control.hasError('required')) return 'Username is required';
+      if (control.hasError('minlength')) return 'Username must be at least 3 characters';
+      if (control.hasError('maxlength')) return 'Username cannot exceed 30 characters';
+      if (control.hasError('pattern')) return 'Only letters, numbers, dots, hyphens, and underscores allowed';
+      if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number';
+      if (control.hasError('consecutiveSpecial')) return 'Username cannot contain consecutive dots or underscores';
     }
 
     if (fieldName === 'email') {
-      if (control.hasError('required')) return 'Email is required.';
-      if (control.hasError('pattern') || control.hasError('email')) return 'Please enter a valid email address (e.g. user@example.com).';
-      if (control.hasError('maxlength')) return 'Email cannot exceed 100 characters.';
+      if (control.hasError('required')) return 'Email address is required';
+      if (control.hasError('pattern') || control.hasError('email')) return 'Please enter a valid email (e.g. name@example.com)';
+      if (control.hasError('maxlength')) return 'Email cannot exceed 100 characters';
     }
 
     if (fieldName === 'password') {
-      if (control.hasError('required')) return 'Password is required.';
-      if (control.hasError('minlength')) return 'Password must be at least 6 characters.';
-      if (control.hasError('maxlength')) return 'Password cannot exceed 32 characters.';
-      if (control.hasError('missingUpper')) return 'Must contain at least one uppercase letter (A-Z).';
-      if (control.hasError('missingLower')) return 'Must contain at least one lowercase letter (a-z).';
-      if (control.hasError('missingNumber')) return 'Must contain at least one number (0-9).';
-      if (control.hasError('missingSpecial')) return 'Must contain at least one special character (!@#$...).';
+      if (control.hasError('required')) return 'Password is required';
+      if (control.hasError('minlength')) return 'Password must be at least 6 characters';
+      if (control.hasError('maxlength')) return 'Password cannot exceed 32 characters';
+      if (control.hasError('missingUpper') || control.hasError('missingLower') || control.hasError('missingNumber') || control.hasError('missingSpecial')) {
+        return 'Password must satisfy all security requirements below';
+      }
     }
 
     if (fieldName === 'confirmPassword') {
-      if (control.hasError('required')) return 'Please confirm your password.';
-      if (control.hasError('passwordMismatch')) return 'Passwords do not match.';
+      if (control.hasError('required')) return 'Please confirm your password';
+      if (control.hasError('passwordMismatch')) return 'Passwords do not match';
     }
 
     return null;
@@ -249,9 +262,6 @@ export class RegistrationPage implements OnInit {
 
   onFocus(fieldName: string) {
     this.focusedField = fieldName;
-    if (fieldName === 'password') {
-      this.showPasswordChecklist = true;
-    }
   }
 
   onBlur(fieldName: string) {
@@ -260,7 +270,7 @@ export class RegistrationPage implements OnInit {
     control?.markAsTouched();
   }
 
-  // --- Submission ---
+  // --- Form Submission ---
   onRegister() {
     this.submitted = true;
     this.serverErrorMessage = null;

@@ -1,200 +1,392 @@
-.input-wrapper-custom {
-  position: relative;
-  margin-bottom: 14px;
+.register-page {
+  --background: var(--ion-background-color, #f8fafc);
+}
 
-  .input-item {
-    --background: var(--surface, #ffffff);
-    --border-radius: 12px;
-    --border-width: 1.5px;
-    --border-color: var(--border, #e2e8f0);
-    --border-style: solid;
-    --padding-start: 14px;
-    --padding-end: 14px;
-    --min-height: 52px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease-in-out;
+.auth-page-container {
+  max-width: 440px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 16px 0 32px;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .responsive-logo {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 6px 16px rgba(99, 102, 241, 0.25));
+  }
+
+  .welcome-text {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--ink-1, #0f172a);
+    margin: 0 0 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .sub-text {
+    font-size: 0.88rem;
+    color: var(--ink-3, #64748b);
+    margin: 0;
+    font-weight: 400;
+  }
+}
+
+.card-wrapper {
+  width: 100%;
+}
+
+ion-card.auth-card {
+  width: 100%;
+  margin: 0;
+  border-radius: var(--radius-lg, 20px);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-hairline, rgba(15, 23, 42, 0.08));
+  box-shadow: var(--shadow-card, 0 4px 20px -2px rgba(15, 23, 42, 0.06));
+  overflow: visible;
+
+  ion-card-content {
+    padding: 24px 20px 20px;
+  }
+}
+
+/* ============================================================================
+ * FIELD GROUP & INPUTS
+ * ============================================================================ */
+.auth-field-group {
+  margin-bottom: 16px;
+  position: relative;
+  text-align: left;
+  transition: margin-bottom 0.2s ease;
+
+  &.has-active-error {
+    margin-bottom: 14px;
+  }
+
+  /* Reset global margin-bottom on input-item so error fits seamlessly */
+  ion-item.input-item {
+    --background: var(--surface-sunken, #f8fafc) !important;
+    --border-radius: 14px !important;
+    --border-width: 0 !important;
+    --inner-padding-end: 8px !important;
+    --padding-start: 14px !important;
+    --min-height: 52px !important;
+    height: 52px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border-hairline, rgba(15, 23, 42, 0.1));
+    margin-bottom: 0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
 
     ion-icon[slot="start"] {
       color: var(--ink-3, #94a3b8);
       font-size: 20px;
-      margin-inline-end: 10px;
+      margin-right: 12px;
       transition: color 0.2s ease;
     }
 
+    ion-input {
+      --color: var(--ink-1, #0f172a);
+      --placeholder-color: var(--ink-3, #94a3b8);
+      --placeholder-opacity: 0.85;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Focused State */
     &.ion-focused {
-      --border-color: var(--accent, #4e54c8);
-      box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.15);
+      --background: var(--surface, #ffffff) !important;
+      border-color: var(--accent, #6366f1) !important;
+      box-shadow: 0 0 0 3.5px var(--accent-soft, rgba(99, 102, 241, 0.15)) !important;
 
       ion-icon[slot="start"] {
-        color: var(--accent, #4e54c8);
+        color: var(--accent, #6366f1) !important;
       }
     }
 
+    /* Error State */
     &.has-error {
-      --border-color: #ef4444 !important;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+      border-color: #f43f5e !important;
+      background-color: var(--surface, #ffffff) !important;
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.14) !important;
 
       ion-icon[slot="start"] {
-        color: #ef4444 !important;
+        color: #f43f5e !important;
       }
     }
 
+    /* Valid State (when not currently focused) */
     &.is-valid:not(.ion-focused) {
-      --border-color: #10b981;
+      border-color: rgba(16, 185, 129, 0.45);
+
+      ion-icon[slot="start"] {
+        color: #10b981;
+      }
     }
 
-    .toggle-visibility-btn {
-      --padding-start: 4px;
-      --padding-end: 4px;
+    /* Custom Eye Toggle Button */
+    .eye-toggle-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
       margin: 0;
-      color: var(--ink-3, #94a3b8);
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
       cursor: pointer;
+      color: var(--ink-3, #94a3b8);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(99, 102, 241, 0.08);
+        color: var(--accent, #6366f1);
+      }
+
+      &:active {
+        transform: scale(0.92);
+      }
 
       ion-icon {
         font-size: 20px;
+        pointer-events: none;
       }
     }
 
+    /* Valid Green Check Badge */
     .valid-check-icon {
       color: #10b981;
-      font-size: 18px;
+      font-size: 19px;
+      margin-right: 6px;
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+}
+
+/* ============================================================================
+ * ERROR VISIBILITY - HIGH CLARITY ALERT PILL
+ * ============================================================================ */
+.field-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background-color: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 6px;
+  color: #e11d48;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  animation: fadeInSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    color: #e11d48;
+  }
+
+  span {
+    flex: 1;
+  }
+}
+
+/* ============================================================================
+ * PASSWORD STRENGTH 4-SEGMENT METER
+ * ============================================================================ */
+.strength-meter-box {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+  animation: fadeInSlide 0.2s ease;
+
+  .strength-segments {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+
+    .segment {
+      height: 4px;
+      flex: 1;
+      background: var(--border-hairline, rgba(15, 23, 42, 0.12));
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+
+      &.active {
+        background-color: var(--seg-color, #10b981);
+      }
     }
   }
 
-  .field-error-msg {
-    display: flex;
+  .strength-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    min-width: 48px;
+    text-align: right;
+    letter-spacing: -0.2px;
+  }
+}
+
+/* ============================================================================
+ * PASSWORD CRITERIA CHIPS (COMPACT INLINE TAGS)
+ * ============================================================================ */
+.criteria-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 0 2px;
+  animation: fadeInSlide 0.25s ease;
+
+  .criteria-chip {
+    display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: #ef4444;
-    font-size: 0.78rem;
+    font-size: 0.73rem;
     font-weight: 500;
-    margin-top: 5px;
-    padding-left: 6px;
-    line-height: 1.3;
-    animation: fadeInDown 0.2s ease;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--surface-sunken, #f8fafc);
+    color: var(--ink-3, #64748b);
+    border: 1px solid var(--border-hairline, rgba(15, 23, 42, 0.08));
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
     ion-icon {
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-  }
-}
-
-/* Password Strength Meter */
-.password-meter-container {
-  margin-top: -6px;
-  margin-bottom: 12px;
-  padding: 0 4px;
-
-  .meter-bar-track {
-    height: 4px;
-    width: 100%;
-    background-color: var(--border, #e2e8f0);
-    border-radius: 999px;
-    overflow: hidden;
-
-    .meter-bar-fill {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
-    }
-  }
-
-  .meter-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 4px;
-    font-size: 0.75rem;
-
-    .meter-label {
-      color: var(--ink-3, #64748b);
-      font-weight: 500;
-    }
-
-    .strength-status {
-      font-weight: 600;
-    }
-  }
-}
-
-/* Password Criteria Checklist */
-.password-criteria-list {
-  background: var(--bg-hover, rgba(78, 84, 200, 0.04));
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-top: -6px;
-  margin-bottom: 14px;
-  animation: fadeInDown 0.25s ease;
-
-  .criteria-title {
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: var(--ink-2, #475569);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .criteria-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    color: var(--ink-3, #94a3b8);
-    margin-bottom: 4px;
-    transition: color 0.2s ease;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    ion-icon {
-      font-size: 14px;
-      flex-shrink: 0;
-      transition: transform 0.2s ease, color 0.2s ease;
+      font-size: 13px;
     }
 
     &.met {
-      color: #10b981;
-      font-weight: 500;
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.32);
+      font-weight: 600;
 
       ion-icon {
         color: #10b981;
-        transform: scale(1.1);
       }
     }
   }
 }
 
-/* Server Error Banner */
+/* ============================================================================
+ * SERVER ERROR ALERT BANNER
+ * ============================================================================ */
 .server-error-banner {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  border: 1.5px solid #fecaca;
   color: #b91c1c;
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 16px;
-  font-size: 0.82rem;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  font-size: 0.84rem;
   line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.06);
 
   ion-icon {
-    font-size: 18px;
+    font-size: 20px;
     flex-shrink: 0;
     margin-top: 1px;
+    color: #b91c1c;
   }
 
   ul {
-    margin: 4px 0 0 16px;
+    margin: 6px 0 0 16px;
     padding: 0;
+
+    li {
+      margin-bottom: 2px;
+    }
   }
 }
 
-@keyframes fadeInDown {
+/* ============================================================================
+ * SUBMIT BUTTON & FOOTER
+ * ============================================================================ */
+.register-btn {
+  --background: var(--accent-gradient, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)) !important;
+  --background-hover: var(--accent-gradient-hover, linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)) !important;
+  --color: #ffffff !important;
+  --border-radius: 14px !important;
+  font-weight: 700;
+  height: 52px;
+  font-size: 1rem;
+  margin-top: 18px;
+  --box-shadow: var(--glow-primary, 0 8px 24px -4px rgba(99, 102, 241, 0.35)) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &[disabled] {
+    opacity: 0.55 !important;
+    --box-shadow: none !important;
+    transform: none !important;
+    cursor: not-allowed;
+  }
+
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+
+    ion-icon {
+      font-size: 18px;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  &:hover .btn-content ion-icon {
+    transform: translateX(3px);
+  }
+}
+
+.login-link {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-2, #475569);
+
+  a {
+    color: var(--accent, #6366f1);
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      text-decoration: underline;
+      opacity: 0.85;
+    }
+  }
+}
+
+/* Animations */
+@keyframes fadeInSlide {
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -202,5 +394,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
