@@ -22,6 +22,8 @@ export class LoginPage implements OnInit {
   returnUrl: string | null = null;
   isLoading: boolean = false;
   focusedField = '';
+  cooldownSeconds: number = 0;
+  private cooldownInterval: any = null;
 
   constructor(
     private authService: AuthService,
@@ -53,7 +55,33 @@ export class LoginPage implements OnInit {
     }
   }
 
+  ngOnDestroy() {
+    if (this.cooldownInterval) {
+      clearInterval(this.cooldownInterval);
+      this.cooldownInterval = null;
+    }
+  }
+
+  startCooldown(seconds: number = 60) {
+    this.cooldownSeconds = seconds;
+    if (this.cooldownInterval) {
+      clearInterval(this.cooldownInterval);
+    }
+    this.cooldownInterval = setInterval(() => {
+      this.cooldownSeconds--;
+      if (this.cooldownSeconds <= 0) {
+        clearInterval(this.cooldownInterval);
+        this.cooldownInterval = null;
+      }
+    }, 1000);
+  }
+
   async onLogin() {
+    if (this.cooldownSeconds > 0) {
+      this.showToast(`Account temporarily locked. Please wait ${this.cooldownSeconds}s.`);
+      return;
+    }
+
     this.isLoading = true;
 
     this.authService.login(this.loginData.username, this.loginData.password, this.loginData.rememberMe)
@@ -75,7 +103,10 @@ export class LoginPage implements OnInit {
         },
         error: (err) => {
           this.isLoading = false; // Hide loader
-          if (err.status === 401) {
+          if (err.status === 429) {
+            this.startCooldown(60);
+            this.showToast(err.error?.message || 'Too many attempts. Account locked for 60 seconds.');
+          } else if (err.status === 401) {
             this.showToast('Invalid username or password');
           } else {
             this.showToast(err.error?.message || 'Unable to login. Please try again later.');

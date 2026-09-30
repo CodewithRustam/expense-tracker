@@ -78,9 +78,14 @@
               type="submit" 
               expand="block" 
               class="login-btn"
-              [disabled]="loginData.username.length < 3 || !isPasswordValid(loginData.password)">
-              Login
+              [disabled]="cooldownSeconds > 0 || loginData.username.length < 3 || !isPasswordValid(loginData.password)">
+              {{ cooldownSeconds > 0 ? ('Locked (' + cooldownSeconds + 's)') : 'Login' }}
             </ion-button>
+
+            <!-- Rate limit countdown alert -->
+            <div class="input-error" *ngIf="cooldownSeconds > 0" style="margin-top: 12px; text-align: center; color: #ff4961; font-weight: 600; font-size: 13px;">
+              ⚠️ Account temporarily locked. Please wait {{ cooldownSeconds }}s before trying again.
+            </div>
           </form>
         </ion-card-content>
       </ion-card>
