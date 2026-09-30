@@ -160,11 +160,12 @@
           </ng-template>
         </div>
 
-        <app-transaction-ledger
+        <app-transaction-ledger #transactionLedger
           [isLoadingExpenses]="isLoadingExpenses()"
           [users]="users()"
           [selectedUser]="selectedUser()"
           [currentUserId]="currentUserId()"
+          [isRoomCreator]="isRoomCreator()"
           [groupedExpensesMap]="groupedExpensesMap()"
           (onEditExpense)="openEditExpenseModal($event)"
           (onDeleteExpense)="deleteExpense($event.expense, $event.slidingItem)">

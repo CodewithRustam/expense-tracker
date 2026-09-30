@@ -564,6 +564,14 @@ export class AddExpenseModalComponent implements OnInit {
       this.isSplitValid;
   }
 
+  get isAddDisabled(): boolean {
+    if (this.isSubmitting) return true;
+    const amountVal = Number(this.newExpense.amount?.toString().replace(/,/g, '')) || 0;
+    const itemVal = (this.newExpense.item || '').trim();
+    if (!amountVal && !itemVal) return true;
+    return !this.isFormValid;
+  }
+
   private looksRandom(word: string): boolean {
     const lower = word.toLowerCase();
     const vowels = lower.match(/[aeiou]/g)?.length || 0;

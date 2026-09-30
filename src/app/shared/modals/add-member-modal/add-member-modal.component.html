@@ -1,67 +1,65 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>Add Member</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" class="close-btn">
-        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="rev-modal-sheet">
+  <!-- Top Handle -->
+  <div class="rev-sheet-handle"></div>
 
-<ion-content class="add-member-content">
-  <div class="modal-sheet-content">
+  <!-- Header -->
+  <div class="rev-sheet-header rev-stagger-1">
+    <span class="rev-sheet-title">Add Member</span>
+    <button type="button" class="rev-sheet-close" (click)="dismiss()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+  </div>
 
-    <p class="modal-sheet-subtitle">Invite someone by their name and email</p>
+  <!-- Scrollable Sheet Content -->
+  <div class="rev-sheet-scroll">
+
+    <!-- Room Context Tag (if room name available) -->
+    <div class="rev-split-pill-badge rev-stagger-2" *ngIf="roomName" style="margin: 4px 0 12px; align-self: flex-start;">
+      <ion-icon name="business-outline"></ion-icon>
+      <span>{{ roomName }}</span>
+    </div>
+
+    <div class="rev-modal-subtitle rev-stagger-2">Invite someone to this room by name and email</div>
 
     <form [formGroup]="memberForm" (ngSubmit)="onAddMember()">
 
-      <div class="input-row">
-        <div class="icon-square primary-tint">
-          <ion-icon name="person-outline"></ion-icon>
+      <!-- Unified Inset Details Card -->
+      <div class="rev-unified-card rev-stagger-3">
+        <!-- Name Row -->
+        <div class="rev-card-row">
+          <ion-icon name="person-outline" class="rev-row-icon"></ion-icon>
+          <input type="text" placeholder="Full Name" formControlName="name" class="rev-row-input" />
         </div>
-        <div class="input-body" [class.has-error]="f['name'].invalid && f['name'].touched">
-          <ion-label>Name</ion-label>
-          <input type="text" placeholder="Enter name" formControlName="name" class="native-input" />
+        <div class="rev-input-error" *ngIf="f['name'].invalid && f['name'].touched" style="padding: 0 16px 8px; text-align: left;">
+          <span *ngIf="f['name'].errors?.['required']">Name is required.</span>
+          <span *ngIf="f['name'].errors?.['minlength']">Name must be at least 2 characters.</span>
+          <span *ngIf="f['name'].errors?.['maxlength']">Name cannot exceed 50 characters.</span>
+          <span *ngIf="f['name'].errors?.['pattern']">Name can only contain letters and spaces.</span>
         </div>
-      </div>
 
-      <div class="field-error" *ngIf="f['name'].invalid && f['name'].touched">
-        <span *ngIf="f['name'].errors?.['required']">Name is required.</span>
-        <span *ngIf="f['name'].errors?.['minlength']">Name must be at least 2 characters.</span>
-        <span *ngIf="f['name'].errors?.['maxlength']">Name cannot exceed 50 characters.</span>
-        <span *ngIf="f['name'].errors?.['pattern']">Name can only contain letters and spaces.</span>
-      </div>
+        <div class="rev-card-divider"></div>
 
-      <div class="divider" style="margin-left: 0"></div>
-
-      <div class="input-row">
-        <div class="icon-square success-tint">
-          <ion-icon name="mail-outline"></ion-icon>
+        <!-- Email Row -->
+        <div class="rev-card-row">
+          <ion-icon name="mail-outline" class="rev-row-icon"></ion-icon>
+          <input type="email" placeholder="Email Address" formControlName="email" class="rev-row-input" />
         </div>
-        <div class="input-body" [class.has-error]="f['email'].invalid && f['email'].touched">
-          <ion-label>Email</ion-label>
-          <input type="email" placeholder="email@example.com" formControlName="email" class="native-input" />
+        <div class="rev-input-error" *ngIf="f['email'].invalid && f['email'].touched" style="padding: 0 16px 8px; text-align: left;">
+          <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
+          <span *ngIf="f['email'].errors?.['email'] || f['email'].errors?.['pattern']">Please enter a valid email format.</span>
         </div>
       </div>
 
-      <div class="field-error" *ngIf="f['email'].invalid && f['email'].touched">
-        <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
-        <span *ngIf="f['email'].errors?.['email'] || f['email'].errors?.['pattern']">Please enter a valid email
-          format.</span>
-      </div>
+      <!-- Server Error -->
+      <div class="rev-input-error" *ngIf="serverErrorMsg" style="margin-bottom: 12px; font-size: 13px;">{{ serverErrorMsg }}</div>
 
-      <div class="server-error" *ngIf="serverErrorMsg">{{ serverErrorMsg }}</div>
-
-      <!-- SUBMIT BUTTON -->
-      <div class="footer-pad">
-        <ion-button expand="block" type="submit" class="main-btn" [disabled]="memberForm.invalid || isSubmitting">
-          <ion-spinner name="dots" *ngIf="isSubmitting"></ion-spinner>
-          <span *ngIf="!isSubmitting">Add Member</span>
-        </ion-button>
-      </div>
+      <!-- Primary Action Button -->
+      <button type="submit" class="rev-primary-btn rev-stagger-4" [disabled]="isAddDisabled">
+        <span *ngIf="!isSubmitting">Add Member</span>
+        <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
+      </button>
 
     </form>
 
   </div>
-</ion-content>
+</div>

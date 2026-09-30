@@ -45,6 +45,15 @@ export class AddMemberModalComponent implements OnInit {
   // Easy getter for accessing form controls in the HTML template
   get f() { return this.memberForm.controls; }
 
+  get isAddDisabled(): boolean {
+    if (this.isSubmitting) return true;
+    if (!this.memberForm) return true;
+    const name = (this.memberForm.get('name')?.value || '').trim();
+    const email = (this.memberForm.get('email')?.value || '').trim();
+    if (!name && !email) return true;
+    return this.memberForm.invalid;
+  }
+
   dismiss() {
     this.modalCtrl.dismiss();
   }

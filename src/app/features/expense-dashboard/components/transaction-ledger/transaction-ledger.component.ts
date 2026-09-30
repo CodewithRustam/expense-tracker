@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, HostListener, ViewChildren, QueryList, inject } from '@angular/core';
+import { IonContent } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 @Component({
@@ -6,15 +8,33 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
   templateUrl: './transaction-ledger.component.html',
   standalone: false
 })
-export class TransactionLedgerComponent {
+export class TransactionLedgerComponent implements OnInit, OnDestroy {
   @Input() isLoadingExpenses = false;
   @Input() users: any[] = [];
   @Input() selectedUser: number | undefined;
   @Input() currentUserId!: string;
+  @Input() isRoomCreator: boolean = false;
   @Input() groupedExpensesMap: { [key: string]: any[] } = {};
+
+  private ionContent = inject(IonContent, { optional: true });
+  private scrollSub?: Subscription;
 
   @Output() onEditExpense = new EventEmitter<any>();
   @Output() onDeleteExpense = new EventEmitter<{ expense: any, slidingItem: any }>();
+
+  canEdit(exp: any): boolean {
+    if (this.isCurrentSelectedUserSettled) return false;
+    return !!exp?.isEditShow;
+  }
+
+  canDelete(exp: any): boolean {
+    if (this.isCurrentSelectedUserSettled) return false;
+    return !!exp?.isEditShow;
+  }
+
+  canSlide(exp: any): boolean {
+    return this.canEdit(exp) && this.canDelete(exp);
+  }
 
   searchQuery: string = '';
   selectedCategoryFilter: string = 'all';
@@ -134,22 +154,145 @@ export class TransactionLedgerComponent {
     return groups.reduce((count, g) => count + (g.expenses?.length || 0), 0);
   }
 
+  @ViewChildren('slidingItem') slidingItems!: QueryList<any>;
+
+  private lastDragTimestamp = 0;
+  private activeSlidingItem: any = null;
+  private autoCloseTimer: any = null;
+  private hasTriggeredHaptic = false;
+
+  ngOnInit() {
+    if (this.ionContent?.ionScroll) {
+      this.scrollSub = this.ionContent.ionScroll.subscribe(() => {
+        this.closeAllSliding();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    this.scrollSub?.unsubscribe();
+    this.clearAutoCloseTimer();
+  }
+
   setCategoryFilter(catId: string) {
+    this.closeAllSliding();
     this.selectedCategoryFilter = catId;
   }
 
   clearSearch() {
+    this.closeAllSliding();
     this.searchQuery = '';
   }
 
-  async editExpense(expense: any, slidingItem: any) {
-    if (slidingItem) {
-      await slidingItem.close();
+  private clearAutoCloseTimer() {
+    if (this.autoCloseTimer) {
+      clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = null;
     }
+  }
+
+  public closeAllSliding() {
+    this.clearAutoCloseTimer();
+    if (this.activeSlidingItem) {
+      try {
+        this.activeSlidingItem.close();
+      } catch {}
+      this.activeSlidingItem = null;
+    }
+    if (this.slidingItems) {
+      this.slidingItems.forEach(item => {
+        try {
+          item.close();
+        } catch {}
+      });
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.activeSlidingItem) return;
+    if (Date.now() - this.lastDragTimestamp < 350) return;
+    const target = event?.target as HTMLElement;
+    if (target && !target.closest('.tl-slide-item')) {
+      this.closeAllSliding();
+    }
+  }
+
+  onSlidingDrag(slidingItem: any, exp: any, event?: any) {
+    this.lastDragTimestamp = Date.now();
+    this.activeSlidingItem = slidingItem;
+    this.clearAutoCloseTimer();
+
+    const amount = event?.detail?.amount || 0;
+    const ratio = event?.detail?.ratio || 0;
+
+    // Auto-collapse split breakdown if open so layout stays aligned during swipe
+    if (Math.abs(amount) > 15 || Math.abs(ratio) > 0.1) {
+      if (exp?.expenseId !== undefined && this.expandedExpenseIds.has(exp.expenseId)) {
+        this.expandedExpenseIds.delete(exp.expenseId);
+      }
+    }
+
+    // Subtle tactile haptic tick when passing activation threshold
+    if (Math.abs(amount) > 60 || Math.abs(ratio) > 0.5) {
+      if (!this.hasTriggeredHaptic) {
+        this.hasTriggeredHaptic = true;
+        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+      }
+    } else {
+      this.hasTriggeredHaptic = false;
+    }
+  }
+
+  onSlidingEnd(slidingItem: any) {
+    this.hasTriggeredHaptic = false;
+    this.clearAutoCloseTimer();
+
+    // After gesture completes, check if the card is resting open
+    setTimeout(async () => {
+      try {
+        const amount = await slidingItem.getOpenAmount();
+        if (Math.abs(amount) > 20) {
+          this.activeSlidingItem = slidingItem;
+          // Card is open at rest. If the user leaves it without tapping, auto-return to normal after 3s
+          this.clearAutoCloseTimer();
+          this.autoCloseTimer = setTimeout(async () => {
+            try {
+              await slidingItem.close();
+            } catch {}
+            if (this.activeSlidingItem === slidingItem) {
+              this.activeSlidingItem = null;
+            }
+          }, 3000);
+        }
+      } catch {}
+    }, 150);
+  }
+
+  async editExpense(expense: any, slidingItem: any, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (slidingItem) {
+      try {
+        await slidingItem.close();
+      } catch {}
+    }
+    this.activeSlidingItem = null;
+    try {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    } catch {}
     this.onEditExpense.emit(expense);
   }
 
-  deleteExpense(expense: any, slidingItem: any) {
+  async deleteExpense(expense: any, slidingItem: any, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.activeSlidingItem = null;
+    try {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    } catch {}
     this.onDeleteExpense.emit({ expense, slidingItem });
   }
 
@@ -257,17 +400,44 @@ export class TransactionLedgerComponent {
     return exp?.expenseId !== undefined && this.expandedExpenseIds.has(exp.expenseId);
   }
 
-  toggleExpenseDetails(exp: any, event?: Event) {
+  async toggleExpenseDetails(exp: any, slidingItem?: any, event?: Event) {
     if (event) {
       event.stopPropagation();
     }
+
+    // Guard 1: Ignore click if a swipe gesture just finished within 350ms (avoids expansion on swipe release)
+    if (Date.now() - this.lastDragTimestamp < 350) {
+      return;
+    }
+
+    // Guard 2: If the sliding item is currently open, tapping it should close it smoothly instead of expanding details
+    if (slidingItem) {
+      try {
+        const openAmount = await slidingItem.getOpenAmount();
+        if (openAmount !== 0) {
+          await slidingItem.close();
+          this.activeSlidingItem = null;
+          return;
+        }
+      } catch {}
+    }
+
     if (!exp || exp.expenseId === undefined) return;
 
-    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    try {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    } catch {}
 
     if (this.expandedExpenseIds.has(exp.expenseId)) {
       this.expandedExpenseIds.delete(exp.expenseId);
     } else {
+      // Auto-close any open sliding item before expanding details
+      if (this.activeSlidingItem) {
+        try {
+          await this.activeSlidingItem.close();
+        } catch {}
+        this.activeSlidingItem = null;
+      }
       this.expandedExpenseIds.add(exp.expenseId);
     }
   }

@@ -429,7 +429,12 @@ export class EditExpenseModal implements OnInit {
     const splitsHash = JSON.stringify(this.getSplitsPayload());
     const splitsChanged = splitsHash !== this.originalSplitsHash;
 
+    const itemValid = (this.expense.item || '').trim().length >= 3;
+    const amountValid = Number(this.expense.amount) > 0;
+
     this.hasChanges =
+      itemValid &&
+      amountValid &&
       (this.expense.item !== this.originalExpense.item ||
       Number(this.expense.amount) !== Number(this.originalExpense.amount) ||
       this.expense.roomId !== this.originalExpense.roomId ||

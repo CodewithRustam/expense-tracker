@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal, computed, inject, effect, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ExpenseService } from '../core/services/expense';
 import { IonItemSliding, ModalController, AlertController, NavController } from '@ionic/angular';
@@ -294,8 +294,12 @@ export class ExpensesPage implements OnInit, OnDestroy {
     await modal.present();
   }
 
-  async deleteExpense(expense: any, slidingItem: IonItemSliding) {
-    await slidingItem.close();
+  async deleteExpense(expense: any, slidingItem?: IonItemSliding) {
+    if (slidingItem) {
+      try {
+        await slidingItem.close();
+      } catch {}
+    }
 
     const modal = await this.modalCtrl.create({
       component: GlobalModalComponent,
@@ -371,8 +375,11 @@ export class ExpensesPage implements OnInit, OnDestroy {
     }
   }
 
+  @ViewChild('transactionLedger') transactionLedger?: any;
+
   onScroll(event: any) {
     this.isSticky.set(event.detail.scrollTop > 150);
+    this.transactionLedger?.closeAllSliding();
   }
 
   groupExpensesByDate(expenses: any[]): ExpenseDateGroup[] {
@@ -467,9 +474,8 @@ export class ExpensesPage implements OnInit, OnDestroy {
 
     const modal = await this.modalCtrl.create({
       component: AddMemberModalComponent,
-      componentProps: { roomId: currentRoomId },
-      breakpoints: [0, 0.5, 0.55, 1],
-      initialBreakpoint: 0.55,
+      componentProps: { roomId: currentRoomId, roomName: this.roomName() },
+      cssClass: 'dynamic-height-modal'
     });
 
     await modal.present();

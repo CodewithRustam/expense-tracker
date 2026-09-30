@@ -31,29 +31,36 @@ export class AddGroupModalComponent implements OnInit {
   get f() { return this.groupForm.controls; }
   get members() { return this.groupForm.get('members') as FormArray; }
 
-  async addMember() {
+  get isAddDisabled(): boolean {
+    if (this.isSubmitting) return true;
+    if (!this.groupForm) return true;
+    const name = (this.groupForm.get('name')?.value || '').trim();
+    if (!name) return true;
+    return this.groupForm.invalid;
+  }
+
+  get isAddMemberDisabled(): boolean {
+    if (!this.groupForm) return true;
+    const name = (this.groupForm.get('name')?.value || '').trim();
+    if (!name) return true; // Room name input is empty
+    for (const m of this.members.controls) {
+      const mName = (m.get('name')?.value || '').trim();
+      const mEmail = (m.get('email')?.value || '').trim();
+      if (!mName || !mEmail) return true; // Previous member inputs empty
+    }
+    return false;
+  }
+
+  addMember() {
+    if (this.isAddMemberDisabled) return;
     this.members.push(this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[a-zA-Z\s]*$/)]],
       email: ['', [Validators.required, Validators.email]] 
     }));
-    
-    // Automatically increase modal height to show the newly added rows
-    const modal = await this.modalCtrl.getTop();
-    if (modal) {
-      modal.setCurrentBreakpoint(0.9);
-    }
   }
 
-  async removeMember(index: number) {
+  removeMember(index: number) {
     this.members.removeAt(index);
-    
-    // If no members are left, shrink it back to the smaller size
-    if (this.members.length === 0) {
-      const modal = await this.modalCtrl.getTop();
-      if (modal) {
-        modal.setCurrentBreakpoint(0.5);
-      }
-    }
   }
 
   dismiss() {

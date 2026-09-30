@@ -158,9 +158,7 @@ export class HomePage implements OnInit, OnDestroy {
   async openAddGroupModal() {
     const modal = await this.modalCtrl.create({
       component: AddGroupModalComponent,
-      breakpoints: [0, 0.5, 0.9],
-      initialBreakpoint: 0.5,
-      cssClass: 'bottom-sheet-modal'
+      cssClass: 'dynamic-height-modal'
     });
     await modal.present();
   }

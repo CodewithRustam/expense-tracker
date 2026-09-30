@@ -86,7 +86,7 @@
     </div>
 
     <!-- 5. Submit Action Button -->
-    <button type="button" class="rev-primary-btn rev-stagger-6" [disabled]="isSubmitting" (click)="addExpense()">
+    <button type="button" class="rev-primary-btn rev-stagger-6" [disabled]="isAddDisabled" (click)="addExpense()">
       <span *ngIf="!isSubmitting">Add Expense</span>
       <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
     </button>
