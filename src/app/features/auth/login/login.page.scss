@@ -303,13 +303,13 @@ ion-card.auth-card {
   padding: 0 2px;
   margin-bottom: 14px;
   color: var(--debit, #ef4444);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
   line-height: 1.4;
   animation: fadeInSlide 0.25s ease;
 
   ion-icon {
-    font-size: 18px;
+    font-size: 20px;
     flex-shrink: 0;
     color: var(--debit, #ef4444);
   }

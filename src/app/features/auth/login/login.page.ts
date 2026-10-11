@@ -242,6 +242,7 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   onInput(fieldName: string) {
+    this.serverError = null;
     const control = this.loginForm.get(fieldName);
     if (control) {
       control.markAsDirty();
@@ -289,6 +290,15 @@ export class LoginPage implements OnInit, OnDestroy {
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
+      const userErr = this.getFieldError('username');
+      const passErr = this.getFieldError('password');
+      if (userErr && passErr) {
+        this.serverError = 'Please check your username and password';
+      } else if (userErr) {
+        this.serverError = userErr;
+      } else if (passErr) {
+        this.serverError = passErr;
+      }
       return;
     }
 
@@ -307,7 +317,7 @@ export class LoginPage implements OnInit, OnDestroy {
             }
             this.router.navigate([this.returnUrl]);
           } else {
-            const errorMsg = 'Invalid credentials. Please try again.';
+            const errorMsg = 'Invalid username or password';
             this.serverError = errorMsg;
             this.toastService.error(errorMsg);
           }
@@ -315,19 +325,42 @@ export class LoginPage implements OnInit, OnDestroy {
         error: (err) => {
           this.isLoading = false;
           const status = err?.status ?? err?.originalError?.status;
-          const msg = err?.message || err?.error?.message || err?.originalError?.error?.message;
+          const rawMsg = err?.error?.message || err?.message || err?.originalError?.error?.message;
 
-          if (status === 429) {
+          // 1. Username or password error (401 Unauthorized from API)
+          if (status === 401) {
+            const errorMsg = 'Invalid username or password';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
+          }
+          // 2. Rate limit / Lockout error from API
+          else if (status === 429) {
             this.startCooldown(60);
-            const errorMsg = msg || 'Too many attempts. Account locked for 60 seconds.';
+            const errorMsg = rawMsg && !rawMsg.includes('Http failure')
+              ? rawMsg
+              : 'Too many login attempts. Account temporarily locked for 60 seconds.';
             this.serverError = errorMsg;
             this.toastService.error(errorMsg);
-          } else if (status === 401) {
-            const errorMsg = msg || 'Invalid username or password';
+          }
+          // 3. Network or connection failure (server unreachable)
+          else if (status === 0 || !status) {
+            const errorMsg = 'Unable to connect to server. Please check your internet connection.';
             this.serverError = errorMsg;
             this.toastService.error(errorMsg);
-          } else {
-            const errorMsg = msg || 'Unable to login. Please try again later.';
+          }
+          // 4. Server internal error (500+)
+          else if (status >= 500) {
+            const errorMsg = rawMsg && !rawMsg.includes('Http failure')
+              ? rawMsg
+              : 'Server error. Please try again later.';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
+          }
+          // 5. Other API errors
+          else {
+            const errorMsg = rawMsg && !rawMsg.includes('Http failure')
+              ? rawMsg
+              : 'Unable to login. Please try again later.';
             this.serverError = errorMsg;
             this.toastService.error(errorMsg);
           }
