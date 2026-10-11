@@ -205,6 +205,47 @@ ion-card.auth-card {
 }
 
 /* ============================================================================
+ * PASSWORD CRITERIA CHIPS (COMPACT INLINE TAGS)
+ * ============================================================================ */
+.criteria-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 0 2px;
+  animation: fadeInSlide 0.25s ease;
+
+  .criteria-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.73rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--surface-sunken, #f8fafc);
+    color: var(--ink-3, #64748b);
+    border: 1px solid var(--border-hairline, rgba(15, 23, 42, 0.08));
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    ion-icon {
+      font-size: 13px;
+    }
+
+    &.met {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.32);
+      font-weight: 600;
+
+      ion-icon {
+        color: #10b981;
+      }
+    }
+  }
+}
+
+/* ============================================================================
  * REMEMBER ME & FORGOT PASSWORD ROW
  * ============================================================================ */
 .remember-forgot-row {

@@ -1,12 +1,75 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Platform } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
 import { AppComponent } from '../../../app.component';
 import { Toastservice } from '../../../core/services/toastservice';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SecureTokenService } from '../../../core/services/secure-token.service';
+
+/**
+ * Custom Validator: Validates login identifier (username or email)
+ * Disallows unusual characters, spaces, and ensures valid username or email structure.
+ */
+export function loginIdentifierValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null;
+
+  if (/\s/.test(value)) {
+    return { hasWhitespace: true };
+  }
+
+  // If input contains '@', validate as email address
+  if (value.includes('@')) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(value)) {
+      return { invalidEmail: true };
+    }
+    return null;
+  }
+
+  // Otherwise validate as a clean username (letters, numbers, ., -, _)
+  const usernameRegex = /^[a-zA-Z0-9._-]+$/;
+  if (!usernameRegex.test(value)) {
+    return { invalidCharacters: true };
+  }
+
+  if (/^[._-]|[._-]$/.test(value)) {
+    return { startEndSpecial: true };
+  }
+
+  if (/[._-]{2,}/.test(value)) {
+    return { consecutiveSpecial: true };
+  }
+
+  return null;
+}
+
+/**
+ * Custom Validator: Validates password complexity
+ * - At least 1 uppercase letter (A-Z)
+ * - At least 1 lowercase letter (a-z)
+ * - At least 1 digit (0-9)
+ * - At least 1 special character (!@#$%^&*...)
+ */
+export function passwordComplexityValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value || '';
+  if (!value) return null;
+
+  const hasUpper = /[A-Z]/.test(value);
+  const hasLower = /[a-z]/.test(value);
+  const hasNumber = /[0-9]/.test(value);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+  const errors: any = {};
+  if (!hasUpper) errors.missingUpper = true;
+  if (!hasLower) errors.missingLower = true;
+  if (!hasNumber) errors.missingNumber = true;
+  if (!hasSpecial) errors.missingSpecial = true;
+
+  return Object.keys(errors).length > 0 ? errors : null;
+}
 
 @Component({
   selector: 'app-login',
@@ -27,7 +90,6 @@ export class LoginPage implements OnInit, OnDestroy {
   cooldownSeconds: number = 0;
   private cooldownInterval: any = null;
 
-  // Server error to display as an inline alert
   serverError: string | null = null;
 
   constructor(
@@ -67,14 +129,18 @@ export class LoginPage implements OnInit, OnDestroy {
         '',
         [
           Validators.required,
-          Validators.minLength(3)
+          Validators.minLength(3),
+          Validators.maxLength(50),
+          loginIdentifierValidator
         ]
       ],
       password: [
         '',
         [
           Validators.required,
-          Validators.minLength(6)
+          Validators.minLength(6),
+          Validators.maxLength(32),
+          passwordComplexityValidator
         ]
       ]
     });
@@ -88,7 +154,36 @@ export class LoginPage implements OnInit, OnDestroy {
     }
   }
 
-  // --- Field helpers ---
+  // --- Password Criteria Helpers ---
+  get passwordValue(): string {
+    return this.loginForm.get('password')?.value || '';
+  }
+
+  get hasMinLength(): boolean {
+    return this.passwordValue.length >= 6;
+  }
+
+  get hasUppercase(): boolean {
+    return /[A-Z]/.test(this.passwordValue);
+  }
+
+  get hasLowercase(): boolean {
+    return /[a-z]/.test(this.passwordValue);
+  }
+
+  get hasNumber(): boolean {
+    return /[0-9]/.test(this.passwordValue);
+  }
+
+  get hasSpecialChar(): boolean {
+    return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.passwordValue);
+  }
+
+  get isPasswordAllValid(): boolean {
+    return this.hasMinLength && this.hasUppercase && this.hasLowercase && this.hasNumber && this.hasSpecialChar;
+  }
+
+  // --- Field validation helpers ---
   isFieldInvalid(fieldName: string): boolean {
     const control = this.loginForm.get(fieldName);
     return !!(control && control.invalid && (control.dirty || control.touched || this.submitted));
@@ -108,11 +203,28 @@ export class LoginPage implements OnInit, OnDestroy {
     if (fieldName === 'username') {
       if (control.hasError('required')) return 'Username or email is required';
       if (control.hasError('minlength')) return 'Must be at least 3 characters';
+      if (control.hasError('maxlength')) return 'Cannot exceed 50 characters';
+      if (control.hasError('hasWhitespace')) return 'Cannot contain spaces';
+      if (control.hasError('invalidEmail')) return 'Please enter a valid email address';
+      if (control.hasError('invalidCharacters')) return 'Username can only contain letters, numbers, ., -, and _';
+      if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number';
+      if (control.hasError('consecutiveSpecial')) return 'Username cannot contain consecutive dots, hyphens, or underscores';
     }
 
     if (fieldName === 'password') {
       if (control.hasError('required')) return 'Password is required';
       if (control.hasError('minlength')) return 'Password must be at least 6 characters';
+      if (control.hasError('maxlength')) return 'Password cannot exceed 32 characters';
+
+      const missing = [];
+      if (control.hasError('missingUpper')) missing.push('uppercase (A-Z)');
+      if (control.hasError('missingLower')) missing.push('lowercase (a-z)');
+      if (control.hasError('missingNumber')) missing.push('number (0-9)');
+      if (control.hasError('missingSpecial')) missing.push('special character (!@#$)');
+
+      if (missing.length > 0) {
+        return `Password must include: ${missing.join(', ')}`;
+      }
     }
 
     return null;
@@ -176,8 +288,9 @@ export class LoginPage implements OnInit, OnDestroy {
             }
             this.router.navigate([this.returnUrl]);
           } else {
-            this.serverError = 'Invalid credentials. Please try again.';
-            this.toastService.error(this.serverError);
+            const errorMsg = 'Invalid credentials. Please try again.';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
           }
         },
         error: (err) => {

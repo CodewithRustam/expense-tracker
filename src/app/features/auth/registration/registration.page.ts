@@ -14,6 +14,9 @@ export function usernameStructureValidator(control: AbstractControl): Validation
   const value = control.value;
   if (!value) return null;
 
+  if (/\s/.test(value)) {
+    return { hasWhitespace: true };
+  }
   if (/^[._-]|[._-]$/.test(value)) {
     return { startEndSpecial: true };
   }
@@ -224,6 +227,7 @@ export class RegistrationPage implements OnInit {
       if (control.hasError('required')) return 'Username is required';
       if (control.hasError('minlength')) return 'Username must be at least 3 characters';
       if (control.hasError('maxlength')) return 'Username cannot exceed 30 characters';
+      if (control.hasError('hasWhitespace')) return 'Username cannot contain spaces';
       if (control.hasError('pattern')) return 'Only letters, numbers, dots, hyphens, and underscores allowed';
       if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number';
       if (control.hasError('consecutiveSpecial')) return 'Username cannot contain consecutive dots or underscores';
@@ -239,8 +243,15 @@ export class RegistrationPage implements OnInit {
       if (control.hasError('required')) return 'Password is required';
       if (control.hasError('minlength')) return 'Password must be at least 6 characters';
       if (control.hasError('maxlength')) return 'Password cannot exceed 32 characters';
-      if (control.hasError('missingUpper') || control.hasError('missingLower') || control.hasError('missingNumber') || control.hasError('missingSpecial')) {
-        return 'Password must satisfy all security requirements below';
+
+      const missing = [];
+      if (control.hasError('missingUpper')) missing.push('uppercase (A-Z)');
+      if (control.hasError('missingLower')) missing.push('lowercase (a-z)');
+      if (control.hasError('missingNumber')) missing.push('number (0-9)');
+      if (control.hasError('missingSpecial')) missing.push('special character (!@#$)');
+
+      if (missing.length > 0) {
+        return `Password must include: ${missing.join(', ')}`;
       }
     }
 

@@ -69,7 +69,7 @@
                 lines="none" 
                 [class.ion-focused]="focusedField === 'password'"
                 [class.has-error]="isFieldInvalid('password')"
-                [class.is-valid]="isFieldValid('password')">
+                [class.is-valid]="isFieldValid('password') && isPasswordAllValid">
                 <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
                 <ion-input 
                   [type]="showPassword ? 'text' : 'password'" 
@@ -91,6 +91,30 @@
                   <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
                 </button>
               </ion-item>
+
+              <!-- Compact Requirements Inline Badges -->
+              <div class="criteria-chips-wrap" *ngIf="focusedField === 'password' || (passwordValue.length > 0 && !isPasswordAllValid)">
+                <span class="criteria-chip" [class.met]="hasMinLength">
+                  <ion-icon [name]="hasMinLength ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                  6+ chars
+                </span>
+                <span class="criteria-chip" [class.met]="hasUppercase">
+                  <ion-icon [name]="hasUppercase ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                  A-Z
+                </span>
+                <span class="criteria-chip" [class.met]="hasLowercase">
+                  <ion-icon [name]="hasLowercase ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                  a-z
+                </span>
+                <span class="criteria-chip" [class.met]="hasNumber">
+                  <ion-icon [name]="hasNumber ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                  0-9
+                </span>
+                <span class="criteria-chip" [class.met]="hasSpecialChar">
+                  <ion-icon [name]="hasSpecialChar ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                  !@#$
+                </span>
+              </div>
 
               <!-- High-Clarity Error Pill -->
               <div class="field-error-msg" *ngIf="isFieldInvalid('password')">
