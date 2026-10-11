@@ -22,12 +22,10 @@
       <ion-card class="auth-card">
         <ion-card-content>
 
-          <!-- Server Error Alert Banner -->
+          <!-- Server Error Alert -->
           <div class="server-error-banner" *ngIf="serverError">
             <ion-icon name="alert-circle"></ion-icon>
-            <div>
-              <strong>{{ serverError }}</strong>
-            </div>
+            <span>{{ serverError }}</span>
           </div>
 
           <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>

@@ -177,6 +177,7 @@ export class LoginPage implements OnInit, OnDestroy {
             this.router.navigate([this.returnUrl]);
           } else {
             this.serverError = 'Invalid credentials. Please try again.';
+            this.toastService.error(this.serverError);
           }
         },
         error: (err) => {
@@ -186,11 +187,17 @@ export class LoginPage implements OnInit, OnDestroy {
 
           if (status === 429) {
             this.startCooldown(60);
-            this.serverError = msg || 'Too many attempts. Account locked for 60 seconds.';
+            const errorMsg = msg || 'Too many attempts. Account locked for 60 seconds.';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
           } else if (status === 401) {
-            this.serverError = msg || 'Invalid username or password';
+            const errorMsg = msg || 'Invalid username or password';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
           } else {
-            this.serverError = msg || 'Unable to login. Please try again later.';
+            const errorMsg = msg || 'Unable to login. Please try again later.';
+            this.serverError = errorMsg;
+            this.toastService.error(errorMsg);
           }
         }
       });
