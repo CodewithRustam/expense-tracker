@@ -1,0 +1,393 @@
+.login-page {
+  --background: var(--ion-background-color, #f8fafc);
+}
+
+.auth-page-container {
+  max-width: 440px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 16px 0 32px;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .responsive-logo {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 6px 16px rgba(99, 102, 241, 0.25));
+  }
+
+  .welcome-text {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--ink-1, #0f172a);
+    margin: 0 0 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .sub-text {
+    font-size: 0.88rem;
+    color: var(--ink-3, #64748b);
+    margin: 0;
+    font-weight: 400;
+  }
+}
+
+.card-wrapper {
+  width: 100%;
+}
+
+ion-card.auth-card {
+  width: 100%;
+  margin: 0;
+  border-radius: var(--radius-lg, 20px);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-hairline, rgba(15, 23, 42, 0.08));
+  box-shadow: var(--shadow-card, 0 4px 20px -2px rgba(15, 23, 42, 0.06));
+  overflow: visible;
+
+  ion-card-content {
+    padding: 24px 20px 20px;
+  }
+}
+
+/* ============================================================================
+ * FIELD GROUP & INPUTS
+ * ============================================================================ */
+.auth-field-group {
+  margin-bottom: 16px;
+  position: relative;
+  text-align: left;
+  transition: margin-bottom 0.2s ease;
+
+  &.has-active-error {
+    margin-bottom: 14px;
+  }
+
+  /* Reset global margin-bottom on input-item so error fits seamlessly */
+  ion-item.input-item {
+    --background: var(--surface-sunken, #f8fafc) !important;
+    --border-radius: 14px !important;
+    --border-width: 0 !important;
+    --inner-padding-end: 8px !important;
+    --padding-start: 14px !important;
+    --min-height: 52px !important;
+    height: 52px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border-hairline, rgba(15, 23, 42, 0.1));
+    margin-bottom: 0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+
+    ion-icon[slot="start"] {
+      color: var(--ink-3, #94a3b8);
+      font-size: 20px;
+      margin-right: 12px;
+      transition: color 0.2s ease;
+    }
+
+    ion-input {
+      --color: var(--ink-1, #0f172a);
+      --placeholder-color: var(--ink-3, #94a3b8);
+      --placeholder-opacity: 0.85;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Focused State */
+    &.ion-focused {
+      --background: var(--surface, #ffffff) !important;
+      border-color: var(--accent, #6366f1) !important;
+      box-shadow: 0 0 0 3.5px var(--accent-soft, rgba(99, 102, 241, 0.15)) !important;
+
+      ion-icon[slot="start"] {
+        color: var(--accent, #6366f1) !important;
+      }
+    }
+
+    /* Error State */
+    &.has-error {
+      border-color: #f43f5e !important;
+      background-color: var(--surface, #ffffff) !important;
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.14) !important;
+
+      ion-icon[slot="start"] {
+        color: #f43f5e !important;
+      }
+    }
+
+    /* Valid State (when not currently focused) */
+    &.is-valid:not(.ion-focused) {
+      border-color: rgba(16, 185, 129, 0.45);
+
+      ion-icon[slot="start"] {
+        color: #10b981;
+      }
+    }
+
+    /* Custom Eye Toggle Button */
+    .eye-toggle-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--ink-3, #94a3b8);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(99, 102, 241, 0.08);
+        color: var(--accent, #6366f1);
+      }
+
+      &:active {
+        transform: scale(0.92);
+      }
+
+      ion-icon {
+        font-size: 20px;
+        pointer-events: none;
+      }
+    }
+
+    /* Valid Green Check Badge */
+    .valid-check-icon {
+      color: #10b981;
+      font-size: 19px;
+      margin-right: 6px;
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+}
+
+/* ============================================================================
+ * ERROR VISIBILITY - HIGH CLARITY ALERT PILL
+ * ============================================================================ */
+.field-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background-color: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 6px;
+  color: #e11d48;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  animation: fadeInSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    color: #e11d48;
+  }
+
+  span {
+    flex: 1;
+  }
+}
+
+/* ============================================================================
+ * REMEMBER ME & FORGOT PASSWORD ROW
+ * ============================================================================ */
+.remember-forgot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 16px;
+  font-size: 0.86rem;
+
+  .remember-me {
+    margin-bottom: 0;
+    user-select: none;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      position: relative;
+      padding-left: 28px;
+      color: var(--ink-2, #475569);
+      font-weight: 500;
+    }
+  }
+
+  .forgot-password {
+    margin: 0;
+    text-align: right;
+
+    a {
+      color: var(--accent, #6366f1);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        text-decoration: underline;
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+/* ============================================================================
+ * SERVER ERROR ALERT BANNER
+ * ============================================================================ */
+.server-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.06);
+  animation: fadeInSlide 0.25s ease;
+
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #b91c1c;
+  }
+}
+
+/* ============================================================================
+ * RATE LIMIT LOCKOUT ALERT
+ * ============================================================================ */
+.rate-limit-lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #fff1f2;
+  border: 1.5px solid #fda4af;
+  color: #be123c;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 14px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: fadeInSlide 0.25s ease;
+
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    color: #e11d48;
+  }
+}
+
+/* ============================================================================
+ * SUBMIT BUTTON & FOOTER
+ * ============================================================================ */
+.login-btn {
+  --background: var(--accent-gradient, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)) !important;
+  --background-hover: var(--accent-gradient-hover, linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)) !important;
+  --color: #ffffff !important;
+  --border-radius: 14px !important;
+  font-weight: 700;
+  height: 52px;
+  font-size: 1rem;
+  margin-top: 10px;
+  --box-shadow: var(--glow-primary, 0 8px 24px -4px rgba(99, 102, 241, 0.35)) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &[disabled] {
+    opacity: 0.55 !important;
+    --box-shadow: none !important;
+    transform: none !important;
+    cursor: not-allowed;
+  }
+
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+
+    ion-icon {
+      font-size: 18px;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  &:hover .btn-content ion-icon {
+    transform: translateX(3px);
+  }
+}
+
+.register-link {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-2, #475569);
+
+  a {
+    color: var(--accent, #6366f1);
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+      opacity: 0.85;
+    }
+  }
+}
+
+/* Animations */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

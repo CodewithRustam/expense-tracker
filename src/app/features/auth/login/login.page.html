@@ -8,69 +8,112 @@
     <span></span>
   </div>
 
-  <div class="auth-page-container" style="max-width: 420px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
+  <div class="auth-page-container">
 
     <!-- Logo / Branding -->
-    <div class="logo-section" style="text-align: center;">
+    <div class="logo-section">
       <img src="/assets/donut-chart.png" class="responsive-logo" alt="SplitX Logo" />
-      <h2 class="welcome-text">SplitX</h2>
-      <p class="sub-text">Login to continue</p>
+      <h2 class="welcome-text">Welcome Back</h2>
+      <p class="sub-text">Log in to continue managing your expenses</p>
     </div>
 
     <!-- Centered Card Wrapper -->
-    <div class="card-wrapper" style="margin: 0 auto; width: 100%;">
-      <ion-card class="auth-card" style="margin: 0 auto; width: 100%;">
+    <div class="card-wrapper">
+      <ion-card class="auth-card">
         <ion-card-content>
-          <form #loginForm="ngForm" (ngSubmit)="onLogin()">
 
-            <!-- Username Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'username'">
-              <ion-icon name="person-outline" slot="start"></ion-icon>
-              <ion-input 
-                type="text" 
-                placeholder="Username" 
-                [(ngModel)]="loginData.username" 
-                name="username"
-                #usernameInput="ngModel" 
-                required
-                (ionFocus)="focusedField = 'username'"
-                (ionBlur)="focusedField = ''">
-              </ion-input>
-            </ion-item>
-            <div class="input-error" *ngIf="loginData.username && loginData.username.length < 3">
-              Username must be at least 3 characters.
+          <!-- Server Error Alert Banner -->
+          <div class="server-error-banner" *ngIf="serverError">
+            <ion-icon name="alert-circle"></ion-icon>
+            <div>
+              <strong>{{ serverError }}</strong>
+            </div>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
+
+            <!-- 1. Username Field -->
+            <div class="auth-field-group" [class.has-active-error]="isFieldInvalid('username')">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'username'"
+                [class.has-error]="isFieldInvalid('username')"
+                [class.is-valid]="isFieldValid('username')">
+                <ion-icon name="person-outline" slot="start"></ion-icon>
+                <ion-input 
+                  type="text" 
+                  placeholder="Username or email" 
+                  formControlName="username"
+                  autocomplete="username"
+                  (ionFocus)="onFocus('username')" 
+                  (ionBlur)="onBlur('username')">
+                </ion-input>
+                <ion-icon 
+                  *ngIf="isFieldValid('username')" 
+                  name="checkmark-circle" 
+                  slot="end" 
+                  class="valid-check-icon">
+                </ion-icon>
+              </ion-item>
+              
+              <!-- High-Clarity Error Pill -->
+              <div class="field-error-msg" *ngIf="isFieldInvalid('username')">
+                <ion-icon name="alert-circle"></ion-icon>
+                <span>{{ getFieldError('username') }}</span>
+              </div>
             </div>
 
-            <!-- Password Field -->
-            <ion-item class="input-item" lines="none" [class.ion-focused]="focusedField === 'password'">
-              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-              <ion-input 
-                type="password" 
-                placeholder="Password" 
-                [(ngModel)]="loginData.password" 
-                name="password"
-                #passwordInput="ngModel" 
-                required
-                (ionFocus)="focusedField = 'password'"
-                (ionBlur)="focusedField = ''">
-              </ion-input>
-            </ion-item>
-            <div class="input-error" *ngIf="loginData.password && !isPasswordValid(loginData.password)">
-              Password must be at least 6 chars, include 1 uppercase, 1 number, and 1 special char.
+            <!-- 2. Password Field -->
+            <div class="auth-field-group" [class.has-active-error]="isFieldInvalid('password')">
+              <ion-item 
+                class="input-item" 
+                lines="none" 
+                [class.ion-focused]="focusedField === 'password'"
+                [class.has-error]="isFieldInvalid('password')"
+                [class.is-valid]="isFieldValid('password')">
+                <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+                <ion-input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  placeholder="Password" 
+                  formControlName="password"
+                  autocomplete="current-password"
+                  (ionFocus)="onFocus('password')" 
+                  (ionBlur)="onBlur('password')">
+                </ion-input>
+                
+                <!-- Sleek Native Eye Toggle Button -->
+                <button 
+                  type="button" 
+                  class="eye-toggle-btn"
+                  slot="end"
+                  (click)="togglePasswordVisibility()" 
+                  tabindex="-1"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                  <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </button>
+              </ion-item>
+
+              <!-- High-Clarity Error Pill -->
+              <div class="field-error-msg" *ngIf="isFieldInvalid('password')">
+                <ion-icon name="alert-circle"></ion-icon>
+                <span>{{ getFieldError('password') }}</span>
+              </div>
             </div>
 
-            <!-- Remember Me -->
-            <div class="remember-me">
-              <label>
-                <input type="checkbox" [(ngModel)]="loginData.rememberMe" name="rememberMe">
-                <span class="checkmark"></span>
-                Remember Me
-              </label>
-            </div>
+            <!-- Remember Me & Forgot Password Row -->
+            <div class="remember-forgot-row">
+              <div class="remember-me">
+                <label>
+                  <input type="checkbox" [(ngModel)]="rememberMe" [ngModelOptions]="{standalone: true}" name="rememberMe">
+                  <span class="checkmark"></span>
+                  Remember Me
+                </label>
+              </div>
 
-            <!-- Forgot Password -->
-            <div class="forgot-password">
-              <a (click)="goToForgotPassword()">Forgot Password?</a>
+              <div class="forgot-password">
+                <a (click)="goToForgotPassword()">Forgot Password?</a>
+              </div>
             </div>
 
             <!-- Submit Button -->
@@ -78,23 +121,30 @@
               type="submit" 
               expand="block" 
               class="login-btn"
-              [disabled]="cooldownSeconds > 0 || loginData.username.length < 3 || !isPasswordValid(loginData.password)">
-              {{ cooldownSeconds > 0 ? ('Locked (' + cooldownSeconds + 's)') : 'Login' }}
+              [disabled]="loginForm.invalid || isLoading || cooldownSeconds > 0">
+              <div class="btn-content" *ngIf="!isLoading">
+                <span>{{ cooldownSeconds > 0 ? ('Locked (' + cooldownSeconds + 's)') : 'Login' }}</span>
+                <ion-icon *ngIf="cooldownSeconds <= 0" name="arrow-forward-outline"></ion-icon>
+                <ion-icon *ngIf="cooldownSeconds > 0" name="lock-closed-outline"></ion-icon>
+              </div>
+              <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
             </ion-button>
 
-            <!-- Rate limit countdown alert -->
-            <div class="input-error" *ngIf="cooldownSeconds > 0" style="margin-top: 12px; text-align: center; color: #ff4961; font-weight: 600; font-size: 13px;">
-              ⚠️ Account temporarily locked. Please wait {{ cooldownSeconds }}s before trying again.
+            <!-- Rate Limit Lockout Banner -->
+            <div class="rate-limit-lock-banner" *ngIf="cooldownSeconds > 0">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Account temporarily locked due to repeated attempts. Please wait {{ cooldownSeconds }}s.</span>
             </div>
+
           </form>
         </ion-card-content>
       </ion-card>
     </div>
 
     <!-- Register Footer -->
-    <div class="register-link" style="margin-top: 24px; text-align: center;">
+    <div class="register-link">
       Don’t have an account?
-      <a (click)="goToRegistration()"> Register</a>
+      <a (click)="goToRegistration()">Register</a>
     </div>
 
   </div>
