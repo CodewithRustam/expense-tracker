@@ -17,6 +17,9 @@ export function usernameStructureValidator(control: AbstractControl): Validation
   if (/\s/.test(value)) {
     return { hasWhitespace: true };
   }
+  if (/(.)\1{2,}/.test(value)) {
+    return { repeatingChars: true };
+  }
   if (/^[._-]|[._-]$/.test(value)) {
     return { startEndSpecial: true };
   }
@@ -209,7 +212,9 @@ export class RegistrationPage implements OnInit {
   // --- Field Validation Status Helpers ---
   isFieldInvalid(fieldName: string): boolean {
     const control = this.registerForm.get(fieldName);
-    return !!(control && control.invalid && (control.dirty || control.touched || this.submitted));
+    if (!control) return false;
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    return !!(control.invalid && (hasValue || control.dirty || control.touched || this.submitted));
   }
 
   isFieldValid(fieldName: string): boolean {
@@ -219,7 +224,11 @@ export class RegistrationPage implements OnInit {
 
   getFieldError(fieldName: string): string | null {
     const control = this.registerForm.get(fieldName);
-    if (!control || !control.errors || !(control.dirty || control.touched || this.submitted)) {
+    if (!control || !control.errors) {
+      return null;
+    }
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    if (!hasValue && !control.dirty && !control.touched && !this.submitted) {
       return null;
     }
 
@@ -228,6 +237,7 @@ export class RegistrationPage implements OnInit {
       if (control.hasError('minlength')) return 'Username must be at least 3 characters';
       if (control.hasError('maxlength')) return 'Username cannot exceed 30 characters';
       if (control.hasError('hasWhitespace')) return 'Username cannot contain spaces';
+      if (control.hasError('repeatingChars')) return 'Username cannot contain 3 or more repeating characters';
       if (control.hasError('pattern')) return 'Only letters, numbers, dots, hyphens, and underscores allowed';
       if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number';
       if (control.hasError('consecutiveSpecial')) return 'Username cannot contain consecutive dots or underscores';
@@ -261,6 +271,14 @@ export class RegistrationPage implements OnInit {
     }
 
     return null;
+  }
+
+  onInput(fieldName: string) {
+    const control = this.registerForm.get(fieldName);
+    if (control) {
+      control.markAsDirty();
+      control.updateValueAndValidity({ emitEvent: true });
+    }
   }
 
   togglePasswordVisibility() {

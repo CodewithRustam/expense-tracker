@@ -49,6 +49,7 @@
                   placeholder="Username" 
                   formControlName="username"
                   autocomplete="username"
+                  (ionInput)="onInput('username')"
                   (ionFocus)="onFocus('username')" 
                   (ionBlur)="onBlur('username')">
                 </ion-input>
@@ -60,7 +61,7 @@
                 </ion-icon>
               </ion-item>
               
-              <!-- High-Clarity Error Pill -->
+              <!-- Clean Inline Error -->
               <div class="field-error-msg" *ngIf="isFieldInvalid('username')">
                 <ion-icon name="alert-circle"></ion-icon>
                 <span>{{ getFieldError('username') }}</span>
@@ -82,6 +83,7 @@
                   formControlName="email"
                   inputmode="email"
                   autocomplete="email"
+                  (ionInput)="onInput('email')"
                   (ionFocus)="onFocus('email')" 
                   (ionBlur)="onBlur('email')">
                 </ion-input>
@@ -93,7 +95,7 @@
                 </ion-icon>
               </ion-item>
 
-              <!-- High-Clarity Error Pill -->
+              <!-- Clean Inline Error -->
               <div class="field-error-msg" *ngIf="isFieldInvalid('email')">
                 <ion-icon name="alert-circle"></ion-icon>
                 <span>{{ getFieldError('email') }}</span>
@@ -114,6 +116,7 @@
                   placeholder="Password" 
                   formControlName="password"
                   autocomplete="new-password"
+                  (ionInput)="onInput('password')"
                   (ionFocus)="onFocus('password')" 
                   (ionBlur)="onBlur('password')">
                 </ion-input>
@@ -167,7 +170,7 @@
                 </span>
               </div>
 
-              <!-- High-Clarity Error Pill -->
+              <!-- Clean Inline Error -->
               <div class="field-error-msg" *ngIf="isFieldInvalid('password')">
                 <ion-icon name="alert-circle"></ion-icon>
                 <span>{{ getFieldError('password') }}</span>
@@ -188,6 +191,7 @@
                   placeholder="Confirm password" 
                   formControlName="confirmPassword"
                   autocomplete="new-password"
+                  (ionInput)="onInput('confirmPassword')"
                   (ionFocus)="onFocus('confirmPassword')" 
                   (ionBlur)="onBlur('confirmPassword')">
                 </ion-input>

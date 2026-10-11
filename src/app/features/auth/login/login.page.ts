@@ -35,6 +35,10 @@ export function loginIdentifierValidator(control: AbstractControl): ValidationEr
     return { invalidCharacters: true };
   }
 
+  if (/(.)\1{2,}/.test(value)) {
+    return { repeatingChars: true };
+  }
+
   if (/^[._-]|[._-]$/.test(value)) {
     return { startEndSpecial: true };
   }
@@ -186,7 +190,9 @@ export class LoginPage implements OnInit, OnDestroy {
   // --- Field validation helpers ---
   isFieldInvalid(fieldName: string): boolean {
     const control = this.loginForm.get(fieldName);
-    return !!(control && control.invalid && (control.dirty || control.touched || this.submitted));
+    if (!control) return false;
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    return !!(control.invalid && (hasValue || control.dirty || control.touched || this.submitted));
   }
 
   isFieldValid(fieldName: string): boolean {
@@ -196,7 +202,11 @@ export class LoginPage implements OnInit, OnDestroy {
 
   getFieldError(fieldName: string): string | null {
     const control = this.loginForm.get(fieldName);
-    if (!control || !control.errors || !(control.dirty || control.touched || this.submitted)) {
+    if (!control || !control.errors) {
+      return null;
+    }
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    if (!hasValue && !control.dirty && !control.touched && !this.submitted) {
       return null;
     }
 
@@ -205,6 +215,7 @@ export class LoginPage implements OnInit, OnDestroy {
       if (control.hasError('minlength')) return 'Must be at least 3 characters';
       if (control.hasError('maxlength')) return 'Cannot exceed 50 characters';
       if (control.hasError('hasWhitespace')) return 'Cannot contain spaces';
+      if (control.hasError('repeatingChars')) return 'Username cannot contain 3 or more repeating characters';
       if (control.hasError('invalidEmail')) return 'Please enter a valid email address';
       if (control.hasError('invalidCharacters')) return 'Username can only contain letters, numbers, ., -, and _';
       if (control.hasError('startEndSpecial')) return 'Username must start and end with a letter or number';
@@ -228,6 +239,14 @@ export class LoginPage implements OnInit, OnDestroy {
     }
 
     return null;
+  }
+
+  onInput(fieldName: string) {
+    const control = this.loginForm.get(fieldName);
+    if (control) {
+      control.markAsDirty();
+      control.updateValueAndValidity({ emitEvent: true });
+    }
   }
 
   onFocus(fieldName: string) {
