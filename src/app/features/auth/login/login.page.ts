@@ -5,7 +5,7 @@ import { Platform } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
 import { AppComponent } from '../../../app.component';
 import { Toastservice } from '../../../core/services/toastservice';
-import { StatusBar, Style } from '@capacitor/status-bar';
+import { StatusBarService } from '../../../core/services/status-bar.service';
 import { SecureTokenService } from '../../../core/services/secure-token.service';
 
 /**
@@ -102,7 +102,8 @@ export class LoginPage implements OnInit, OnDestroy {
     private toastService: Toastservice,
     private appComponent: AppComponent,
     private platform: Platform,
-    private secureTokenService: SecureTokenService
+    private secureTokenService: SecureTokenService,
+    private statusBarService: StatusBarService
   ) {
     this.initializeApp();
   }
@@ -150,10 +151,7 @@ export class LoginPage implements OnInit, OnDestroy {
 
   async initializeApp() {
     await this.platform.ready();
-    if (this.platform.is('capacitor')) {
-      await StatusBar.setStyle({ style: Style.Dark });
-      await StatusBar.setBackgroundColor({ color: '#4E54C8' });
-    }
+    await this.statusBarService.applyStatusBar();
   }
 
   // --- Password Criteria Helpers ---

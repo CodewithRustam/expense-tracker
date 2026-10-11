@@ -19,6 +19,16 @@ export class ResetPasswordPage implements OnInit {
   tokenValid = false;          
   checkingToken = true;       
   passwordResetSuccess = false;
+  showPassword = false;
+  showConfirmPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   constructor(
     private route: ActivatedRoute,
