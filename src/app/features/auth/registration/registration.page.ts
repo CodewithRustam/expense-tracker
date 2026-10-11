@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ModalController } from '@ionic/angular';
+import { ModalController, NavController, Platform } from '@ionic/angular';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth-service';
+import { StatusBarService } from '../../../core/services/status-bar.service';
 import { GlobalModalComponent } from '../../../shared/modals/global-modal/global-modal.component';
 
 /**
@@ -89,11 +90,16 @@ export class RegistrationPage implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private navCtrl: NavController,
+    private statusBarService: StatusBarService,
+    private platform: Platform
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.initForm();
+    await this.platform.ready();
+    await this.statusBarService.applyStatusBar();
   }
 
   private initForm() {
@@ -368,11 +374,11 @@ export class RegistrationPage implements OnInit {
 
     const { data } = await modal.onDidDismiss();
     if (data === true) {
-      this.router.navigate(['/login']);
+      this.navCtrl.navigateRoot('/login', { animated: false });
     }
   }
 
   goToLogin() {
-    this.router.navigate(['/login']);
+    this.navCtrl.navigateRoot('/login', { animated: false });
   }
 }

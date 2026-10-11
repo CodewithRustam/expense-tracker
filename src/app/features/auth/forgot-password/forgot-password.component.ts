@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, NavController, Platform } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
 import { Toastservice } from '../../../core/services/toastservice';
+import { StatusBarService } from '../../../core/services/status-bar.service';
 
 /**
  * Strict RFC 5322-compliant email validator
@@ -45,10 +46,13 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private toastService: Toastservice,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private navCtrl: NavController,
+    private statusBarService: StatusBarService,
+    private platform: Platform
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.forgotForm = this.fb.group({
       email: [
         '',
@@ -59,6 +63,8 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
         ]
       ]
     });
+    await this.platform.ready();
+    await this.statusBarService.applyStatusBar();
   }
 
   ngOnDestroy() {
@@ -185,6 +191,6 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
 
   goToLogin() {
     this.stopTimer();
-    this.router.navigate(['/login']);
+    this.navCtrl.navigateRoot('/login', { animated: false });
   }
 }

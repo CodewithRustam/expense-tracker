@@ -1,9 +1,10 @@
 // reset-password.page.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, NavController, Platform } from '@ionic/angular';
 import { AuthService, ApiResponse } from '../../../core/services/auth-service';
 import { Toastservice } from '../../../core/services/toastservice';
+import { StatusBarService } from '../../../core/services/status-bar.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -35,10 +36,16 @@ export class ResetPasswordPage implements OnInit {
     private router: Router,
     private authService: AuthService,
     private toastService: Toastservice,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private navCtrl: NavController,
+    private statusBarService: StatusBarService,
+    private platform: Platform
   ) {}
 
   async ngOnInit() {
+    await this.platform.ready();
+    await this.statusBarService.applyStatusBar();
+
     this.code = this.route.snapshot.queryParamMap.get('code') ?? '';
 
     if (!this.code) {
@@ -93,7 +100,11 @@ export class ResetPasswordPage implements OnInit {
   }
 
   goToLogin() {
-    this.router.navigate(['/login']);
+    this.navCtrl.navigateRoot('/login', { animated: false });
+  }
+
+  goToForgotPassword() {
+    this.navCtrl.navigateRoot('/forgot-password', { animated: false });
   }
 
   async resetPassword() {

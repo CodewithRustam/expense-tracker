@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { Platform } from '@ionic/angular';
+import { Platform, NavController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
 import { AppComponent } from '../../../app.component';
 import { Toastservice } from '../../../core/services/toastservice';
@@ -102,6 +102,7 @@ export class LoginPage implements OnInit, OnDestroy {
     private toastService: Toastservice,
     private appComponent: AppComponent,
     private platform: Platform,
+    private navCtrl: NavController,
     private secureTokenService: SecureTokenService,
     private statusBarService: StatusBarService
   ) {
@@ -115,7 +116,7 @@ export class LoginPage implements OnInit, OnDestroy {
     await this.secureTokenService.initialize();
 
     if (this.authService.isAuthenticated()) {
-      this.router.navigate([this.returnUrl]);
+      this.navCtrl.navigateRoot(this.returnUrl || '/tabs/home', { animated: false });
     }
   }
 
@@ -307,7 +308,7 @@ export class LoginPage implements OnInit, OnDestroy {
             if (this.platform.is('capacitor')) {
               await this.appComponent.initPush();
             }
-            this.router.navigate([this.returnUrl]);
+            this.navCtrl.navigateRoot(this.returnUrl || '/tabs/home', { animated: false });
           } else {
             this.toastService.error('Invalid username or password');
           }
@@ -352,10 +353,10 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   goToRegistration() {
-    this.router.navigate(['/registration']);
+    this.navCtrl.navigateRoot('/registration', { animated: false });
   }
 
   goToForgotPassword() {
-    this.router.navigate(['/forgot-password']);
+    this.navCtrl.navigateRoot('/forgot-password', { animated: false });
   }
 }

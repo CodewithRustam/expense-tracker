@@ -882,6 +882,58 @@ ion-skeleton-text {
   opacity: 0.8;
 }
 
+/* ============================================================================
+ * AUTH PAGES SEAMLESS TRANSITIONS
+ * Prevent previous page ghosting / lingering during auth screen navigation
+ * ============================================================================ */
+app-login,
+app-registration,
+app-forgot-password,
+app-reset-password {
+  background-color: var(--ion-background-color, #f8fafc) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  app-login,
+  app-registration,
+  app-forgot-password,
+  app-reset-password {
+    background-color: #080a11 !important;
+  }
+}
+
+/* Instantly suppress leaving auth view so it never blinks or shows underneath */
+app-login.ion-page-leaving,
+app-registration.ion-page-leaving,
+app-forgot-password.ion-page-leaving,
+app-reset-password.ion-page-leaving,
+ion-content.login-page.ion-page-leaving,
+ion-content.register-page.ion-page-leaving,
+ion-content.forgot-page.ion-page-leaving,
+ion-content.reset-page.ion-page-leaving {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Make entering auth page immediately solid without opacity ramp */
+app-login.ion-page-entering,
+app-registration.ion-page-entering,
+app-forgot-password.ion-page-entering,
+app-reset-password.ion-page-entering,
+ion-content.login-page.ion-page-entering,
+ion-content.register-page.ion-page-entering,
+ion-content.forgot-page.ion-page-entering,
+ion-content.reset-page.ion-page-entering {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Auth Pages (Login, Register, Forgot Password, Reset Password) */
 ion-content.login-page,
 ion-content.register-page,
