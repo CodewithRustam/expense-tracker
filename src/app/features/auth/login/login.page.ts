@@ -94,8 +94,6 @@ export class LoginPage implements OnInit, OnDestroy {
   cooldownSeconds: number = 0;
   private cooldownInterval: any = null;
 
-  serverError: string | null = null;
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -242,7 +240,6 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   onInput(fieldName: string) {
-    this.serverError = null;
     const control = this.loginForm.get(fieldName);
     if (control) {
       control.markAsDirty();
@@ -274,7 +271,6 @@ export class LoginPage implements OnInit, OnDestroy {
       if (this.cooldownSeconds <= 0) {
         clearInterval(this.cooldownInterval);
         this.cooldownInterval = null;
-        this.serverError = null;
       }
     }, 1000);
   }
@@ -282,7 +278,6 @@ export class LoginPage implements OnInit, OnDestroy {
   // --- Login Submission ---
   async onLogin() {
     this.submitted = true;
-    this.serverError = null;
 
     if (this.cooldownSeconds > 0) {
       return;
@@ -293,11 +288,11 @@ export class LoginPage implements OnInit, OnDestroy {
       const userErr = this.getFieldError('username');
       const passErr = this.getFieldError('password');
       if (userErr && passErr) {
-        this.serverError = 'Please check your username and password';
+        this.toastService.error('Please check your username and password');
       } else if (userErr) {
-        this.serverError = userErr;
+        this.toastService.error(userErr);
       } else if (passErr) {
-        this.serverError = passErr;
+        this.toastService.error(passErr);
       }
       return;
     }
@@ -310,16 +305,13 @@ export class LoginPage implements OnInit, OnDestroy {
         next: async (res: any) => {
           this.isLoading = false;
           if (res) {
-            this.serverError = null;
             console.log('[PushDebug]', 'initPush called AFTER login');
             if (this.platform.is('capacitor')) {
               await this.appComponent.initPush();
             }
             this.router.navigate([this.returnUrl]);
           } else {
-            const errorMsg = 'Invalid username or password';
-            this.serverError = errorMsg;
-            this.toastService.error(errorMsg);
+            this.toastService.error('Invalid username or password');
           }
         },
         error: (err) => {
@@ -329,9 +321,7 @@ export class LoginPage implements OnInit, OnDestroy {
 
           // 1. Username or password error (401 Unauthorized from API)
           if (status === 401) {
-            const errorMsg = 'Invalid username or password';
-            this.serverError = errorMsg;
-            this.toastService.error(errorMsg);
+            this.toastService.error('Invalid username or password');
           }
           // 2. Rate limit / Lockout error from API
           else if (status === 429) {
@@ -339,21 +329,17 @@ export class LoginPage implements OnInit, OnDestroy {
             const errorMsg = rawMsg && !rawMsg.includes('Http failure')
               ? rawMsg
               : 'Too many login attempts. Account temporarily locked for 60 seconds.';
-            this.serverError = errorMsg;
             this.toastService.error(errorMsg);
           }
           // 3. Network or connection failure (server unreachable)
           else if (status === 0 || !status) {
-            const errorMsg = 'Unable to connect to server. Please check your internet connection.';
-            this.serverError = errorMsg;
-            this.toastService.error(errorMsg);
+            this.toastService.error('Unable to connect to server. Please check your internet connection.');
           }
           // 4. Server internal error (500+)
           else if (status >= 500) {
             const errorMsg = rawMsg && !rawMsg.includes('Http failure')
               ? rawMsg
               : 'Server error. Please try again later.';
-            this.serverError = errorMsg;
             this.toastService.error(errorMsg);
           }
           // 5. Other API errors
@@ -361,7 +347,6 @@ export class LoginPage implements OnInit, OnDestroy {
             const errorMsg = rawMsg && !rawMsg.includes('Http failure')
               ? rawMsg
               : 'Unable to login. Please try again later.';
-            this.serverError = errorMsg;
             this.toastService.error(errorMsg);
           }
         }

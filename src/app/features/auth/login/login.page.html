@@ -22,12 +22,6 @@
       <ion-card class="auth-card">
         <ion-card-content>
 
-          <!-- Server Error Alert -->
-          <div class="server-error-banner" *ngIf="serverError">
-            <ion-icon name="alert-circle"></ion-icon>
-            <span>{{ serverError }}</span>
-          </div>
-
           <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
 
             <!-- 1. Username Field -->
