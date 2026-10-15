@@ -79,7 +79,7 @@ export class AddMemberModalComponent implements OnInit {
       next: async (res) => {
         this.isSubmitting = false;
         if (res.success || res.roomId) {
-          this.toastService.success('Member added successfully');
+          this.toastService.success(res.message || 'Invitation sent successfully');
           this.modalCtrl.dismiss({ added: true });
         } else {
           this.serverErrorMsg = res.message || 'Failed to add member.';

@@ -6,27 +6,32 @@
            role="tab"
            [attr.aria-selected]="selectedUser === u.memberId"
            [class.is-selected]="selectedUser === u.memberId"
-           [class.status-owe]="u.netBalance < 0 && u.badgeText !== 'Settled up'"
-           [class.status-get]="u.netBalance >= 0 && u.badgeText !== 'Settled up'"
-           [class.status-settled]="u.badgeText === 'Settled up'">
+           [class.status-pending]="u.isPending || u.badgeText === 'Pending'"
+           [class.status-owe]="!u.isPending && u.badgeText !== 'Pending' && u.netBalance < 0 && u.badgeText !== 'Settled up'"
+           [class.status-get]="!u.isPending && u.badgeText !== 'Pending' && u.netBalance >= 0 && u.badgeText !== 'Settled up'"
+           [class.status-settled]="!u.isPending && u.badgeText === 'Settled up'">
 
         <!-- Avatar with Halo Ring & Settled check -->
         <div class="member-avatar-wrapper">
           <div class="member-avatar-ring">
             <div class="member-avatar">{{ u.memberName | initials }}</div>
           </div>
-          <div class="member-settled-check" *ngIf="u.badgeText === 'Settled up'">
+          <div class="member-settled-check" *ngIf="!u.isPending && u.badgeText === 'Settled up'">
             <i class="fa-solid fa-check"></i>
+          </div>
+          <div class="member-pending-badge" *ngIf="u.isPending || u.badgeText === 'Pending'" title="Invitation Pending">
+            <i class="fa-solid fa-clock"></i>
           </div>
         </div>
 
         <div class="member-meta-block">
           <span class="member-card-name" [title]="u.memberName">{{ u.memberName | firstName }}</span>
-          <span *ngIf="u.badgeText === 'Settled up'" class="member-card-bal settled">Settled</span>
-          <span *ngIf="u.badgeText !== 'Settled up' && u.netBalance >= 0" class="member-card-bal get">
+          <span *ngIf="u.isPending || u.badgeText === 'Pending'" class="member-card-bal pending">Pending</span>
+          <span *ngIf="!u.isPending && u.badgeText === 'Settled up'" class="member-card-bal settled">Settled</span>
+          <span *ngIf="!u.isPending && u.badgeText !== 'Settled up' && u.badgeText !== 'Pending' && u.netBalance >= 0" class="member-card-bal get">
             +₹{{ u.netBalance | number:'1.0-0' }}
           </span>
-          <span *ngIf="u.badgeText !== 'Settled up' && u.netBalance < 0" class="member-card-bal owe">
+          <span *ngIf="!u.isPending && u.badgeText !== 'Settled up' && u.badgeText !== 'Pending' && u.netBalance < 0" class="member-card-bal owe">
             -₹{{ -u.netBalance | number:'1.0-0' }}
           </span>
         </div>

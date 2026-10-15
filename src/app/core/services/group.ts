@@ -136,4 +136,14 @@ export class GroupService {
       tap(() => this.triggerRefresh())
     );
   }
+
+  getInvitationDetails(token: string): Observable<any> {
+    return this.apiService.get<any>(`rooms/invitation/${token}`);
+  }
+
+  acceptInvitation(token: string): Observable<any> {
+    return this.apiService.post<any>(`rooms/accept-invitation`, { token }).pipe(
+      tap(() => this.triggerRefresh())
+    );
+  }
 }

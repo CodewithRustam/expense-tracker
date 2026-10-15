@@ -1,0 +1,107 @@
+<ion-content [fullscreen]="true" class="join-room-content">
+  <div class="join-room-container">
+
+    <!-- Brand Header -->
+    <div class="brand-header">
+      <div class="brand-logo-ring">
+        <img src="assets/donut-chart.png" alt="SplitX Logo" class="brand-logo" />
+      </div>
+      <h2 class="brand-title">SplitX</h2>
+      <p class="brand-subtitle">Smart Group Expense Splitting</p>
+    </div>
+
+    <!-- State 1: Loading Skeleton -->
+    <div class="invite-card skeleton-card" *ngIf="isLoading">
+      <ion-skeleton-text animated style="width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 16px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 70%; height: 22px; margin: 0 auto 8px; border-radius: 6px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 50%; height: 16px; margin: 0 auto 24px; border-radius: 4px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100%; height: 48px; border-radius: 10px;"></ion-skeleton-text>
+    </div>
+
+    <!-- State 2: Error State -->
+    <div class="invite-card state-error" *ngIf="!isLoading && errorMsg">
+      <div class="state-icon-circle error-circle">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
+      <h3 class="state-title">Invitation Unavailable</h3>
+      <p class="state-desc">{{ errorMsg }}</p>
+      <button class="primary-action-btn" (click)="goToHome()">
+        <span>Return to Home</span>
+      </button>
+    </div>
+
+    <!-- State 3: Already Accepted -->
+    <div class="invite-card state-accepted" *ngIf="!isLoading && !errorMsg && isAlreadyAccepted">
+      <div class="state-icon-circle success-circle">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+      <h3 class="state-title">Already a Member!</h3>
+      <p class="state-desc">You have already accepted the invitation to join <strong>{{ invitation?.roomName }}</strong>.</p>
+      <button class="primary-action-btn" (click)="goToDashboard()">
+        <span>Go to Group Dashboard</span>
+      </button>
+    </div>
+
+    <!-- State 4: Expired State -->
+    <div class="invite-card state-expired" *ngIf="!isLoading && !errorMsg && !isAlreadyAccepted && isExpired">
+      <div class="state-icon-circle warning-circle">
+        <ion-icon name="time-outline"></ion-icon>
+      </div>
+      <h3 class="state-title">Invitation Expired</h3>
+      <p class="state-desc">This invitation link has expired. Please contact <strong>{{ invitation?.inviterName }}</strong> to send you a fresh invite.</p>
+      <button class="secondary-action-btn" (click)="goToHome()">
+        <span>Go to Home</span>
+      </button>
+    </div>
+
+    <!-- State 5: Active Invitation Ready to Accept -->
+    <div class="invite-card" *ngIf="!isLoading && !errorMsg && !isAlreadyAccepted && !isExpired && invitation">
+      
+      <div class="room-avatar-badge">
+        <ion-icon name="people-outline"></ion-icon>
+      </div>
+
+      <div class="inviter-pill">
+        <span>Invited by <strong>{{ invitation.inviterName }}</strong></span>
+      </div>
+
+      <h3 class="room-headline">{{ invitation.roomName }}</h3>
+
+      <div class="target-email-chip">
+        <ion-icon name="mail-outline"></ion-icon>
+        <span>{{ invitation.invitedEmail }}</span>
+      </div>
+
+      <p class="invite-explanation">
+        You've been invited to join this group. You'll be able to view expenses, split bills, and track settlements seamlessly.
+      </p>
+
+      <!-- Authenticated User Action -->
+      <div class="action-block" *ngIf="isLoggedIn">
+        <button class="primary-action-btn" (click)="acceptInvitation()" [disabled]="isAccepting">
+          <span *ngIf="!isAccepting">Accept & Join Room</span>
+          <ion-spinner name="crescent" *ngIf="isAccepting"></ion-spinner>
+        </button>
+      </div>
+
+      <!-- Anonymous / Unauthenticated User Action -->
+      <div class="action-block" *ngIf="!isLoggedIn">
+        <p class="auth-notice">
+          To join this room, please log in or create an account with your invited email.
+        </p>
+
+        <button class="primary-action-btn" (click)="goToLogin()">
+          <ion-icon name="log-in-outline" style="margin-right: 6px;"></ion-icon>
+          <span>Log In to Accept</span>
+        </button>
+
+        <button class="secondary-action-btn" (click)="goToRegister()" style="margin-top: 10px;">
+          <ion-icon name="person-add-outline" style="margin-right: 6px;"></ion-icon>
+          <span>Create an Account</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

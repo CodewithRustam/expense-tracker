@@ -41,6 +41,10 @@ const routes: Routes = [
   {
     path: 'reset-password',
     loadChildren: () => import('./features/auth/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule)
+  },
+  {
+    path: 'join-room',
+    loadChildren: () => import('./features/auth/join-room/join-room.module').then(m => m.JoinRoomPageModule)
   }
 ];
 

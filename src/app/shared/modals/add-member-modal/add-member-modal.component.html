@@ -19,7 +19,7 @@
       <span>{{ roomName }}</span>
     </div>
 
-    <div class="rev-modal-subtitle rev-stagger-2">Invite someone to this group by name and email</div>
+    <div class="rev-modal-subtitle rev-stagger-2">An invitation email with a secure link will be sent to this member to join the group.</div>
 
     <form [formGroup]="memberForm" (ngSubmit)="onAddMember()">
 
@@ -55,7 +55,7 @@
 
       <!-- Primary Action Button -->
       <button type="submit" class="rev-primary-btn rev-stagger-4" [disabled]="isAddDisabled">
-        <span *ngIf="!isSubmitting">Add Member</span>
+        <span *ngIf="!isSubmitting">Send Invitation</span>
         <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
       </button>
 
