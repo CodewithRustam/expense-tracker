@@ -10,8 +10,8 @@
           <ion-skeleton-text animated style="width: 70%; height: 20px; border-radius: 4px;"></ion-skeleton-text>
         </div>
       </div>
-      <ion-skeleton-text animated style="width: 100%; height: 42px; border-radius: 10px; margin-top: 18px;"></ion-skeleton-text>
-      <ion-skeleton-text animated style="width: 100%; height: 44px; border-radius: 10px; margin-top: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100%; height: 48px; border-radius: 12px; margin-top: 18px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100%; height: 48px; border-radius: 12px; margin-top: 12px;"></ion-skeleton-text>
     </div>
 
     <!-- State 2: Error State -->
@@ -44,13 +44,13 @@
         <ion-icon name="time-outline"></ion-icon>
       </div>
       <h3 class="state-title">Invitation Expired</h3>
-      <p class="state-desc">This invitation has expired. Ask <strong>{{ invitation?.inviterName }}</strong> to send you a fresh invite.</p>
+      <p class="state-desc">This invitation link has expired. Ask <strong>{{ invitation?.inviterName }}</strong> to send you a fresh invite.</p>
       <button class="secondary-btn" (click)="goToHome()">
         <span>Go to Home</span>
       </button>
     </div>
 
-    <!-- State 5: Active Invitation (Compact Hero & 1-Step Card) -->
+    <!-- State 5: Active Invitation (Compact Ticket + Identical Login Design) -->
     <div class="invite-card" *ngIf="!isLoading && !errorMsg && !isAlreadyAccepted && !isExpired && invitation">
       
       <!-- Top Brand Tag -->
@@ -105,27 +105,46 @@
           <p class="step-subtitle">Enter your password to join this room</p>
         </div>
 
-        <form (ngSubmit)="onLoginAndJoin()" class="compact-form">
-          <div class="compact-input-wrap">
-            <ion-icon name="lock-closed-outline" class="leading-icon"></ion-icon>
-            <input 
-              [type]="showLoginPassword ? 'text' : 'password'"
-              [(ngModel)]="loginPassword" 
-              name="loginPassword"
-              placeholder="Enter your password" 
-              class="compact-input"
-              required />
-            <button type="button" class="eye-toggle" (click)="showLoginPassword = !showLoginPassword" tabindex="-1">
-              <ion-icon [name]="showLoginPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
-            </button>
+        <form [formGroup]="existingUserForm" (ngSubmit)="onLoginAndJoin()" novalidate>
+          <div class="auth-field-group" [class.has-active-error]="isFieldInvalid('existing', 'password')">
+            <ion-item 
+              class="input-item" 
+              lines="none" 
+              [class.ion-focused]="focusedField === 'existing_password'"
+              [class.has-error]="isFieldInvalid('existing', 'password')">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-input 
+                [type]="showLoginPassword ? 'text' : 'password'"
+                placeholder="Enter password" 
+                formControlName="password"
+                autocomplete="current-password"
+                (ionInput)="onInput('existing', 'password')"
+                (ionFocus)="onFocus('existing_password')" 
+                (ionBlur)="onBlur('password')">
+              </ion-input>
+              <button 
+                type="button" 
+                class="eye-toggle-btn"
+                slot="end"
+                (click)="toggleLoginPassword()" 
+                tabindex="-1"
+                [attr.aria-label]="showLoginPassword ? 'Hide password' : 'Show password'">
+                <ion-icon [name]="showLoginPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </ion-item>
+
+            <div class="field-error-msg" *ngIf="isFieldInvalid('existing', 'password')">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ getFieldError('existing', 'password') }}</span>
+            </div>
+
+            <div class="field-error-msg" *ngIf="loginError && !isFieldInvalid('existing', 'password')">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ loginError }}</span>
+            </div>
           </div>
 
-          <div class="inline-error-pill" *ngIf="loginError">
-            <ion-icon name="alert-circle"></ion-icon>
-            <span>{{ loginError }}</span>
-          </div>
-
-          <button type="submit" class="primary-btn" [disabled]="!loginPassword || isLoggingIn">
+          <button type="submit" class="primary-btn" [disabled]="isLoggingIn">
             <span *ngIf="!isLoggingIn">Log In & Join Room</span>
             <ion-spinner name="crescent" *ngIf="isLoggingIn"></ion-spinner>
           </button>
@@ -148,64 +167,106 @@
           <p class="step-subtitle">Set your username and password to join</p>
         </div>
 
-        <form (ngSubmit)="onCreateAndJoin()" class="compact-form">
-          <!-- Username Input -->
-          <div class="compact-input-wrap">
-            <ion-icon name="person-outline" class="leading-icon"></ion-icon>
-            <input 
-              type="text" 
-              [(ngModel)]="newUsername" 
-              name="newUsername" 
-              placeholder="Choose username" 
-              class="compact-input"
-              required />
+        <form [formGroup]="newUserForm" (ngSubmit)="onCreateAndJoin()" novalidate>
+          
+          <!-- 1. Username Field -->
+          <div class="auth-field-group" [class.has-active-error]="isFieldInvalid('new', 'username')">
+            <ion-item 
+              class="input-item" 
+              lines="none" 
+              [class.ion-focused]="focusedField === 'new_username'"
+              [class.has-error]="isFieldInvalid('new', 'username')"
+              [class.is-valid]="isFieldValid('new', 'username')">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              <ion-input 
+                type="text" 
+                placeholder="Choose username" 
+                formControlName="username"
+                autocomplete="username"
+                (ionInput)="onInput('new', 'username')"
+                (ionFocus)="onFocus('new_username')" 
+                (ionBlur)="onBlur('username')">
+              </ion-input>
+              <ion-icon 
+                *ngIf="isFieldValid('new', 'username')" 
+                name="checkmark-circle" 
+                slot="end" 
+                class="valid-check-icon">
+              </ion-icon>
+            </ion-item>
+
+            <div class="field-error-msg" *ngIf="isFieldInvalid('new', 'username')">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ getFieldError('new', 'username') }}</span>
+            </div>
           </div>
 
-          <!-- Password Input -->
-          <div class="compact-input-wrap">
-            <ion-icon name="lock-closed-outline" class="leading-icon"></ion-icon>
-            <input 
-              [type]="showNewPassword ? 'text' : 'password'" 
-              [(ngModel)]="newPassword" 
-              name="newPassword" 
-              placeholder="Set a password" 
-              class="compact-input"
-              required />
-            <button type="button" class="eye-toggle" (click)="showNewPassword = !showNewPassword" tabindex="-1">
-              <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
-            </button>
+          <!-- 2. Password Field -->
+          <div class="auth-field-group" [class.has-active-error]="isFieldInvalid('new', 'password')">
+            <ion-item 
+              class="input-item" 
+              lines="none" 
+              [class.ion-focused]="focusedField === 'new_password'"
+              [class.has-error]="isFieldInvalid('new', 'password')"
+              [class.is-valid]="isFieldValid('new', 'password') && isNewPasswordAllValid">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-input 
+                [type]="showNewPassword ? 'text' : 'password'" 
+                placeholder="Create password" 
+                formControlName="password"
+                autocomplete="new-password"
+                (ionInput)="onInput('new', 'password')"
+                (ionFocus)="onFocus('new_password')" 
+                (ionBlur)="onBlur('password')">
+              </ion-input>
+              
+              <button 
+                type="button" 
+                class="eye-toggle-btn"
+                slot="end"
+                (click)="toggleNewPassword()" 
+                tabindex="-1"
+                [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'">
+                <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </ion-item>
+
+            <!-- Compact Criteria Chips (matching LoginPage) -->
+            <div class="criteria-chips-wrap" *ngIf="focusedField === 'new_password' || (newPasswordValue.length > 0 && !isNewPasswordAllValid)">
+              <span class="criteria-chip" [class.met]="hasMinLength">
+                <ion-icon [name]="hasMinLength ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                6+ chars
+              </span>
+              <span class="criteria-chip" [class.met]="hasUppercase">
+                <ion-icon [name]="hasUppercase ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                A-Z
+              </span>
+              <span class="criteria-chip" [class.met]="hasLowercase">
+                <ion-icon [name]="hasLowercase ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                a-z
+              </span>
+              <span class="criteria-chip" [class.met]="hasNumber">
+                <ion-icon [name]="hasNumber ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                0-9
+              </span>
+              <span class="criteria-chip" [class.met]="hasSpecialChar">
+                <ion-icon [name]="hasSpecialChar ? 'checkmark' : 'ellipse-outline'"></ion-icon>
+                !@#$
+              </span>
+            </div>
+
+            <div class="field-error-msg" *ngIf="isFieldInvalid('new', 'password')">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ getFieldError('new', 'password') }}</span>
+            </div>
+
+            <div class="field-error-msg" *ngIf="registerError && !isFieldInvalid('new', 'password')">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ registerError }}</span>
+            </div>
           </div>
 
-          <!-- 1-Row Compact Criteria Chips -->
-          <div class="criteria-row" *ngIf="newPassword.length > 0">
-            <span class="mini-chip" [class.met]="hasMinLength">
-              <ion-icon [name]="hasMinLength ? 'checkmark' : 'ellipse-outline'"></ion-icon>
-              6+ chars
-            </span>
-            <span class="mini-chip" [class.met]="hasUpper">
-              <ion-icon [name]="hasUpper ? 'checkmark' : 'ellipse-outline'"></ion-icon>
-              A-Z
-            </span>
-            <span class="mini-chip" [class.met]="hasLower">
-              <ion-icon [name]="hasLower ? 'checkmark' : 'ellipse-outline'"></ion-icon>
-              a-z
-            </span>
-            <span class="mini-chip" [class.met]="hasNumber">
-              <ion-icon [name]="hasNumber ? 'checkmark' : 'ellipse-outline'"></ion-icon>
-              0-9
-            </span>
-            <span class="mini-chip" [class.met]="hasSpecial">
-              <ion-icon [name]="hasSpecial ? 'checkmark' : 'ellipse-outline'"></ion-icon>
-              !@#$
-            </span>
-          </div>
-
-          <div class="inline-error-pill" *ngIf="registerError">
-            <ion-icon name="alert-circle"></ion-icon>
-            <span>{{ registerError }}</span>
-          </div>
-
-          <button type="submit" class="primary-btn" [disabled]="!isPasswordValid || !newUsername || isRegistering">
+          <button type="submit" class="primary-btn" [disabled]="isRegistering">
             <span *ngIf="!isRegistering">Create Account & Join</span>
             <ion-spinner name="crescent" *ngIf="isRegistering"></ion-spinner>
           </button>

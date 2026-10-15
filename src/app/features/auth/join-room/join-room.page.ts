@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavController, Platform } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth-service';
@@ -6,6 +7,7 @@ import { GroupService } from '../../../core/services/group';
 import { Toastservice } from '../../../core/services/toastservice';
 import { StatusBarService } from '../../../core/services/status-bar.service';
 import { SecureTokenService } from '../../../core/services/secure-token.service';
+import { loginIdentifierValidator, passwordComplexityValidator } from '../login/login.page';
 
 @Component({
   selector: 'app-join-room',
@@ -29,20 +31,24 @@ export class JoinRoomPage implements OnInit {
   // Smart Authentication State
   isRegisteredUser: boolean = false;
 
-  // Existing User Login Form
-  loginPassword: string = '';
-  showLoginPassword: boolean = false;
-  isLoggingIn: boolean = false;
-  loginError: string = '';
+  // Reactive Forms matching LoginPage design & validation
+  existingUserForm!: FormGroup;
+  newUserForm!: FormGroup;
 
-  // New User Registration Form
-  newUsername: string = '';
-  newPassword: string = '';
+  focusedField: string = '';
+  submittedExisting: boolean = false;
+  submittedNew: boolean = false;
+
+  showLoginPassword: boolean = false;
   showNewPassword: boolean = false;
+
+  isLoggingIn: boolean = false;
   isRegistering: boolean = false;
+  loginError: string = '';
   registerError: string = '';
 
   constructor(
+    private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private navCtrl: NavController,
@@ -52,7 +58,9 @@ export class JoinRoomPage implements OnInit {
     private statusBarService: StatusBarService,
     private secureTokenService: SecureTokenService,
     private platform: Platform
-  ) {}
+  ) {
+    this.initForms();
+  }
 
   async ngOnInit() {
     await this.platform.ready();
@@ -78,6 +86,33 @@ export class JoinRoomPage implements OnInit {
     this.loadInvitationDetails();
   }
 
+  private initForms() {
+    this.existingUserForm = this.fb.group({
+      password: ['', [Validators.required]]
+    });
+
+    this.newUserForm = this.fb.group({
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(30),
+          loginIdentifierValidator
+        ]
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(32),
+          passwordComplexityValidator
+        ]
+      ]
+    });
+  }
+
   loadInvitationDetails() {
     this.isLoading = true;
     this.errorMsg = '';
@@ -91,13 +126,14 @@ export class JoinRoomPage implements OnInit {
           this.isAlreadyAccepted = this.invitation.status === 'Accepted';
           this.isRegisteredUser = !!this.invitation.isRegisteredUser;
 
-          // Pre-fill suggested username for new users based on invited name
-          if (!this.newUsername && this.invitation.invitedName) {
+          // Pre-fill default suggested username for new users based on invited name
+          if (this.invitation.invitedName && !this.newUserForm.get('username')?.value) {
             const sanitized = this.invitation.invitedName
               .trim()
               .replace(/[^a-zA-Z0-9._-]/g, '_')
               .toLowerCase();
-            this.newUsername = sanitized.length >= 3 ? sanitized : `user_${sanitized}`;
+            const defaultUser = sanitized.length >= 3 ? sanitized : `user_${sanitized}`;
+            this.newUserForm.get('username')?.setValue(defaultUser);
           }
 
           // If autoAccept is requested and user is authenticated and invite is active, accept immediately
@@ -115,41 +151,124 @@ export class JoinRoomPage implements OnInit {
     });
   }
 
-  // --- Password Validation Getters for New Users ---
+  // --- Form Interaction & Validation Helpers (identical to LoginPage) ---
+  onFocus(fieldName: string) {
+    this.focusedField = fieldName;
+  }
+
+  onBlur(fieldName: string) {
+    this.focusedField = '';
+    this.existingUserForm.get(fieldName)?.markAsTouched();
+    this.newUserForm.get(fieldName)?.markAsTouched();
+  }
+
+  onInput(formType: 'existing' | 'new', fieldName: string) {
+    const form = formType === 'existing' ? this.existingUserForm : this.newUserForm;
+    const control = form.get(fieldName);
+    if (control) {
+      control.markAsDirty();
+      control.updateValueAndValidity({ emitEvent: true });
+    }
+  }
+
+  isFieldInvalid(formType: 'existing' | 'new', fieldName: string): boolean {
+    const form = formType === 'existing' ? this.existingUserForm : this.newUserForm;
+    const submitted = formType === 'existing' ? this.submittedExisting : this.submittedNew;
+    const control = form.get(fieldName);
+    if (!control) return false;
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    return !!(control.invalid && (hasValue || control.dirty || control.touched || submitted));
+  }
+
+  isFieldValid(formType: 'existing' | 'new', fieldName: string): boolean {
+    const form = formType === 'existing' ? this.existingUserForm : this.newUserForm;
+    const control = form.get(fieldName);
+    return !!(control && control.valid && (control.dirty || control.touched));
+  }
+
+  getFieldError(formType: 'existing' | 'new', fieldName: string): string | null {
+    const form = formType === 'existing' ? this.existingUserForm : this.newUserForm;
+    const submitted = formType === 'existing' ? this.submittedExisting : this.submittedNew;
+    const control = form.get(fieldName);
+    if (!control || !control.errors) return null;
+    const hasValue = control.value !== null && control.value !== undefined && control.value.toString().trim().length > 0;
+    if (!hasValue && !control.dirty && !control.touched && !submitted) return null;
+
+    if (fieldName === 'username') {
+      if (control.hasError('required')) return 'Username is required';
+      if (control.hasError('minlength')) return 'Username must be at least 3 characters';
+      if (control.hasError('maxlength')) return 'Username cannot exceed 30 characters';
+      if (control.hasError('hasWhitespace')) return 'Username cannot contain spaces';
+      if (control.hasError('repeatingChars')) return 'Cannot contain 3 or more repeating characters';
+      if (control.hasError('invalidCharacters')) return 'Only letters, numbers, and . _ - are allowed';
+      if (control.hasError('startEndSpecial')) return 'Cannot start or end with special characters';
+      if (control.hasError('consecutiveSpecial')) return 'Cannot have consecutive special characters';
+    }
+
+    if (fieldName === 'password') {
+      if (control.hasError('required')) return 'Password is required';
+      if (control.hasError('minlength')) return 'Password must be at least 6 characters';
+      if (control.hasError('missingUpper')) return 'Must contain at least 1 uppercase letter';
+      if (control.hasError('missingLower')) return 'Must contain at least 1 lowercase letter';
+      if (control.hasError('missingNumber')) return 'Must contain at least 1 number';
+      if (control.hasError('missingSpecial')) return 'Must contain at least 1 special character (!@#$%^&*)';
+    }
+
+    return null;
+  }
+
+  // --- Password Criteria Helpers (for New User) ---
+  get newPasswordValue(): string {
+    return this.newUserForm.get('password')?.value || '';
+  }
+
   get hasMinLength(): boolean {
-    return (this.newPassword || '').length >= 6;
+    return this.newPasswordValue.length >= 6;
   }
 
-  get hasUpper(): boolean {
-    return /[A-Z]/.test(this.newPassword || '');
+  get hasUppercase(): boolean {
+    return /[A-Z]/.test(this.newPasswordValue);
   }
 
-  get hasLower(): boolean {
-    return /[a-z]/.test(this.newPassword || '');
+  get hasLowercase(): boolean {
+    return /[a-z]/.test(this.newPasswordValue);
   }
 
   get hasNumber(): boolean {
-    return /[0-9]/.test(this.newPassword || '');
+    return /[0-9]/.test(this.newPasswordValue);
   }
 
-  get hasSpecial(): boolean {
-    return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.newPassword || '');
+  get hasSpecialChar(): boolean {
+    return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.newPasswordValue);
   }
 
-  get isPasswordValid(): boolean {
-    return this.hasMinLength && this.hasUpper && this.hasLower && this.hasNumber && this.hasSpecial;
+  get isNewPasswordAllValid(): boolean {
+    return this.hasMinLength && this.hasUppercase && this.hasLowercase && this.hasNumber && this.hasSpecialChar;
+  }
+
+  toggleLoginPassword() {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+
+  toggleNewPassword() {
+    this.showNewPassword = !this.showNewPassword;
   }
 
   // --- 1-Step Login & Join (for Registered Users) ---
   onLoginAndJoin() {
-    if (!this.loginPassword || this.isLoggingIn) return;
+    this.submittedExisting = true;
+    if (this.existingUserForm.invalid || this.isLoggingIn) {
+      this.existingUserForm.markAllAsTouched();
+      return;
+    }
 
     this.isLoggingIn = true;
     this.loginError = '';
 
     const identifier = (this.invitation?.invitedEmail || '').trim();
+    const password = this.existingUserForm.get('password')?.value;
 
-    this.authService.login(identifier, this.loginPassword, true).subscribe({
+    this.authService.login(identifier, password, true).subscribe({
       next: (res: any) => {
         if (res) {
           this.isLoggedIn = true;
@@ -173,26 +292,15 @@ export class JoinRoomPage implements OnInit {
 
   // --- 1-Step Create Account & Join (for New Users) ---
   onCreateAndJoin() {
-    if (this.isRegistering) return;
+    this.submittedNew = true;
+    if (this.newUserForm.invalid || this.isRegistering) {
+      this.newUserForm.markAllAsTouched();
+      return;
+    }
 
-    const username = (this.newUsername || '').trim();
+    const username = this.newUserForm.get('username')?.value.trim();
     const email = (this.invitation?.invitedEmail || '').trim().toLowerCase();
-    const password = this.newPassword;
-
-    if (!username || username.length < 3) {
-      this.registerError = 'Username must be at least 3 characters.';
-      return;
-    }
-
-    if (/\s/.test(username)) {
-      this.registerError = 'Username cannot contain spaces.';
-      return;
-    }
-
-    if (!this.isPasswordValid) {
-      this.registerError = 'Please satisfy all password criteria.';
-      return;
-    }
+    const password = this.newUserForm.get('password')?.value;
 
     this.isRegistering = true;
     this.registerError = '';
@@ -200,7 +308,6 @@ export class JoinRoomPage implements OnInit {
     this.authService.register(username, email, password, password).subscribe({
       next: (success) => {
         if (success) {
-          // Immediately log the user in
           this.authService.login(username, password, true).subscribe({
             next: (loginSuccess) => {
               if (loginSuccess) {
