@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ModalController, NavController, Platform } from '@ionic/angular';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth-service';
@@ -79,6 +79,7 @@ export class RegistrationPage implements OnInit {
   submitted: boolean = false;
   isLoading: boolean = false;
   focusedField: string = '';
+  returnUrl: string | null = null;
 
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -90,6 +91,7 @@ export class RegistrationPage implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private modalCtrl: ModalController,
     private navCtrl: NavController,
     private statusBarService: StatusBarService,
@@ -98,6 +100,8 @@ export class RegistrationPage implements OnInit {
 
   async ngOnInit() {
     this.initForm();
+    const rawReturn = this.route.snapshot.queryParams['returnUrl'];
+    this.returnUrl = rawReturn ? decodeURIComponent(rawReturn) : null;
     await this.platform.ready();
     await this.statusBarService.applyStatusBar();
   }
@@ -374,11 +378,15 @@ export class RegistrationPage implements OnInit {
 
     const { data } = await modal.onDidDismiss();
     if (data === true) {
-      this.navCtrl.navigateRoot('/login', { animated: false });
+      this.goToLogin();
     }
   }
 
   goToLogin() {
-    this.navCtrl.navigateRoot('/login', { animated: false });
+    if (this.returnUrl) {
+      this.navCtrl.navigateRoot(`/login?returnUrl=${encodeURIComponent(this.returnUrl)}`, { animated: false });
+    } else {
+      this.navCtrl.navigateRoot('/login', { animated: false });
+    }
   }
 }

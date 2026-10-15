@@ -117,6 +117,25 @@ export class AppComponent implements OnInit {
         this.navCtrl.navigateRoot(targetPath);
       });
     }
+
+    if (rawUrl.includes('join-room')) {
+      let token = '';
+      try {
+        const parsedUrl = new URL(rawUrl);
+        token = parsedUrl.searchParams.get('token') ?? '';
+      } catch {
+        const match = rawUrl.match(/[?&]token=([^&]+)/);
+        if (match) {
+          token = decodeURIComponent(match[1]);
+        }
+      }
+
+      this.zone.run(() => {
+        const targetPath = token ? `/join-room?token=${encodeURIComponent(token)}` : '/join-room';
+        console.log('Navigating root to join-room target:', targetPath);
+        this.navCtrl.navigateRoot(targetPath);
+      });
+    }
   }
 
   private listenNetworkStatus() {

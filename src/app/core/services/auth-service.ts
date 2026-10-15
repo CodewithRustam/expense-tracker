@@ -116,6 +116,22 @@ export class AuthService {
     return decoded?.nameid || null;
   }
 
+  getUserName(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    const decoded = this.decodeToken(token);
+    return decoded?.unique_name || decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || decoded?.name || null;
+  }
+
+  getUserEmail(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    const decoded = this.decodeToken(token);
+    return decoded?.email || decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || null;
+  }
+
   // Decode JWT token to get payload
   public decodeToken(token: string): any {
     try {

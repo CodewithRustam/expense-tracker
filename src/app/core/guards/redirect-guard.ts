@@ -18,8 +18,14 @@ export class RedirectGuard implements CanActivate {
     await this.secureTokenService.initialize();
 
     if (this.authService.isAuthenticated()) {
-      // ✅ User already logged in — send them to home
-      this.router.navigate(['/tabs/home']);
+      // ✅ User already logged in — send them to returnUrl if present, otherwise home
+      const rawReturnUrl = route.queryParams['returnUrl'] || state.root.queryParams['returnUrl'];
+      if (rawReturnUrl) {
+        const decodedUrl = decodeURIComponent(rawReturnUrl);
+        this.router.navigateByUrl(decodedUrl);
+      } else {
+        this.router.navigate(['/tabs/home']);
+      }
       return false;
     }
 

@@ -111,12 +111,13 @@ export class LoginPage implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.initForm();
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tabs/home';
+    const rawReturn = this.route.snapshot.queryParams['returnUrl'];
+    this.returnUrl = rawReturn ? decodeURIComponent(rawReturn) : '/tabs/home';
 
     await this.secureTokenService.initialize();
 
     if (this.authService.isAuthenticated()) {
-      this.navCtrl.navigateRoot(this.returnUrl || '/tabs/home', { animated: false });
+      this.navCtrl.navigateRoot(this.returnUrl, { animated: false });
     }
   }
 
@@ -353,7 +354,11 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   goToRegistration() {
-    this.navCtrl.navigateRoot('/registration', { animated: false });
+    if (this.returnUrl && this.returnUrl !== '/tabs/home') {
+      this.navCtrl.navigateRoot(`/registration?returnUrl=${encodeURIComponent(this.returnUrl)}`, { animated: false });
+    } else {
+      this.navCtrl.navigateRoot('/registration', { animated: false });
+    }
   }
 
   goToForgotPassword() {
