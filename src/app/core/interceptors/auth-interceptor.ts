@@ -33,16 +33,26 @@ export class AuthInterceptor implements HttpInterceptor {
       '/api/account/register',
       '/api/account/forgot-password',
       '/api/account/reset-password',
-      '/api/account/verify-resetpassword-link'
+      '/api/account/verify-resetpassword-link',
+      'rooms/invitation',
+      '/api/rooms/invitation'
     ];
 
-    // Skip auth token check for public endpoints, but attach device fingerprint for device binding
-    if (publicEndpoints.some(endpoint => req.url.includes(endpoint))) {
+    // Skip auth token check for public endpoints, but attach device fingerprint and auth header if logged in
+    if (publicEndpoints.some(endpoint => req.url.toLowerCase().includes(endpoint.toLowerCase()))) {
       const fingerprint = this.deviceFingerprintService.getFingerprintSync();
+      const token = this.authService.getToken();
+      const headers: { [key: string]: string } = {};
+
+      if (fingerprint) {
+        headers['X-Device-Fingerprint'] = fingerprint;
+      }
+      if (token && !this.authService.isTokenExpired()) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const publicReq = req.clone({
-        setHeaders: {
-          'X-Device-Fingerprint': fingerprint
-        }
+        setHeaders: headers
       });
       return next.handle(publicReq);
     }

@@ -18,10 +18,10 @@ export class RedirectGuard implements CanActivate {
     await this.secureTokenService.initialize();
 
     if (this.authService.isAuthenticated()) {
-      // ✅ User already logged in — send them to returnUrl if present, otherwise home
+      // ✅ User already logged in — send them to returnUrl if present (and not login/register), otherwise home
       const rawReturnUrl = route.queryParams['returnUrl'] || state.root.queryParams['returnUrl'];
-      if (rawReturnUrl) {
-        const decodedUrl = decodeURIComponent(rawReturnUrl);
+      const decodedUrl = rawReturnUrl ? decodeURIComponent(rawReturnUrl) : '';
+      if (decodedUrl && !decodedUrl.includes('/login') && !decodedUrl.includes('/registration')) {
         this.router.navigateByUrl(decodedUrl);
       } else {
         this.router.navigate(['/tabs/home']);

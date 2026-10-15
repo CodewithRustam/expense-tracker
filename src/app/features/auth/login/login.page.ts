@@ -117,7 +117,10 @@ export class LoginPage implements OnInit, OnDestroy {
     await this.secureTokenService.initialize();
 
     if (this.authService.isAuthenticated()) {
-      this.navCtrl.navigateRoot(this.returnUrl, { animated: false });
+      const target = (this.returnUrl && !this.returnUrl.includes('/login') && !this.returnUrl.includes('/registration'))
+        ? this.returnUrl
+        : '/tabs/home';
+      this.navCtrl.navigateRoot(target, { animated: false });
     }
   }
 
@@ -309,7 +312,10 @@ export class LoginPage implements OnInit, OnDestroy {
             if (this.platform.is('capacitor')) {
               await this.appComponent.initPush();
             }
-            this.navCtrl.navigateRoot(this.returnUrl || '/tabs/home', { animated: false });
+            const target = (this.returnUrl && !this.returnUrl.includes('/login') && !this.returnUrl.includes('/registration'))
+              ? this.returnUrl
+              : '/tabs/home';
+            this.navCtrl.navigateRoot(target, { animated: false });
           } else {
             this.toastService.error('Invalid username or password');
           }

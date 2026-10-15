@@ -165,6 +165,13 @@ export class AuthService {
     this.secureTokenService.clearToken();
     localStorage.removeItem('rememberedUser');
     this.logoutSubject.next();
+
+    // Prevent redirect and reload loops if the user is already on a public/auth screen
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/login') || currentPath.includes('/join-room') || currentPath.includes('/registration')) {
+      return;
+    }
+
     this.navCtrl.navigateRoot('/login').then(() => {
       window.location.reload();
     });
